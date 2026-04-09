@@ -3,7 +3,8 @@
 import React from 'react';
 import Navbar from '@/components/layout/Navbar';
 import StatCard from '@/components/dashboard/StatCard';
-import { Activity, Trophy, Users, Calendar, ArrowRight, Play, Star, Zap } from 'lucide-react';
+import BroadcastCard from '@/components/broadcast/BroadcastCard';
+import { Activity, Trophy, Users, Calendar, ArrowRight, Play, Star, Zap, Radio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
@@ -26,9 +27,9 @@ const Index = () => {
             <p className="text-muted-foreground font-medium">Monitoring 12 live courts across 3 global regions.</p>
           </div>
           <div className="flex gap-4">
-            <Link to="/tournaments/create">
+            <Link to="/broadcast/create">
               <Button variant="outline" className="border-white/10 hover:bg-white/5 h-12 px-6 rounded-xl font-bold">
-                <Trophy className="mr-2 h-4 w-4" /> Start Event
+                <Radio className="mr-2 h-4 w-4" /> Start Broadcast
               </Button>
             </Link>
             <Link to="/live-match/create">
@@ -47,13 +48,54 @@ const Index = () => {
           <StatCard title="Matches Today" value="84" icon={Calendar} trend="+12%" trendUp />
         </div>
 
+        {/* New Broadcast Section */}
+        <section className="space-y-8">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-black tracking-tight flex items-center gap-3 italic">
+              <Radio className="h-6 w-6 text-primary animate-pulse" />
+              Watch Live Broadcasts
+            </h2>
+            <div className="flex gap-3">
+              <Badge variant="outline" className="border-white/10 text-muted-foreground px-4">ALL STREAMS</Badge>
+              <Badge className="bg-primary text-black px-4">LIVE NOW</Badge>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <BroadcastCard 
+              id="active-1"
+              title="Viktor Axelsen vs Lee Zii Jia"
+              subtitle="BWF World Tour Finals • Finals"
+              thumbnail="https://images.unsplash.com/photo-1626224580175-340ad0e3a242?q=80&w=2070&auto=format&fit=crop"
+              viewers={12482}
+              status="live"
+            />
+            <BroadcastCard 
+              id="active-2"
+              title="An Se-young vs Tai Tzu-ying"
+              subtitle="Indonesia Open • Semi-Finals"
+              thumbnail="https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?q=80&w=2070&auto=format&fit=crop"
+              viewers={8210}
+              status="live"
+            />
+            <BroadcastCard 
+              id="upcoming-1"
+              title="Jonatan Christie vs Anthony Ginting"
+              subtitle="Exhibition Match • friendly"
+              thumbnail="https://images.unsplash.com/photo-1613918108466-292b78a8ef95?q=80&w=2070&auto=format&fit=crop"
+              status="upcoming"
+              startTime="18:30 PM"
+            />
+          </div>
+        </section>
+
         <div className="grid lg:grid-cols-12 gap-12">
           {/* Live Matches List */}
           <div className="lg:col-span-8 space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-black tracking-tight flex items-center gap-3">
                 <span className="h-3 w-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
-                Live Broadcasts
+                Live Scores
               </h2>
               <Button variant="link" className="text-primary font-bold">
                 See Tournament Schedule <ArrowRight className="ml-2 h-4 w-4" />
@@ -111,37 +153,28 @@ const Index = () => {
             <section className="space-y-4">
               <h2 className="text-xl font-black flex items-center gap-3">
                 <Star className="h-5 w-5 text-yellow-500 fill-current" />
-                Top Players
+                Recent Replays
               </h2>
               <div className="glass-card rounded-[2rem] overflow-hidden border-white/5">
                 <div className="p-2 space-y-1">
                   {[
-                    { id: '1', name: "Viktor Axelsen", points: "12,450", rank: 1, country: "DK" },
-                    { id: '2', name: "An Se-young", points: "11,820", rank: 2, country: "KR" },
-                    { id: '3', name: "Tai Tzu-ying", points: "10,940", rank: 3, country: "TW" },
-                    { id: '4', name: "Shi Yuqi", points: "10,210", rank: 4, country: "CN" }
-                  ].map((player, idx) => (
-                    <Link key={player.id} to={`/player/${player.id}`}>
-                      <div className="flex items-center justify-between p-4 rounded-2xl hover:bg-white/5 transition-all group">
-                        <div className="flex items-center gap-4">
-                          <span className="text-muted-foreground font-mono font-bold w-4">{player.rank}</span>
-                          <div className="h-10 w-10 rounded-xl bg-secondary flex items-center justify-center text-xs font-bold border border-white/10 group-hover:border-primary/30 transition-colors">
-                            {player.name.charAt(0)}
-                          </div>
-                          <div>
-                            <h4 className="font-bold text-sm group-hover:text-primary transition-colors">{player.name}</h4>
-                            <p className="text-[10px] text-muted-foreground font-bold uppercase">{player.country}</p>
-                          </div>
+                    { id: '1', name: "Axelsen vs Shi Yuqi", dur: "1h 12m", views: "42k", img: "S" },
+                    { id: '2', name: "Tai vs Yamaguchi", dur: "48m", views: "28k", img: "T" },
+                    { id: '3', name: "Christie vs Loh", dur: "1h 05m", views: "15k", img: "C" },
+                  ].map((replay, idx) => (
+                    <div key={replay.id} className="flex items-center justify-between p-4 rounded-2xl hover:bg-white/5 transition-all group cursor-pointer">
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-xl bg-secondary flex items-center justify-center text-xs font-bold border border-white/10 group-hover:border-primary/30 transition-colors text-muted-foreground">
+                          {replay.img}
                         </div>
-                        <span className="font-mono text-primary font-black text-xs">{player.points}</span>
+                        <div>
+                          <h4 className="font-bold text-sm group-hover:text-primary transition-colors">{replay.name}</h4>
+                          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">{replay.dur} • {replay.views} views</p>
+                        </div>
                       </div>
-                    </Link>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                    </div>
                   ))}
-                </div>
-                <div className="p-4 border-t border-white/5 text-center">
-                  <Button variant="link" className="text-primary hover:text-primary/80 h-auto p-0 text-[10px] font-black uppercase tracking-[0.2em]">
-                    Global Ranking Table
-                  </Button>
                 </div>
               </div>
             </section>
@@ -149,26 +182,23 @@ const Index = () => {
             <section className="space-y-4">
               <h2 className="text-xl font-black flex items-center gap-3">
                 <Trophy className="h-5 w-5 text-primary" />
-                Featured Event
+                Featured Broadcast
               </h2>
-              <Link to="/tournament/bwf-finals-2024">
+              <Link to="/broadcast/active-1">
                 <div className="glass-card p-6 rounded-[2rem] bg-gradient-to-br from-primary/10 to-transparent border-primary/20 hover:border-primary/40 transition-all cursor-pointer group">
                   <div className="flex justify-between items-start mb-4">
-                    <Badge className="bg-primary text-black font-black text-[10px]">MAJOR</Badge>
+                    <Badge className="bg-primary text-black font-black text-[10px]">PREMIUM</Badge>
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">LIVE</span>
                   </div>
                   <h3 className="text-xl font-black group-hover:text-primary transition-colors">BWF World Tour Finals</h3>
-                  <p className="text-xs text-muted-foreground mt-2 line-clamp-2">The season finale where the top 8 players in the world rankings battle for the ultimate glory.</p>
+                  <p className="text-xs text-muted-foreground mt-2 line-clamp-2">Multi-court broadcasting featuring global superstars Axelsen, Lee, and more.</p>
                   <div className="mt-6 flex items-center justify-between">
                     <div className="flex -space-x-3">
-                      {[1, 2, 3, 4].map(i => (
+                      {[1, 2, 3].map(i => (
                         <div key={i} className="h-8 w-8 rounded-full border-2 border-background bg-secondary flex items-center justify-center text-[10px] font-bold">
-                          P{i}
+                          {i}
                         </div>
                       ))}
-                      <div className="h-8 w-8 rounded-full border-2 border-background bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">
-                        +28
-                      </div>
                     </div>
                     <ArrowRight className="h-5 w-5 text-primary group-hover:translate-x-1 transition-transform" />
                   </div>
