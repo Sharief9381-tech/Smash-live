@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Trophy, Activity, Users, Search, Bell, Menu } from 'lucide-react';
+import { Trophy, Activity, Users, Search, Bell, Menu, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -11,7 +11,8 @@ const Navbar = () => {
   
   const navItems = [
     { name: 'Command Center', path: '/', icon: Activity },
-    { name: 'Live Scores', path: '/live-match/active', icon: Trophy },
+    { name: 'Tournaments', path: '/tournaments', icon: Trophy },
+    { name: 'Live Scores', path: '/live-match/active', icon: Activity },
     { name: 'Players', path: '/player/1', icon: Users },
   ];
 
@@ -28,13 +29,13 @@ const Navbar = () => {
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-1">
             {navItems.map((item) => (
               <Link 
                 key={item.path} 
                 to={item.path}
                 className={cn(
-                  "px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2",
+                  "px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap",
                   location.pathname === item.path 
                     ? "bg-primary/10 text-primary" 
                     : "text-muted-foreground hover:text-white hover:bg-white/5"
@@ -48,7 +49,7 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="hidden lg:flex items-center bg-secondary/50 rounded-full px-4 py-2 border border-white/5 focus-within:border-primary/50 transition-colors">
+          <div className="hidden xl:flex items-center bg-secondary/50 rounded-full px-4 py-2 border border-white/5 focus-within:border-primary/50 transition-colors">
             <Search className="h-4 w-4 text-muted-foreground" />
             <input 
               type="text" 
@@ -65,7 +66,7 @@ const Navbar = () => {
             <span className="text-xs font-black text-black">JD</span>
           </div>
 
-          <Button variant="ghost" size="icon" className="md:hidden rounded-full">
+          <Button variant="ghost" size="icon" className="lg:hidden rounded-full">
             <Menu className="h-5 w-5" />
           </Button>
         </div>

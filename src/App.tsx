@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import LiveMatch from "./pages/LiveMatch";
+import Tournaments from "./pages/Tournaments";
 import CreateTournament from "./pages/CreateTournament";
 import CreateMatch from "./pages/CreateMatch";
 import TournamentDetail from "./pages/TournamentDetail";
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/live-match/active" element={<LiveMatch />} />
           <Route path="/live-match/active-:id" element={<LiveMatch />} />
           <Route path="/live-match/create" element={<CreateMatch />} />
+          <Route path="/tournaments" element={<Tournaments />} />
           <Route path="/tournaments/create" element={<CreateTournament />} />
           <Route path="/tournament/:id" element={<TournamentDetail />} />
           <Route path="/player/:id" element={<PlayerProfile />} />

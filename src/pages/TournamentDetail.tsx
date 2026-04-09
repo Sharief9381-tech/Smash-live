@@ -7,9 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   Trophy, Calendar, Users, MapPin, 
-  Share2, Settings, ListFilter, Play 
+  Share2, ListFilter, Play, CheckCircle2,
+  Clock, Timer
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const TournamentDetail = () => {
   return (
@@ -107,6 +109,50 @@ const TournamentDetail = () => {
             </div>
           </TabsContent>
 
+          <TabsContent value="matches" className="m-0">
+            <div className="space-y-6">
+              {[
+                { date: "TODAY, DEC 14", matches: [
+                  { id: '1', t1: "Viktor Axelsen", t2: "Lee Zii Jia", score: "21-19, 21-17", status: "completed", cat: "Men's Singles" },
+                  { id: '3', t1: "Jonatan Christie", t2: "Kunlavut Vitidsarn", score: "14-11", status: "live", cat: "Men's Singles" },
+                  { id: '4', t1: "Loh Kean Yew", t2: "Anthony Ginting", score: "18:30", status: "scheduled", cat: "Men's Singles" },
+                ]},
+                { date: "YESTERDAY, DEC 13", matches: [
+                  { id: '10', t1: "An Se-young", t2: "Tai Tzu-ying", score: "21-12, 21-15", status: "completed", cat: "Women's Singles" },
+                  { id: '11', t1: "Chen Qingchen / Jia Yifan", t2: "Baek Ha-na / Lee So-hee", score: "21-18, 21-19", status: "completed", cat: "Women's Doubles" },
+                ]}
+              ].map((group, idx) => (
+                <div key={idx} className="space-y-4">
+                  <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">{group.date}</h3>
+                  <div className="grid gap-4">
+                    {group.matches.map((m) => (
+                      <div key={m.id} className="glass-card p-6 rounded-2xl flex items-center justify-between group hover:border-primary/30 transition-all">
+                        <div className="flex items-center gap-6">
+                          <div className="hidden sm:flex flex-col items-center justify-center h-12 w-12 rounded-xl bg-secondary/50 border border-white/5">
+                            {m.status === 'live' ? <Timer className="h-5 w-5 text-red-500 animate-pulse" /> : <Clock className="h-5 w-5 text-muted-foreground" />}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-3 mb-1">
+                              <span className="text-xs font-black tracking-tight">{m.t1} vs {m.t2}</span>
+                              <Badge variant="outline" className="text-[10px] font-bold border-white/5 uppercase">{m.cat}</Badge>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {m.status === 'live' && <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />}
+                              <span className={`text-xl font-black font-mono ${m.status === 'live' ? 'text-primary' : 'text-foreground'}`}>{m.score}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="sm" className="rounded-xl font-bold group-hover:bg-primary group-hover:text-black transition-all">
+                          {m.status === 'completed' ? 'View Details' : 'Watch Live'}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+
           <TabsContent value="players" className="m-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
@@ -127,6 +173,46 @@ const TournamentDetail = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="standings" className="m-0">
+            <div className="glass-card rounded-3xl overflow-hidden border-white/5">
+              <Table>
+                <TableHeader className="bg-secondary/30">
+                  <TableRow className="border-white/5 hover:bg-transparent">
+                    <TableHead className="w-16 text-center font-black text-[10px] uppercase tracking-widest">Rank</TableHead>
+                    <TableHead className="font-black text-[10px] uppercase tracking-widest">Player / Team</TableHead>
+                    <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">P</TableHead>
+                    <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">W</TableHead>
+                    <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">L</TableHead>
+                    <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">Points</TableHead>
+                    <TableHead className="text-right font-black text-[10px] uppercase tracking-widest pr-8">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[
+                    { rank: 1, name: "Viktor Axelsen", p: 3, w: 3, l: 0, pts: 6300, status: "Qualified" },
+                    { rank: 2, name: "Lee Zii Jia", p: 3, w: 2, l: 1, pts: 4200, status: "Qualified" },
+                    { rank: 3, name: "Shi Yuqi", p: 3, w: 1, l: 2, pts: 2100, status: "Eliminated" },
+                    { rank: 4, name: "Anders Antonsen", p: 3, w: 0, l: 3, pts: 800, status: "Eliminated" },
+                  ].map((row) => (
+                    <TableRow key={row.rank} className="border-white/5 hover:bg-white/5">
+                      <TableCell className="text-center font-mono font-bold text-muted-foreground">{row.rank}</TableCell>
+                      <TableCell className="font-bold">{row.name}</TableCell>
+                      <TableCell className="text-center font-mono">{row.p}</TableCell>
+                      <TableCell className="text-center font-mono text-primary">{row.w}</TableCell>
+                      <TableCell className="text-center font-mono text-red-400">{row.l}</TableCell>
+                      <TableCell className="text-center font-mono font-black">{row.pts.toLocaleString()}</TableCell>
+                      <TableCell className="text-right pr-8">
+                        <Badge variant="outline" className={row.status === 'Qualified' ? 'border-primary/50 text-primary' : 'border-white/10 text-muted-foreground'}>
+                          {row.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           </TabsContent>
         </Tabs>
