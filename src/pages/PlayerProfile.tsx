@@ -11,34 +11,15 @@ import AnalyticsSection from '@/components/profile/AnalyticsSection';
 import AchievementSection from '@/components/profile/AchievementSection';
 import RankingSection from '@/components/profile/RankingSection';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Zap, LogOut } from 'lucide-react';
+import { ShieldCheck, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
 
 const PlayerProfile = () => {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    // Logic for logout would go here
-    navigate('/');
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 text-[#0B1F3A] selection:bg-sky-500/30">
       <Navbar />
       
       <main className="container px-6 py-12 space-y-24">
-        {/* Profile Controls (Top Right Float in Profile Section) */}
-        <div className="flex justify-end pt-4">
-           <Button 
-            onClick={handleLogout}
-            variant="ghost" 
-            className="text-red-500 font-black text-xs uppercase tracking-widest hover:bg-red-50 hover:text-red-600 px-6 h-12 rounded-2xl"
-           >
-             TERMINATE SESSION <LogOut className="ml-2 h-4 w-4" />
-           </Button>
-        </div>
-
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

@@ -99,15 +99,6 @@ const Navbar = () => {
                     <User className="h-4 w-4 text-sky-500" /> Player Profile
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/dashboard" className="flex items-center gap-2 p-3 font-bold cursor-pointer hover:bg-slate-50 rounded-xl">
-                    <Settings className="h-4 w-4 text-sky-500" /> Dashboard Settings
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="p-3 text-red-500 font-bold cursor-pointer hover:bg-red-50 rounded-xl">
-                  Sign Out
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
