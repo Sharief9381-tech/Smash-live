@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, ArrowRight, Phone, ShieldCheck, ChevronDown, Globe } from 'lucide-react';
+import { Zap, ArrowRight, Phone, ShieldCheck, Globe } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,7 +30,8 @@ const Login = () => {
     if (step === 1) {
       setStep(2);
     } else {
-      navigate('/dashboard'); // Redirecting to Dashboard after successful OTP
+      // Direct redirection to the Command Center (Dashboard)
+      navigate('/dashboard'); 
     }
   };
 

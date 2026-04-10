@@ -24,9 +24,9 @@ const Dashboard = () => {
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <LayoutDashboard className="h-4 w-4 text-sky-500" />
-            <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.3em]">Command Center</span>
+            <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.3em]">Operational Dashboard</span>
           </div>
-          <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter">Event Operations</h1>
+          <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic">Command Center</h1>
           <p className="text-slate-500 font-bold max-w-2xl">
             Precision management for elite competition. Streamline your broadcasting and tournament intelligence through one unified portal.
           </p>
