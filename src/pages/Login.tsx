@@ -30,7 +30,7 @@ const Login = () => {
     if (step === 1) {
       setStep(2);
     } else {
-      navigate('/');
+      navigate('/dashboard'); // Redirecting to Dashboard after successful OTP
     }
   };
 

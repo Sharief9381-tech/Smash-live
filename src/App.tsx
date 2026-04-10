@@ -16,6 +16,7 @@ import Rankings from "./pages/Rankings";
 import News from "./pages/News";
 import MatchArchive from "./pages/MatchArchive";
 import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/live-match/active" element={<LiveMatch />} />
           <Route path="/live-match/active-:id" element={<LiveMatch />} />
           <Route path="/live-match/create" element={<CreateMatch />} />
