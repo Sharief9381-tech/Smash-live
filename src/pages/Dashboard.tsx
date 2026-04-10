@@ -8,7 +8,7 @@ import {
   Activity, Trophy, Zap, 
   ArrowUpRight, Play, Users, 
   History, Radio, LayoutDashboard, 
-  ChevronRight, MapPin
+  ChevronRight, MapPin, Star
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
