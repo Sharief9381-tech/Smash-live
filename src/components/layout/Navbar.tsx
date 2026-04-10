@@ -27,7 +27,7 @@ const Navbar = () => {
   ];
 
   // Logic to determine if we should show Profile instead of Login
-  const isInternalPage = ['/dashboard', '/player', '/archive', '/live-match'].some(path => location.pathname.startsWith(path));
+  const isInternalPage = ['/dashboard', '/player', '/archive', '/live-match', '/tournaments'].some(path => location.pathname.startsWith(path));
 
   return (
     <nav className={cn(

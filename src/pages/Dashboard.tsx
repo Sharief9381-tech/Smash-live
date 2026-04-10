@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Navbar from '@/components/layout/Navbar';
-import ProfileHero from '@/components/profile/ProfileHero';
 import { motion } from 'framer-motion';
 import { 
   Activity, Trophy, Zap, 
@@ -20,13 +19,10 @@ const Dashboard = () => {
       <Navbar />
       
       <main className="container px-6 py-12 space-y-12">
-        {/* Persistent Player Profile Identity */}
-        <div className="space-y-6">
-          <div className="flex items-center gap-2 mb-2">
-            <LayoutDashboard className="h-4 w-4 text-sky-500" />
-            <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.3em]">Command Center</span>
-          </div>
-          <ProfileHero />
+        {/* Header Section */}
+        <div className="flex items-center gap-2">
+          <LayoutDashboard className="h-4 w-4 text-sky-500" />
+          <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.3em]">Command Center</span>
         </div>
 
         <div className="grid lg:grid-cols-12 gap-8">
