@@ -154,7 +154,7 @@ const Rankings = () => {
                 <TabsTrigger value="xd" className="rounded-xl px-8 font-black text-xs uppercase data-[state=active]:bg-[#0B1F3A] data-[state=active]:text-white">Mixed Doubles</TabsTrigger>
               </TabsList>
               <Button variant="ghost" className="text-sky-600 font-black text-xs uppercase tracking-widest">
-                Export Data <ChevronRight className="ml-2 h-4 w-4" />
+                Smash It <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
 

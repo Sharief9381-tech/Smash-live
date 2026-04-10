@@ -61,7 +61,7 @@ const Dashboard = () => {
                 </h3>
                 <Link to="/live-match/active">
                   <Button variant="ghost" className="text-sky-600 font-black text-xs uppercase tracking-widest hover:bg-sky-50">
-                    View All Live <ChevronRight className="ml-1 h-4 w-4" />
+                    Smash It <ChevronRight className="ml-1 h-4 w-4" />
                   </Button>
                 </Link>
               </div>
@@ -96,7 +96,7 @@ const Dashboard = () => {
                 </div>
                 <Link to="/tournaments">
                   <Button variant="outline" className="rounded-xl border-slate-200 font-black text-xs px-6 h-10 text-[#0B1F3A] hover:bg-slate-50">
-                    EXPLORE CIRCUIT
+                    SMASH IT
                   </Button>
                 </Link>
               </div>

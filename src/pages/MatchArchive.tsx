@@ -124,7 +124,7 @@ const MatchArchive = () => {
         {/* Load More */}
         <div className="flex flex-col items-center gap-4 py-8">
            <Button variant="outline" className="rounded-full px-12 h-14 font-black text-[#0B1F3A] border-slate-200 hover:bg-slate-50">
-             LOAD MORE ARCHIVES
+             SMASH IT
            </Button>
            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Showing 5 of 14,242 records</p>
         </div>

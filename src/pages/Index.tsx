@@ -61,7 +61,7 @@ const Index = () => {
             <div className="flex flex-wrap gap-4 pt-4">
               <Link to="/tournaments">
                 <Button size="lg" className="bg-[#0B1F3A] text-white rounded-full px-8 font-black text-lg h-16 hover:bg-[#0B1F3A]/90 transition-all hover:translate-y-[-2px] shadow-xl">
-                  Explore Platform <ArrowRight className="ml-2 h-5 w-5" />
+                  Smash It <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/login">
@@ -144,7 +144,7 @@ const Index = () => {
               <h2 className="text-4xl font-black text-white tracking-tighter uppercase">Watch Live Broadcasts</h2>
             </div>
             <Link to="/tournaments" className="text-sky-400 font-black text-sm uppercase tracking-[0.2em] flex items-center gap-2 hover:text-sky-300 transition-colors">
-              Explore All Streams <ArrowRight className="h-4 w-4" />
+              Smash It <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
 

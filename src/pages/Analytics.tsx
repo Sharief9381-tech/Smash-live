@@ -15,6 +15,7 @@ import {
 } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 const performanceData = [
   { month: 'Jan', score: 8200 },
@@ -206,7 +207,7 @@ const Analytics = () => {
             </div>
             <div className="pt-8">
               <Button className="bg-[#0B1F3A] text-white rounded-full px-8 font-black h-14 group-hover:translate-x-2 transition-transform">
-                View Scenarios <ArrowUpRight className="ml-2 h-5 w-5" />
+                Smash It <ArrowUpRight className="ml-2 h-5 w-5" />
               </Button>
             </div>
           </div>
