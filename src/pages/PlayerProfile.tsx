@@ -18,12 +18,12 @@ const PlayerProfile = () => {
     <div className="min-h-screen bg-slate-50 text-[#0B1F3A] selection:bg-sky-500/30">
       <Navbar />
       
-      <main className="container px-6 py-12 space-y-12">
-        {/* Intro Section */}
+      <main className="container px-6 py-12 space-y-24">
+        {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-8"
+          className="space-y-12"
         >
           <div className="flex items-center gap-3">
             <div className="h-1.5 w-12 bg-sky-500 rounded-full" />
@@ -32,12 +32,12 @@ const PlayerProfile = () => {
           
           <ProfileHero />
           
-          {/* Quick Platform Navigation */}
+          {/* Internal Section Navigation */}
           <ProfileNavigation />
         </motion.div>
 
         {/* Core Stats Section */}
-        <section className="space-y-10 pt-8">
+        <section id="performance-core" className="space-y-10 scroll-mt-32">
           <div className="flex items-center justify-between">
             <h2 className="text-3xl font-black tracking-tighter uppercase">Performance Core</h2>
             <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -48,24 +48,24 @@ const PlayerProfile = () => {
         </section>
 
         {/* Analytics Section */}
-        <section className="space-y-10">
+        <section id="strategic-analytics" className="space-y-10 scroll-mt-32">
           <h2 className="text-3xl font-black tracking-tighter uppercase">Strategic Analytics</h2>
           <AnalyticsSection />
         </section>
 
         {/* Tournaments Section */}
-        <section className="space-y-10">
+        <section id="circuit-history" className="space-y-10 scroll-mt-32">
           <h2 className="text-3xl font-black tracking-tighter uppercase">Circuit History</h2>
           <TournamentSection />
         </section>
 
         {/* Teams Section */}
-        <section className="space-y-10">
+        <section id="team-intelligence" className="space-y-10 scroll-mt-32">
           <TeamSection />
         </section>
 
         {/* Achievements Section */}
-        <section className="space-y-12">
+        <section id="hall-of-fame" className="space-y-12 scroll-mt-32">
           <div className="text-center space-y-4">
             <h2 className="text-4xl font-black tracking-tighter uppercase italic">Hall of Fame</h2>
             <p className="text-slate-400 font-medium uppercase text-xs tracking-widest">Global career milestones and verified badges</p>
