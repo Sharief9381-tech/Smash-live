@@ -10,6 +10,7 @@ import CreateTournament from "./pages/CreateTournament";
 import CreateMatch from "./pages/CreateMatch";
 import TournamentDetail from "./pages/TournamentDetail";
 import PlayerProfile from "./pages/PlayerProfile";
+import EditProfile from "./pages/EditProfile";
 import LiveBroadcast from "./pages/LiveBroadcast";
 import CreateBroadcast from "./pages/CreateBroadcast";
 import Rankings from "./pages/Rankings";
@@ -37,7 +38,8 @@ const App = () => (
           <Route path="/tournaments" element={<Tournaments />} />
           <Route path="/tournaments/create" element={<CreateTournament />} />
           <Route path="/tournament/:id" element={<TournamentDetail />} />
-          <Route path="/player/:id" element={<PlayerProfile />} />
+          <Route path="/player/me" element={<PlayerProfile />} />
+          <Route path="/player/edit" element={<EditProfile />} />
           <Route path="/rankings" element={<Rankings />} />
           <Route path="/news" element={<News />} />
           <Route path="/archive" element={<MatchArchive />} />

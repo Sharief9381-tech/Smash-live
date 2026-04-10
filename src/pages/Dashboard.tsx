@@ -5,9 +5,10 @@ import Navbar from '@/components/layout/Navbar';
 import { motion } from 'framer-motion';
 import { 
   Activity, Trophy, Zap, 
-  ArrowUpRight, Play, Users, 
+  ArrowUpRight, Users, 
   History, Radio, LayoutDashboard, 
-  ChevronRight, MapPin, Star
+  ChevronRight, MapPin, Star,
+  Bell, Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -26,7 +27,26 @@ const Dashboard = () => {
             <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.3em]">Command Center</span>
           </div>
           <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter">Event Operations</h1>
-          <p className="text-slate-500 font-bold max-w-2xl">Manage your broadcasting assets, live match tracking, and global tournament intelligence from one unified portal.</p>
+          <p className="text-slate-500 font-bold max-w-2xl">
+            Precision management for elite competition. Streamline your broadcasting and tournament intelligence through one unified portal.
+          </p>
+        </div>
+
+        {/* Global News Ticker */}
+        <div className="bg-[#0B1F3A] rounded-2xl py-3 px-6 overflow-hidden relative shadow-xl">
+           <div className="flex items-center gap-8 whitespace-nowrap animate-marquee">
+              {[
+                "BWF FINALS: Axelsen secures semi-final spot with dominant win over Zii Jia.",
+                "RANKING UPDATE: Shi Yuqi moves up to World No. 2 following China Masters performance.",
+                "TECH: New AI smash analysis engine deployed to all regional server nodes.",
+                "BROADCAST: Ultra-low latency mode now active for all Premium Members."
+              ].map((text, i) => (
+                <div key={i} className="flex items-center gap-3">
+                   <div className="h-1.5 w-1.5 rounded-full bg-sky-500" />
+                   <span className="text-[10px] font-black text-white uppercase tracking-widest">{text}</span>
+                </div>
+              ))}
+           </div>
         </div>
 
         <div className="grid lg:grid-cols-12 gap-8">
@@ -141,6 +161,26 @@ const Dashboard = () => {
                   </Button>
                 </Link>
               </div>
+            </div>
+
+            <div className="glass-panel p-10 rounded-[3rem] space-y-6">
+              <h3 className="text-sm font-black text-[#0B1F3A] uppercase tracking-widest flex items-center gap-2">
+                <Bell className="h-4 w-4 text-sky-500" /> Notifications Hub
+              </h3>
+              <div className="space-y-4">
+                 {[
+                   { text: "Your win probability simulation is ready.", time: "2m ago" },
+                   { text: "Security alert: New login from Jakarta, ID.", time: "1h ago" },
+                 ].map((notif, i) => (
+                   <div key={i} className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                      <p className="text-[11px] font-bold text-[#0B1F3A] leading-tight">{notif.text}</p>
+                      <p className="text-[9px] text-slate-400 font-black mt-1 uppercase tracking-widest">{notif.time}</p>
+                   </div>
+                 ))}
+              </div>
+              <Button variant="outline" className="w-full h-12 rounded-xl border-dashed border-slate-300 font-black text-xs uppercase hover:bg-slate-50 text-[#0B1F3A]">
+                CLEAR ALL
+              </Button>
             </div>
 
             <div className="glass-panel p-10 rounded-[3rem] space-y-6">
