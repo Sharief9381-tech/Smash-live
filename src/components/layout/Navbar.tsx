@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Bell, Menu, Trophy, Activity, Users, Globe, BarChart3, Radio, Zap } from 'lucide-react';
+import { Search, Bell, Menu, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -21,9 +21,8 @@ const Navbar = () => {
     { name: 'Live Matches', path: '/live-match/active' },
     { name: 'Tournaments', path: '/tournaments' },
     { name: 'Players', path: '/player/1' },
-    { name: 'Rankings', path: '#' },
-    { name: 'Analytics', path: '#' },
-    { name: 'AI Commentary', path: '#' },
+    { name: 'Rankings', path: '/rankings' },
+    { name: 'Analytics', path: '/analytics' },
     { name: 'Broadcast', path: '/broadcast/create' },
   ];
 
