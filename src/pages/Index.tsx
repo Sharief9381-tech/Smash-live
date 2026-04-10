@@ -7,8 +7,7 @@ import DashboardPreview from '@/components/landing/DashboardPreview';
 import { motion } from 'framer-motion';
 import { 
   ArrowRight, Activity, Trophy, Users, 
-  Target, Globe, BarChart3, Radio, 
-  Zap, Bell, ShieldCheck, Flame
+  Target, Globe, Radio, Zap, Bell, Flame
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,12 +17,12 @@ const Index = () => {
   const modules = [
     { title: "Live Match Scoring", icon: Activity, features: ["Real-time synchronization", "Dynamic court tracking"] },
     { title: "AI Commentary", icon: Zap, features: ["Context-aware analysis", "Highlight detection"] },
-    { title: "Tournament Management", icon: Trophy, features: ["Auto-bracket generation", "Player seeding"] },
-    { title: "Player Profiles", icon: Users, features: ["Career performance", "Skill breakdown"] },
-    { title: "Analytics Dashboard", icon: BarChart3, features: ["Heatmap tracking", "Win probability"] },
+    { title: "Tournament Hub", icon: Trophy, features: ["Auto-bracket generation", "Global circuit tracking"] },
+    { title: "Player Registry", icon: Users, features: ["Career performance", "Official BWF integration"] },
     { title: "Live Broadcast", icon: Radio, features: ["Ultra-low latency", "Interactive overlays"] },
     { title: "Notifications", icon: Bell, features: ["Instant score alerts", "Match reminders"] },
-    { title: "Rankings", icon: Globe, features: ["Global BWF integration", "Local club ladders"] },
+    { title: "Global Rankings", icon: Globe, features: ["Real-time ladder updates", "National dominance"] },
+    { title: "Targeted Intelligence", icon: Target, features: ["Shot accuracy tracking", "Momentum mapping"] },
   ];
 
   const whyChoose = [
@@ -31,7 +30,7 @@ const Index = () => {
     { title: "Global Broadcasting", icon: Radio },
     { title: "Real-Time Insights", icon: Activity },
     { title: "Player Intelligence", icon: Target },
-    { title: "Performance Analytics", icon: BarChart3 },
+    { title: "Official Integration", icon: Trophy },
   ];
 
   return (
@@ -57,7 +56,7 @@ const Index = () => {
               Intelligence
             </h1>
             <p className="text-xl text-slate-500 font-medium max-w-lg leading-relaxed">
-              Live scores, AI commentary, player analytics, tournament management, and match insights — all in one unified platform.
+              Live scores, AI commentary, and match insights — all in one unified platform.
             </p>
             <div className="flex flex-wrap gap-4 pt-4">
               <Link to="/tournaments">
@@ -65,9 +64,11 @@ const Index = () => {
                   Explore Platform <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="border-slate-200 text-[#0B1F3A] rounded-full px-8 font-black text-lg h-16 hover:bg-slate-50">
-                Join Now
-              </Button>
+              <Link to="/login">
+                <Button size="lg" variant="outline" className="border-slate-200 text-[#0B1F3A] rounded-full px-8 font-black text-lg h-16 hover:bg-slate-50">
+                  Join Now
+                </Button>
+              </Link>
             </div>
           </motion.div>
 
@@ -164,9 +165,11 @@ const Index = () => {
                   <h4 className="text-xl font-black text-white">{match.players}</h4>
                   <div className="flex items-center justify-between">
                     <span className="text-2xl font-mono font-black text-sky-400">{match.score}</span>
-                    <Button size="icon" className="h-10 w-10 rounded-full bg-white text-[#0B1F3A] hover:bg-sky-500 hover:text-white transition-all">
-                      <PlayIcon className="h-4 w-4 fill-current" />
-                    </Button>
+                    <Link to="/broadcast/live">
+                      <Button size="icon" className="h-10 w-10 rounded-full bg-white text-[#0B1F3A] hover:bg-sky-500 hover:text-white transition-all">
+                        <PlayIcon className="h-4 w-4 fill-current" />
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </div>

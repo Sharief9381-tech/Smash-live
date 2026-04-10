@@ -21,10 +21,8 @@ const Navbar = () => {
     { name: 'Live', path: '/live-match/active' },
     { name: 'Tournaments', path: '/tournaments' },
     { name: 'Rankings', path: '/rankings' },
-    { name: 'Analytics', path: '/analytics' },
     { name: 'News', path: '/news' },
     { name: 'Archive', path: '/archive' },
-    { name: 'Pricing', path: '/pricing' },
   ];
 
   return (
@@ -66,9 +64,9 @@ const Navbar = () => {
           <button className="p-2 text-[#0B1F3A]/60 hover:text-sky-500 transition-colors">
             <Bell className="h-5 w-5" />
           </button>
-          <Link to="/pricing">
-            <Button className="bg-[#0B1F3A] text-white px-6 rounded-full font-bold hover:bg-[#0B1F3A]/90 transition-all hover:shadow-[0_0_15px_rgba(11,31,58,0.2)]">
-              Pro
+          <Link to="/login">
+            <Button className="bg-[#0B1F3A] text-white px-8 rounded-full font-bold hover:bg-[#0B1F3A]/90 transition-all shadow-lg hover:shadow-sky-500/20">
+              Login
             </Button>
           </Link>
           <button className="lg:hidden p-2">
