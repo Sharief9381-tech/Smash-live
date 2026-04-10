@@ -20,9 +20,13 @@ const Dashboard = () => {
       
       <main className="container px-6 py-12 space-y-12">
         {/* Header Section */}
-        <div className="flex items-center gap-2">
-          <LayoutDashboard className="h-4 w-4 text-sky-500" />
-          <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.3em]">Command Center</span>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <LayoutDashboard className="h-4 w-4 text-sky-500" />
+            <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.3em]">Command Center</span>
+          </div>
+          <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter">Event Operations</h1>
+          <p className="text-slate-500 font-bold max-w-2xl">Manage your broadcasting assets, live match tracking, and global tournament intelligence from one unified portal.</p>
         </div>
 
         <div className="grid lg:grid-cols-12 gap-8">
@@ -36,7 +40,7 @@ const Dashboard = () => {
                   <Activity className="h-5 w-5 text-red-500 animate-pulse" /> Live Match Feed
                 </h3>
                 <Link to="/live-match/active">
-                  <Button variant="ghost" className="text-sky-600 font-black text-xs uppercase tracking-widest">
+                  <Button variant="ghost" className="text-sky-600 font-black text-xs uppercase tracking-widest hover:bg-sky-50">
                     View All Live <ChevronRight className="ml-1 h-4 w-4" />
                   </Button>
                 </Link>
@@ -71,7 +75,7 @@ const Dashboard = () => {
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ongoing high-stakes events</p>
                 </div>
                 <Link to="/tournaments">
-                  <Button variant="outline" className="rounded-xl border-slate-200 font-black text-xs px-6 h-10">
+                  <Button variant="outline" className="rounded-xl border-slate-200 font-black text-xs px-6 h-10 text-[#0B1F3A] hover:bg-slate-50">
                     EXPLORE CIRCUIT
                   </Button>
                 </Link>
@@ -95,7 +99,7 @@ const Dashboard = () => {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-black text-[#0B1F3A]">{tourney.name}</h4>
-                          <Badge className={tourney.status === 'Live' ? 'bg-red-500 animate-pulse' : 'bg-slate-200 text-slate-600'}>
+                          <Badge className={tourney.status === 'Live' ? 'bg-red-500 animate-pulse text-white font-black' : 'bg-slate-200 text-slate-600 font-black'}>
                             {tourney.status.toUpperCase()}
                           </Badge>
                         </div>
@@ -111,7 +115,7 @@ const Dashboard = () => {
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Prize Points</p>
                         <p className="text-lg font-black text-[#0B1F3A]">{tourney.points}</p>
                       </div>
-                      <Button size="icon" className="h-12 w-12 rounded-2xl bg-white border border-slate-100 text-[#0B1F3A] hover:bg-sky-500 hover:text-white transition-all">
+                      <Button size="icon" className="h-12 w-12 rounded-2xl bg-white border border-slate-100 text-[#0B1F3A] hover:bg-sky-500 hover:text-white transition-all shadow-sm">
                         <ArrowUpRight className="h-5 w-5" />
                       </Button>
                     </div>
@@ -128,11 +132,11 @@ const Dashboard = () => {
                 <Radio className="h-40 w-40" />
               </div>
               <div className="space-y-4 relative z-10">
-                <Badge className="bg-sky-500 text-white border-none font-black px-4">STUDIO READY</Badge>
+                <Badge className="bg-sky-500 text-white border-none font-black px-4 py-1 text-[10px]">STUDIO READY</Badge>
                 <h3 className="text-2xl font-black tracking-tight italic">Broadcast Studio</h3>
-                <p className="text-white/60 text-sm font-medium">Initialize 4K low-latency streams with live AI commentary overlays.</p>
+                <p className="text-white/70 text-sm font-bold">Initialize 4K low-latency streams with live AI commentary overlays.</p>
                 <Link to="/broadcast/create" className="block pt-4">
-                  <Button className="w-full h-14 bg-white text-[#0B1F3A] font-black rounded-2xl hover:bg-sky-500 hover:text-white transition-all">
+                  <Button className="w-full h-14 bg-white text-[#0B1F3A] font-black rounded-2xl hover:bg-sky-500 hover:text-white transition-all shadow-xl border-none">
                     LAUNCH STUDIO <ArrowUpRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
@@ -150,14 +154,14 @@ const Dashboard = () => {
                   { label: "Referee Mode", icon: Star },
                   { label: "Match Record", icon: Activity },
                 ].map((tool, i) => (
-                  <button key={i} className="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-sky-500/30 hover:bg-sky-50 transition-all gap-2 group">
+                  <button key={i} className="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-sky-500/30 hover:bg-sky-50 transition-all gap-2 group outline-none">
                     <tool.icon className="h-5 w-5 text-slate-400 group-hover:text-sky-600 transition-colors" />
                     <span className="text-[9px] font-black text-[#0B1F3A] uppercase tracking-widest">{tool.label}</span>
                   </button>
                 ))}
               </div>
               <Link to="/live-match/create">
-                <Button variant="outline" className="w-full h-12 rounded-xl border-dashed border-slate-300 font-black text-xs uppercase hover:bg-slate-50">
+                <Button variant="outline" className="w-full h-12 rounded-xl border-dashed border-slate-300 font-black text-xs uppercase hover:bg-slate-50 text-[#0B1F3A]">
                   + INITIALIZE QUICK MATCH
                 </Button>
               </Link>

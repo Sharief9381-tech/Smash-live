@@ -4,7 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Share2, UserPlus, Star, GraduationCap, MapPin } from 'lucide-react';
+import { Share2, UserPlus, Star, GraduationCap, MapPin, Edit3 } from 'lucide-react';
 
 const ProfileHero = () => {
   return (
@@ -52,9 +52,9 @@ const ProfileHero = () => {
               <span className="text-xl">🇩🇰</span> Denmark
             </div>
             <div className="h-4 w-px bg-slate-200 hidden md:block" />
-            <div className="text-slate-500 font-medium">30 Years • Male</div>
+            <div className="text-slate-500 font-bold">30 Years • Male</div>
             <div className="h-4 w-px bg-slate-200 hidden md:block" />
-            <div className="text-slate-500 font-medium italic">Right Handed</div>
+            <div className="text-slate-500 font-bold italic">Right Handed</div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -82,12 +82,15 @@ const ProfileHero = () => {
             </div>
           </div>
 
-          <div className="flex gap-3 w-full max-w-sm lg:max-w-none">
-            <Button className="flex-1 bg-[#0B1F3A] text-white font-black h-14 rounded-2xl hover:bg-[#0B1F3A]/90 shadow-lg transition-all">
-              FOLLOW PLAYER <UserPlus className="ml-2 h-5 w-5" />
+          <div className="flex flex-wrap gap-3 w-full max-w-sm lg:max-w-none">
+            <Button className="flex-1 bg-sky-500 text-white font-black h-14 rounded-2xl hover:bg-sky-400 shadow-lg transition-all text-sm uppercase tracking-widest border-none">
+              FOLLOW <UserPlus className="ml-2 h-4 w-4" />
+            </Button>
+            <Button variant="outline" className="flex-1 border-slate-200 text-[#0B1F3A] font-black h-14 rounded-2xl hover:bg-slate-50 text-sm uppercase tracking-widest">
+              EDIT <Edit3 className="ml-2 h-4 w-4" />
             </Button>
             <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl border-slate-200 hover:bg-slate-50">
-              <Share2 className="h-6 w-6 text-[#0B1F3A]" />
+              <Share2 className="h-5 w-5 text-[#0B1F3A]" />
             </Button>
           </div>
         </div>
