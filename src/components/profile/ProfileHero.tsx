@@ -4,10 +4,17 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Share2, UserPlus, Star, GraduationCap, Edit3 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Share2, UserPlus, Star, GraduationCap, Edit3, LogOut } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const ProfileHero = () => {
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    // In a real app, you'd clear session/tokens here
+    navigate('/');
+  };
+
   return (
     <section className="relative glass-panel p-10 rounded-[3rem] border-slate-200 overflow-hidden group">
       {/* Background Glows */}
@@ -92,6 +99,13 @@ const ProfileHero = () => {
                 EDIT <Edit3 className="ml-2 h-4 w-4" />
               </Button>
             </Link>
+            <Button 
+              onClick={handleSignOut}
+              variant="outline" 
+              className="flex-1 border-red-200 text-red-500 font-black h-14 rounded-2xl hover:bg-red-50 text-sm uppercase tracking-widest"
+            >
+              EXIT COURT <LogOut className="ml-2 h-4 w-4" />
+            </Button>
             <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl border-slate-200 hover:bg-slate-50">
               <Share2 className="h-5 w-5 text-[#0B1F3A]" />
             </Button>
