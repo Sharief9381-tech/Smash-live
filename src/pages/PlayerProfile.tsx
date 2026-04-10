@@ -10,6 +10,7 @@ import TournamentSection from '@/components/profile/TournamentSection';
 import TeamSection from '@/components/profile/TeamSection';
 import AnalyticsSection from '@/components/profile/AnalyticsSection';
 import AchievementSection from '@/components/profile/AchievementSection';
+import RankingSection from '@/components/profile/RankingSection';
 import { motion } from 'framer-motion';
 import { ShieldCheck, Zap } from 'lucide-react';
 
@@ -51,6 +52,12 @@ const PlayerProfile = () => {
         <section id="strategic-analytics" className="space-y-10 scroll-mt-32">
           <h2 className="text-3xl font-black tracking-tighter uppercase">Strategic Analytics</h2>
           <AnalyticsSection />
+        </section>
+
+        {/* Rankings Section */}
+        <section id="global-rankings" className="space-y-10 scroll-mt-32">
+          <h2 className="text-3xl font-black tracking-tighter uppercase">Global Rankings</h2>
+          <RankingSection />
         </section>
 
         {/* Tournaments Section */}
