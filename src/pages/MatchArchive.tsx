@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { motion } from 'framer-motion';
 import { 
   History, Search, Filter, Calendar, 
@@ -130,8 +129,6 @@ const MatchArchive = () => {
            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Showing 5 of 14,242 records</p>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

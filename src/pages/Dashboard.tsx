@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import StatCard from '@/components/dashboard/StatCard';
 import { motion } from 'framer-motion';
 import { 
@@ -169,8 +168,6 @@ const Dashboard = () => {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

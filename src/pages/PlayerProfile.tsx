@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import ProfileHero from '@/components/profile/ProfileHero';
 import ProfileNavigation from '@/components/profile/ProfileNavigation';
 import PerformanceStats from '@/components/profile/PerformanceStats';
@@ -107,8 +106,6 @@ const PlayerProfile = () => {
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 };
