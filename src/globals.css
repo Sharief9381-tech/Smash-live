@@ -47,7 +47,7 @@
 }
 
 .glass-panel {
-  @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-xl shadow-navy-900/5;
+  @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-xl shadow-slate-900/5;
 }
 
 .neon-glow {

@@ -14,6 +14,9 @@ import LiveBroadcast from "./pages/LiveBroadcast";
 import CreateBroadcast from "./pages/CreateBroadcast";
 import Rankings from "./pages/Rankings";
 import Analytics from "./pages/Analytics";
+import News from "./pages/News";
+import MatchArchive from "./pages/MatchArchive";
+import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +38,9 @@ const App = () => (
           <Route path="/player/:id" element={<PlayerProfile />} />
           <Route path="/rankings" element={<Rankings />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/news" element={<News />} />
+          <Route path="/archive" element={<MatchArchive />} />
+          <Route path="/pricing" element={<Pricing />} />
           <Route path="/broadcast/create" element={<CreateBroadcast />} />
           <Route path="/broadcast/:id" element={<LiveBroadcast />} />
           <Route path="*" element={<NotFound />} />
