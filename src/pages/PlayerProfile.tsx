@@ -4,6 +4,7 @@ import React from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import ProfileHero from '@/components/profile/ProfileHero';
+import ProfileNavigation from '@/components/profile/ProfileNavigation';
 import PerformanceStats from '@/components/profile/PerformanceStats';
 import TournamentSection from '@/components/profile/TournamentSection';
 import TeamSection from '@/components/profile/TeamSection';
@@ -17,12 +18,12 @@ const PlayerProfile = () => {
     <div className="min-h-screen bg-slate-50 text-[#0B1F3A] selection:bg-sky-500/30">
       <Navbar />
       
-      <main className="container px-6 py-12 space-y-20">
+      <main className="container px-6 py-12 space-y-12">
         {/* Intro Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-12"
+          className="space-y-8"
         >
           <div className="flex items-center gap-3">
             <div className="h-1.5 w-12 bg-sky-500 rounded-full" />
@@ -30,10 +31,13 @@ const PlayerProfile = () => {
           </div>
           
           <ProfileHero />
+          
+          {/* Quick Platform Navigation */}
+          <ProfileNavigation />
         </motion.div>
 
         {/* Core Stats Section */}
-        <section className="space-y-10">
+        <section className="space-y-10 pt-8">
           <div className="flex items-center justify-between">
             <h2 className="text-3xl font-black tracking-tighter uppercase">Performance Core</h2>
             <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
