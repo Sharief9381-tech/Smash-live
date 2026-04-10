@@ -8,22 +8,12 @@ import {
   Activity, Trophy, Target, Zap, 
   TrendingUp, Calendar, ArrowUpRight,
   Play, Users, Star, History, Radio,
-  Globe, LayoutDashboard, ChevronRight
+  Globe, LayoutDashboard, ChevronRight,
+  MapPin, Timer
 } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
-
-const performanceData = [
-  { name: 'Mon', value: 400 },
-  { name: 'Tue', value: 600 },
-  { name: 'Wed', value: 500 },
-  { name: 'Thu', value: 900 },
-  { name: 'Fri', value: 700 },
-  { name: 'Sat', value: 1100 },
-  { name: 'Sun', value: 1300 },
-];
 
 const Dashboard = () => {
   return (
@@ -66,7 +56,7 @@ const Dashboard = () => {
             <div className="glass-panel p-10 rounded-[3rem] space-y-8 border-sky-500/10 shadow-sky-500/5">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-black text-[#0B1F3A] flex items-center gap-3">
-                  <Activity className="h-5 w-5 text-red-500 animate-pulse" /> Live Event Feed
+                  <Activity className="h-5 w-5 text-red-500 animate-pulse" /> Live Match Feed
                 </h3>
                 <Link to="/live-match/active">
                   <Button variant="ghost" className="text-sky-600 font-black text-xs uppercase tracking-widest">
@@ -84,8 +74,8 @@ const Dashboard = () => {
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">{match.tournament}</p>
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <p className="font-black text-[#0B1F3A]">{match.p1}</p>
-                        <p className="font-black text-[#0B1F3A]">{match.p2}</p>
+                        <p className="font-black text-[#0B1F3A] group-hover:text-sky-600 transition-colors">{match.p1}</p>
+                        <p className="font-black text-[#0B1F3A] group-hover:text-sky-600 transition-colors">{match.p2}</p>
                       </div>
                       <span className="text-xl font-mono font-black text-sky-600 group-hover:scale-110 transition-transform">{match.score}</span>
                     </div>
@@ -94,28 +84,62 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Performance Analytics */}
+            {/* Live Global Tournaments Hub (Replaced Platform Growth) */}
             <div className="glass-panel p-10 rounded-[3rem] space-y-8">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-black text-[#0B1F3A] flex items-center gap-3">
-                  <TrendingUp className="h-5 w-5 text-sky-500" /> Platform Growth
-                </h3>
-                <Badge variant="outline" className="border-slate-200">System Analytics</Badge>
+                <div className="space-y-1">
+                  <h3 className="text-xl font-black text-[#0B1F3A] flex items-center gap-3">
+                    <Trophy className="h-5 w-5 text-sky-500" /> Live Global Tournaments
+                  </h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ongoing high-stakes events</p>
+                </div>
+                <Link to="/tournaments">
+                  <Button variant="outline" className="rounded-xl border-slate-200 font-black text-xs px-6 h-10">
+                    EXPLORE CIRCUIT
+                  </Button>
+                </Link>
               </div>
-              <div className="h-[250px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={performanceData}>
-                    <defs>
-                      <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} fontWeight="bold" axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={{ border: 'none', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                    <Area type="monotone" dataKey="value" stroke="#0ea5e9" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
-                  </AreaChart>
-                </ResponsiveContainer>
+
+              <div className="space-y-4">
+                {[
+                  { name: "BWF World Tour Finals", loc: "Jakarta, ID", status: "Live", players: 32, cat: "Major", points: "12,000", bg: "bg-sky-500/5" },
+                  { name: "China Masters 2024", loc: "Shenzhen, CN", status: "Live", players: 64, cat: "Super 750", points: "9,200", bg: "bg-slate-50" },
+                  { name: "European Championships", loc: "Saarbrücken, DE", status: "Break", players: 128, cat: "Continental", points: "7,000", bg: "bg-slate-50" },
+                ].map((tourney, i) => (
+                  <motion.div 
+                    key={i}
+                    whileHover={{ x: 5 }}
+                    className={`flex flex-col md:flex-row items-center justify-between p-6 rounded-[2rem] border border-slate-100 ${tourney.bg} group transition-all cursor-pointer`}
+                  >
+                    <div className="flex items-center gap-6">
+                      <div className="h-14 w-14 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-sky-500 shadow-sm group-hover:border-sky-500 group-hover:bg-[#0B1F3A] group-hover:text-white transition-all">
+                        <Trophy className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-black text-[#0B1F3A]">{tourney.name}</h4>
+                          <Badge className={tourney.status === 'Live' ? 'bg-red-500 animate-pulse' : 'bg-slate-200 text-slate-600'}>
+                            {tourney.status.toUpperCase()}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {tourney.loc}</span>
+                          <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {tourney.players} Players</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-8 mt-4 md:mt-0">
+                      <div className="text-right hidden sm:block">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Prize Points</p>
+                        <p className="text-lg font-black text-[#0B1F3A]">{tourney.points}</p>
+                      </div>
+                      <Button size="icon" className="h-12 w-12 rounded-2xl bg-white border border-slate-100 text-[#0B1F3A] hover:bg-sky-500 hover:text-white transition-all">
+                        <ArrowUpRight className="h-5 w-5" />
+                      </Button>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
             </div>
           </div>
@@ -140,28 +164,27 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Tournament Quick Access */}
+            {/* Quick Intelligence Tools */}
             <div className="glass-panel p-10 rounded-[3rem] space-y-6">
               <h3 className="text-sm font-black text-[#0B1F3A] uppercase tracking-widest flex items-center gap-2">
-                <Trophy className="h-4 w-4 text-sky-500" /> Tournament Hub
+                <Target className="h-4 w-4 text-sky-500" /> Command Tools
               </h3>
-              <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
                 {[
-                  { name: "BWF Finals 2024", date: "Dec 12", type: "Major" },
-                  { name: "Jakarta Open", date: "Jan 07", type: "Pro" },
-                ].map((t, i) => (
-                  <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-sky-500/30 transition-all cursor-pointer">
-                    <div>
-                      <p className="text-sm font-black text-[#0B1F3A]">{t.name}</p>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.date}</p>
-                    </div>
-                    <Badge variant="outline" className="text-[8px] font-black border-slate-200">{t.type}</Badge>
-                  </div>
+                  { label: "Sync Brackets", icon: History },
+                  { label: "AI Predictions", icon: Zap },
+                  { label: "Referee Mode", icon: Star },
+                  { label: "Fan Alerts", icon: Radio },
+                ].map((tool, i) => (
+                  <button key={i} className="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-sky-500/30 hover:bg-sky-50 transition-all gap-2 group">
+                    <tool.icon className="h-5 w-5 text-slate-400 group-hover:text-sky-600 transition-colors" />
+                    <span className="text-[9px] font-black text-[#0B1F3A] uppercase tracking-widest">{tool.label}</span>
+                  </button>
                 ))}
               </div>
               <Link to="/tournaments/create">
                 <Button variant="outline" className="w-full h-12 rounded-xl border-dashed border-slate-300 font-black text-xs uppercase hover:bg-slate-50">
-                  + REGISTER EVENT
+                  + REGISTER NEW EVENT
                 </Button>
               </Link>
             </div>
