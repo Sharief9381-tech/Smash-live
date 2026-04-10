@@ -1,8 +1,8 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Zap, ArrowRight, Github, Mail, Lock } from 'lucide-react';
+import { Zap, ArrowRight, Github, Phone, ShieldCheck } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 
 const Login = () => {
   const navigate = useNavigate();
+  const [step, setStep] = useState(1); // 1: Phone, 2: OTP
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
@@ -32,19 +33,19 @@ const Login = () => {
               Smash<span className="text-sky-500">Live</span>
             </span>
           </Link>
-          <h1 className="text-3xl font-black text-[#0B1F3A] tracking-tight">Welcome Back</h1>
-          <p className="text-slate-500 font-medium">Enter your credentials to access the intelligence hub.</p>
+          <h1 className="text-3xl font-black text-[#0B1F3A] tracking-tight">Access Hub</h1>
+          <p className="text-slate-500 font-medium">Verify your identity via mobile authentication.</p>
         </div>
 
         <div className="glass-panel p-10 rounded-[3rem] space-y-6">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Email Address</Label>
+              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Phone Number</Label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input 
-                  type="email" 
-                  placeholder="name@company.com" 
+                  type="tel" 
+                  placeholder="+1 (555) 000-0000" 
                   className="h-14 bg-white border-slate-100 rounded-2xl pl-11 font-bold focus:border-sky-500 transition-all"
                 />
               </div>
@@ -52,15 +53,16 @@ const Login = () => {
 
             <div className="space-y-2">
               <div className="flex justify-between">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Password</Label>
-                <button className="text-[10px] font-black uppercase tracking-widest text-sky-600 hover:text-sky-500">Forgot?</button>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Verification Code</Label>
+                <button className="text-[10px] font-black uppercase tracking-widest text-sky-600 hover:text-sky-500">Resend?</button>
               </div>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input 
-                  type="password" 
-                  placeholder="••••••••" 
-                  className="h-14 bg-white border-slate-100 rounded-2xl pl-11 font-bold focus:border-sky-500 transition-all"
+                  type="text" 
+                  placeholder="Enter 6-digit OTP" 
+                  maxLength={6}
+                  className="h-14 bg-white border-slate-100 rounded-2xl pl-11 font-bold tracking-[0.5em] focus:border-sky-500 transition-all"
                 />
               </div>
             </div>
@@ -70,7 +72,7 @@ const Login = () => {
             onClick={() => navigate('/')}
             className="w-full h-16 bg-[#0B1F3A] text-white font-black text-lg rounded-full shadow-xl hover:bg-[#0B1F3A]/90 transition-all group"
           >
-            Sign In <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            Verify & Sign In <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
           </Button>
 
           <div className="relative py-2">
@@ -97,7 +99,7 @@ const Login = () => {
         </div>
 
         <p className="text-center text-sm font-medium text-slate-500">
-          Don't have an account? <Link to="/login" className="text-sky-600 font-black">Register Now</Link>
+          Need help? <Link to="/" className="text-sky-600 font-black">Contact Support</Link>
         </p>
       </motion.div>
     </div>
