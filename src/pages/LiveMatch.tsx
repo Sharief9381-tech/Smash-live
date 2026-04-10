@@ -118,18 +118,6 @@ const LiveMatch = () => {
                 </div>
               </div>
             </div>
-
-            <div className="glass-panel p-10 rounded-[3.5rem] space-y-6">
-              <h3 className="text-sm font-black text-[#0B1F3A] uppercase tracking-widest flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-sky-500" /> Momentum Alert
-              </h3>
-              <p className="text-xs text-slate-500 font-bold leading-relaxed">
-                Viktor Axelsen has won 8 of the last 10 points. AI suggests a <span className="text-sky-600">84% win probability</span> for Set 2.
-              </p>
-              <Button variant="outline" className="w-full h-12 rounded-2xl border-dashed border-slate-300 font-black text-xs uppercase hover:bg-slate-50 text-[#0B1F3A]">
-                ANALYZE FULL MATCH
-              </Button>
-            </div>
           </div>
         </div>
       </main>

@@ -135,18 +135,6 @@ const Tournaments = () => {
                  </div>
               </div>
             </div>
-
-            <div className="glass-panel p-10 rounded-[3.5rem] space-y-6 border-slate-200">
-              <h3 className="text-sm font-black text-[#0B1F3A] uppercase tracking-widest flex items-center gap-2">
-                <Globe className="h-4 w-4 text-sky-500" /> Circuit Pulse
-              </h3>
-              <p className="text-xs text-slate-500 font-bold leading-relaxed">
-                China Masters 2024 has reached the Quarter Finals. Over <span className="text-sky-600">4,200 player stats</span> have been updated in real-time.
-              </p>
-              <Button variant="outline" className="w-full h-12 rounded-2xl border-dashed border-slate-300 font-black text-xs uppercase hover:bg-slate-50 text-[#0B1F3A]">
-                VIEW FULL CIRCUIT MAP
-              </Button>
-            </div>
           </div>
         </div>
       </main>
