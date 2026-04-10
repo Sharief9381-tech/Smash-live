@@ -13,6 +13,7 @@ import {
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Link } from 'react-router-dom';
 
 const performanceData = [
   { name: 'Mon', value: 400 },
@@ -33,16 +34,20 @@ const Dashboard = () => {
         {/* Welcome Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1">
-            <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter">Welcome Back, Player</h1>
+            <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter">Welcome Back, Viktor</h1>
             <p className="text-slate-500 font-medium italic uppercase tracking-widest text-[10px]">Intelligence Sync Active • Last Update: 2m ago</p>
           </div>
           <div className="flex gap-4">
-            <Button variant="outline" className="h-12 rounded-2xl border-slate-200 font-bold px-6">
-              View Profile
-            </Button>
-            <Button className="bg-[#0B1F3A] text-white hover:bg-[#0B1F3A]/90 h-12 rounded-2xl font-bold px-8 shadow-xl">
-              Start Match <Play className="ml-2 h-4 w-4 fill-current" />
-            </Button>
+            <Link to="/player/me">
+              <Button variant="outline" className="h-12 rounded-2xl border-slate-200 font-bold px-6">
+                View Profile
+              </Button>
+            </Link>
+            <Link to="/live-match/create">
+              <Button className="bg-[#0B1F3A] text-white hover:bg-[#0B1F3A]/90 h-12 rounded-2xl font-bold px-8 shadow-xl">
+                Start Match <Play className="ml-2 h-4 w-4 fill-current" />
+              </Button>
+            </Link>
           </div>
         </div>
 
@@ -112,9 +117,11 @@ const Dashboard = () => {
               ))}
             </div>
             
-            <Button variant="ghost" className="w-full text-sky-600 font-black text-xs uppercase tracking-widest hover:bg-sky-50 transition-colors">
-              View All History <ArrowUpRight className="ml-2 h-4 w-4" />
-            </Button>
+            <Link to="/archive">
+              <Button variant="ghost" className="w-full text-sky-600 font-black text-xs uppercase tracking-widest hover:bg-sky-50 transition-colors">
+                View All History <ArrowUpRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
           </div>
         </div>
       </main>

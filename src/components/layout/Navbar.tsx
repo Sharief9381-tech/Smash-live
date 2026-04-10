@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Bell, Menu, Zap } from 'lucide-react';
+import { Search, Bell, Menu, Zap, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -24,6 +25,9 @@ const Navbar = () => {
     { name: 'News', path: '/news' },
     { name: 'Archive', path: '/archive' },
   ];
+
+  // Logic to determine if we should show Profile instead of Login
+  const isInternalPage = ['/dashboard', '/player', '/archive', '/live-match'].some(path => location.pathname.startsWith(path));
 
   return (
     <nav className={cn(
@@ -64,11 +68,26 @@ const Navbar = () => {
           <button className="p-2 text-[#0B1F3A]/60 hover:text-sky-500 transition-colors">
             <Bell className="h-5 w-5" />
           </button>
-          <Link to="/login">
-            <Button className="bg-[#0B1F3A] text-white px-8 rounded-full font-bold hover:bg-[#0B1F3A]/90 transition-all shadow-lg hover:shadow-sky-500/20">
-              Login
-            </Button>
-          </Link>
+          
+          {isInternalPage ? (
+            <Link to="/player/me" className="flex items-center gap-3 group">
+              <div className="text-right hidden sm:block">
+                <p className="text-[10px] font-black text-[#0B1F3A] uppercase tracking-widest leading-none">V. Axelsen</p>
+                <p className="text-[8px] font-bold text-sky-500 uppercase tracking-tighter">Pro Member</p>
+              </div>
+              <Avatar className="h-10 w-10 border-2 border-slate-100 group-hover:border-sky-500 transition-all">
+                <AvatarImage src="https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?q=80&w=2070&auto=format&fit=crop" />
+                <AvatarFallback>VA</AvatarFallback>
+              </Avatar>
+            </Link>
+          ) : (
+            <Link to="/login">
+              <Button className="bg-[#0B1F3A] text-white px-8 rounded-full font-bold hover:bg-[#0B1F3A]/90 transition-all shadow-lg hover:shadow-sky-500/20">
+                Login
+              </Button>
+            </Link>
+          )}
+
           <button className="lg:hidden p-2">
             <Menu className="h-6 w-6 text-[#0B1F3A]" />
           </button>
