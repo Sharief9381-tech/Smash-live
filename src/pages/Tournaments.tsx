@@ -7,13 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Trophy, Calendar, MapPin, 
   Search, ListFilter, ArrowRight,
-  Globe, Zap, Filter
+  Globe, Zap, Filter, Play
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const Tournaments = () => {
-  const categories = ["All Events", "BWF World Tour", "Championships", "Local Clubs", "Youth"];
-  
   const tournaments = [
     {
       id: "bwf-finals-2024",
@@ -36,149 +35,120 @@ const Tournaments = () => {
       participants: 128,
       prize: "$1.3M",
       img: "https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-      id: "malaysia-open-2025",
-      name: "PETRONAS Malaysia Open",
-      date: "Jan 07 - 12, 2025",
-      location: "Kuala Lumpur, MY",
-      status: "Upcoming",
-      category: "Super 1000",
-      participants: 96,
-      prize: "$1.2M",
-      img: "https://images.unsplash.com/photo-1613918108466-292b78a8ef95?q=80&w=2070&auto=format&fit=crop"
     }
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-slate-50">
       <Navbar />
       
-      <main className="container px-4 py-12 space-y-12">
-        {/* Header */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-primary" />
-            <span className="text-xs font-black text-primary uppercase tracking-[0.3em]">Global Pro Circuit</span>
-          </div>
-          <h1 className="text-5xl font-black tracking-tighter">Tournaments</h1>
-          <p className="text-muted-foreground max-w-2xl font-medium">Explore the world's most prestigious badminton events, track brackets, and watch history in the making.</p>
-        </div>
-
-        {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
-          <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide w-full md:w-auto">
-            {categories.map((cat, i) => (
-              <Button 
-                key={i} 
-                variant={i === 0 ? "default" : "outline"} 
-                className={`rounded-xl px-6 h-11 font-bold whitespace-nowrap ${i === 0 ? 'bg-primary text-black' : 'border-white/5 hover:bg-white/5'}`}
-              >
-                {cat}
-              </Button>
-            ))}
-          </div>
-          
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <div className="flex-1 md:flex-none flex items-center bg-secondary/50 rounded-xl px-4 h-11 border border-white/5 focus-within:border-primary/50 transition-colors">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <input 
-                type="text" 
-                placeholder="Find event..." 
-                className="bg-transparent border-none outline-none text-sm font-medium px-3 w-full md:w-40"
-              />
+      <main className="container px-6 py-12 space-y-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sky-600">
+              <Trophy className="h-4 w-4" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Circuit Intelligence</span>
             </div>
-            <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl border-white/5">
-              <Filter className="h-4 w-4" />
-            </Button>
+            <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter">Tournaments Dashboard</h1>
+            <p className="text-slate-500 font-bold">Manage global brackets or initialize professional tournament environments.</p>
+          </div>
+          <div className="flex gap-3">
+             <div className="flex items-center bg-white border border-slate-200 rounded-2xl px-4 h-12 shadow-sm focus-within:border-sky-500 transition-all">
+                <Search className="h-4 w-4 text-slate-400" />
+                <input placeholder="Search Event..." className="bg-transparent border-none outline-none text-sm font-bold px-3 w-40" />
+             </div>
+             <Button variant="outline" size="icon" className="h-12 w-12 rounded-2xl border-slate-200 bg-white shadow-sm">
+                <Filter className="h-4 w-4 text-[#0B1F3A]" />
+             </Button>
           </div>
         </div>
 
-        {/* Tournament Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {tournaments.map((t) => (
-            <Link key={t.id} to={`/tournament/${t.id}`}>
-              <div className="group relative glass-card rounded-[2.5rem] overflow-hidden hover:border-primary/30 transition-all">
-                <div className="aspect-[16/10] overflow-hidden">
-                  <img 
-                    src={t.img} 
-                    alt={t.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-60 grayscale-[50%] group-hover:grayscale-0"
-                  />
-                  <div className="absolute top-6 left-6 flex flex-col gap-2">
-                    <Badge className={t.status === 'Live' ? 'bg-red-500 text-white animate-pulse' : 'bg-primary text-black'}>
-                      {t.status.toUpperCase()}
-                    </Badge>
-                  </div>
-                </div>
-                
-                <div className="p-8 space-y-6">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black text-primary uppercase tracking-widest">{t.category}</span>
-                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{t.date}</span>
+        <div className="grid lg:grid-cols-12 gap-8">
+          {/* Main Tournament Feed */}
+          <div className="lg:col-span-8 space-y-8">
+            <div className="grid md:grid-cols-2 gap-8">
+              {tournaments.map((t) => (
+                <Link key={t.id} to={`/tournament/${t.id}`}>
+                  <motion.div 
+                    whileHover={{ y: -10 }}
+                    className="group relative glass-panel rounded-[3rem] overflow-hidden border-slate-200 shadow-xl"
+                  >
+                    <div className="aspect-[16/10] overflow-hidden">
+                      <img src={t.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80" alt="" />
+                      <Badge className="absolute top-6 left-6 bg-red-500 text-white animate-pulse font-black px-4 h-7 border-none">{t.status}</Badge>
                     </div>
-                    <h3 className="text-2xl font-black tracking-tight group-hover:text-primary transition-colors">{t.name}</h3>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5" /> {t.location}
+                    <div className="p-8 space-y-6">
+                       <div>
+                          <p className="text-[10px] font-black text-sky-600 uppercase tracking-widest mb-1">{t.category}</p>
+                          <h3 className="text-2xl font-black text-[#0B1F3A] group-hover:text-sky-600 transition-colors">{t.name}</h3>
+                       </div>
+                       <div className="flex items-center gap-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                          <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> {t.location}</span>
+                          <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> {t.date}</span>
+                       </div>
+                       <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                          <div className="space-y-1">
+                             <p className="text-[8px] font-black text-slate-400 uppercase">Prize Pool</p>
+                             <p className="text-xl font-black text-[#0B1F3A]">{t.prize}</p>
+                          </div>
+                          <div className="h-12 w-12 rounded-2xl bg-[#0B1F3A] text-white flex items-center justify-center group-hover:bg-sky-500 transition-colors shadow-lg">
+                             <ArrowRight className="h-6 w-6" />
+                          </div>
+                       </div>
                     </div>
-                    <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
-                      <Users className="h-3.5 w-3.5" /> {t.participants} Players
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-white/5 flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase">Prize Pool</span>
-                      <span className="text-lg font-black text-primary">{t.prize}</span>
-                    </div>
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all">
-                      <ArrowRight className="h-5 w-5" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* Global Hub Section */}
-        <section className="glass-card p-12 rounded-[3.5rem] bg-gradient-to-br from-primary/10 via-transparent to-transparent flex flex-col md:flex-row items-center justify-between gap-12 overflow-hidden relative">
-          <div className="absolute -right-20 -bottom-20 opacity-5 pointer-events-none">
-            <Globe className="h-80 w-80" />
-          </div>
-          
-          <div className="space-y-6 max-w-xl relative z-10">
-            <div className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-primary fill-current" />
-              <span className="text-xs font-black text-primary uppercase tracking-[0.3em]">Organizer Network</span>
+                  </motion.div>
+                </Link>
+              ))}
             </div>
-            <h2 className="text-4xl font-black tracking-tighter">Hosting your own tournament?</h2>
-            <p className="text-muted-foreground font-medium">Get access to professional-grade bracket management, live scoring tools, and global broadcasting features.</p>
-            <Link to="/tournaments/create">
-              <Button className="h-14 px-8 bg-primary text-black font-black rounded-2xl shadow-[0_20px_40px_rgba(182,255,42,0.1)]">
-                LAUNCH EVENT STUDIO
-              </Button>
-            </Link>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 w-full md:w-auto relative z-10">
-            {[
-              { label: "Events Managed", val: "1.4k+" },
-              { label: "Active Regions", val: "42" },
-              { label: "Pro Scouters", val: "850+" },
-              { label: "Fan Base", val: "2.8M" }
-            ].map((s, i) => (
-              <div key={i} className="glass-card p-6 rounded-3xl text-center border-white/10">
-                <p className="text-2xl font-black">{s.val}</p>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{s.label}</p>
+          {/* Tournament Studio Sidebar */}
+          <div className="lg:col-span-4 space-y-8">
+            <div className="bg-[#0B1F3A] p-12 rounded-[4rem] text-white space-y-8 relative overflow-hidden group shadow-2xl">
+              <div className="absolute -right-16 -top-16 opacity-10 group-hover:rotate-45 transition-transform duration-1000">
+                <Trophy className="h-64 w-64" />
               </div>
-            ))}
+
+              <div className="space-y-6 relative z-10">
+                 <div className="h-16 w-16 bg-sky-500 rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(14,165,233,0.3)]">
+                    <Trophy className="h-8 w-8 text-white" />
+                 </div>
+                 <div className="space-y-2">
+                    <h3 className="text-3xl font-black tracking-tighter italic leading-none">Event <br /> Studio</h3>
+                    <p className="text-white/60 text-sm font-bold leading-relaxed">Initialize full-scale tournament brackets and broadcast live rounds.</p>
+                 </div>
+                 <Link to="/tournaments/create">
+                    <Button className="w-full h-16 bg-white text-[#0B1F3A] font-black rounded-2xl hover:bg-sky-500 hover:text-white transition-all shadow-xl border-none">
+                       START TOURNAMENT <Zap className="ml-2 h-5 w-5 fill-current" />
+                    </Button>
+                 </Link>
+              </div>
+
+              <div className="pt-8 border-t border-white/10 relative z-10 space-y-4">
+                 <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Ready Modules</span>
+                 </div>
+                 <div className="grid grid-cols-2 gap-3">
+                    {['Brackets', 'Seeding', 'Scoring', 'Live TV'].map((m) => (
+                      <div key={m} className="bg-white/5 p-3 rounded-xl border border-white/10 text-[10px] font-black text-center uppercase tracking-widest">{m}</div>
+                    ))}
+                 </div>
+              </div>
+            </div>
+
+            <div className="glass-panel p-10 rounded-[3.5rem] space-y-6 border-slate-200">
+              <h3 className="text-sm font-black text-[#0B1F3A] uppercase tracking-widest flex items-center gap-2">
+                <Globe className="h-4 w-4 text-sky-500" /> Circuit Pulse
+              </h3>
+              <p className="text-xs text-slate-500 font-bold leading-relaxed">
+                China Masters 2024 has reached the Quarter Finals. Over <span className="text-sky-600">4,200 player stats</span> have been updated in real-time.
+              </p>
+              <Button variant="outline" className="w-full h-12 rounded-2xl border-dashed border-slate-300 font-black text-xs uppercase hover:bg-slate-50 text-[#0B1F3A]">
+                VIEW FULL CIRCUIT MAP
+              </Button>
+            </div>
           </div>
-        </section>
+        </div>
       </main>
     </div>
   );

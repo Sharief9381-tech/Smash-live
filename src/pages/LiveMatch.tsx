@@ -1,206 +1,134 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
-  History, Zap, Volume2, Maximize2, 
-  Settings, ChevronLeft, Share2, 
-  TrendingUp, Activity
+  History, Radio, ChevronRight, Play, 
+  Activity, Users, MapPin, Zap, ArrowRight,
+  TrendingUp, Globe
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 const LiveMatch = () => {
-  const [score, setScore] = useState({ p1: 18, p2: 19 });
-  const [sets, setSets] = useState({ p1: 1, p2: 0 });
-
-  const addPoint = (player: 'p1' | 'p2') => {
-    setScore(prev => ({ ...prev, [player]: prev[player] + 1 }));
-  };
-
   return (
-    <div className="min-h-screen bg-black text-foreground selection:bg-primary selection:text-black">
+    <div className="min-h-screen bg-slate-50">
       <Navbar />
       
-      <main className="container px-4 py-8">
-        {/* Match Info Bar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="rounded-full hover:bg-white/5">
-              <ChevronLeft className="h-6 w-6" />
-            </Button>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Badge className="bg-red-500 text-white animate-pulse border-none text-[10px] font-black">LIVE</Badge>
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Court 01 • BWF Finals</span>
-              </div>
-              <h2 className="text-xl font-black tracking-tight">Men's Singles • Group A</h2>
+      <main className="container px-6 py-12 space-y-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+              <span className="text-[10px] font-black text-red-500 uppercase tracking-[0.3em]">Active Intelligence</span>
             </div>
+            <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter">Live Match Dashboard</h1>
+            <p className="text-slate-500 font-bold">Monitor real-time court activity or launch your own broadcast stream.</p>
           </div>
           
-          <div className="flex items-center gap-3">
-            <Button variant="outline" className="border-white/10 hover:bg-white/5 rounded-xl gap-2 font-bold h-11">
-              <History className="h-4 w-4" /> REPLAY
-            </Button>
-            <Button variant="outline" className="border-white/10 hover:bg-white/5 rounded-xl gap-2 font-bold h-11">
-              <Share2 className="h-4 w-4" /> SHARE
-            </Button>
-            <Button className="bg-primary text-black hover:bg-primary/90 rounded-xl font-bold h-11 px-6 shadow-[0_0_20px_rgba(182,255,42,0.2)]">
-              WATCH BROADCAST
-            </Button>
+          <div className="flex gap-4">
+             <Button variant="outline" className="h-12 border-slate-200 rounded-xl font-black text-xs px-6 uppercase text-[#0B1F3A]">
+               <History className="mr-2 h-4 w-4" /> REPLAY VAULT
+             </Button>
           </div>
         </div>
 
         <div className="grid lg:grid-cols-12 gap-8">
-          {/* Main Scoreboard */}
-          <div className="lg:col-span-8 space-y-6">
-            <div className="glass-card rounded-[3rem] p-12 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
-              
-              <div className="relative flex flex-col md:flex-row items-center justify-between gap-12">
-                {/* Player 1 */}
-                <div className="flex flex-col items-center gap-6 flex-1 text-center">
-                  <div className="h-32 w-32 rounded-full bg-secondary border-4 border-white/5 flex items-center justify-center text-4xl font-black group hover:border-primary/50 transition-colors">
-                    VA
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-2xl font-black uppercase tracking-tight">Viktor Axelsen</h3>
-                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em]">Denmark</p>
-                  </div>
-                  <div className="flex gap-1">
-                    <div className={cn("h-2 w-8 rounded-full", sets.p1 >= 1 ? "bg-primary shadow-[0_0_10px_rgba(182,255,42,0.5)]" : "bg-white/5")} />
-                    <div className={cn("h-2 w-8 rounded-full", sets.p1 >= 2 ? "bg-primary shadow-[0_0_10px_rgba(182,255,42,0.5)]" : "bg-white/5")} />
-                  </div>
-                </div>
-
-                {/* VS & Score */}
-                <div className="flex flex-col items-center gap-4">
-                  <div className="text-xs font-black text-muted-foreground uppercase tracking-[0.3em]">Set 02</div>
-                  <div className="flex items-center gap-8">
-                    <AnimatePresence mode="wait">
-                      <motion.span 
-                        key={score.p1}
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        className="text-8xl md:text-9xl font-black font-mono text-primary tabular-nums"
-                      >
-                        {score.p1}
-                      </motion.span>
-                    </AnimatePresence>
-                    <div className="h-16 w-1 bg-white/10 rounded-full" />
-                    <AnimatePresence mode="wait">
-                      <motion.span 
-                        key={score.p2}
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        className="text-8xl md:text-9xl font-black font-mono text-white tabular-nums"
-                      >
-                        {score.p2}
-                      </motion.span>
-                    </AnimatePresence>
-                  </div>
-                  <Button variant="ghost" className="text-primary font-black text-xs uppercase tracking-widest hover:bg-primary/10">
-                    MATCH STATS <TrendingUp className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-
-                {/* Player 2 */}
-                <div className="flex flex-col items-center gap-6 flex-1 text-center">
-                  <div className="h-32 w-32 rounded-full bg-secondary border-4 border-white/5 flex items-center justify-center text-4xl font-black group hover:border-primary/50 transition-colors">
-                    LZ
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-2xl font-black uppercase tracking-tight">Lee Zii Jia</h3>
-                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em]">Malaysia</p>
-                  </div>
-                  <div className="flex gap-1">
-                    <div className={cn("h-2 w-8 rounded-full", sets.p2 >= 1 ? "bg-primary shadow-[0_0_10px_rgba(182,255,42,0.5)]" : "bg-white/5")} />
-                    <div className={cn("h-2 w-8 rounded-full", sets.p2 >= 2 ? "bg-primary shadow-[0_0_10px_rgba(182,255,42,0.5)]" : "bg-white/5")} />
-                  </div>
-                </div>
+          {/* Main Dashboard Feed */}
+          <div className="lg:col-span-8 space-y-8">
+            <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 border-sky-500/10 shadow-2xl shadow-sky-500/5">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-black text-[#0B1F3A] flex items-center gap-3 italic">
+                  <Activity className="h-5 w-5 text-red-500" /> Active Global Courts
+                </h3>
               </div>
 
-              {/* Court Visualization */}
-              <div className="mt-16 h-32 w-full border border-white/5 rounded-2xl relative bg-secondary/20 flex items-center justify-center">
-                <div className="absolute inset-y-0 left-1/2 w-px bg-white/20" />
-                <div className="h-2 w-full bg-white/5 absolute top-1/2 -translate-y-1/2" />
-                <div className="h-12 w-12 rounded-full bg-primary/20 blur-xl animate-pulse absolute left-1/4" />
-                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">Bird's Eye Court Tracker</span>
+              <div className="space-y-4">
+                {[
+                  { p1: "Viktor Axelsen", p2: "Lee Zii Jia", score: "21-19, 14-11", tournament: "BWF Finals", viewers: "12.4k", status: "Live" },
+                  { p1: "An Se-young", p2: "Tai Tzu-ying", score: "21-12, 18-15", tournament: "Jakarta Open", viewers: "8.2k", status: "Live" },
+                  { p1: "Jonatan Christie", p2: "Anthony Ginting", score: "0-0", tournament: "Indonesia Master", viewers: "3.1k", status: "Warm-up" },
+                ].map((match, i) => (
+                  <div key={i} className="flex flex-col md:flex-row items-center justify-between p-8 rounded-[2.5rem] bg-slate-50 border border-slate-100 hover:border-sky-500/30 transition-all group cursor-pointer">
+                    <div className="flex items-center gap-8">
+                       <div className="space-y-1">
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{match.tournament}</p>
+                          <div className="flex items-center gap-4">
+                             <div className="font-black text-xl text-[#0B1F3A]">{match.p1} <span className="text-sky-500">vs</span> {match.p2}</div>
+                          </div>
+                          <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase">
+                             <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {match.viewers} watching</span>
+                             <span className="h-1 w-1 bg-slate-200 rounded-full" />
+                             <span className="flex items-center gap-1 text-red-500"><Globe className="h-3 w-3" /> {match.status}</span>
+                          </div>
+                       </div>
+                    </div>
+                    <div className="flex items-center gap-8 mt-6 md:mt-0">
+                       <span className="text-3xl font-mono font-black text-sky-600 tabular-nums">{match.score}</span>
+                       <Link to="/broadcast/live">
+                        <Button className="h-14 w-14 rounded-2xl bg-[#0B1F3A] text-white hover:bg-sky-500 transition-all shadow-xl group-hover:scale-105">
+                           <Play className="h-6 w-6 fill-current" />
+                        </Button>
+                       </Link>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <Button onClick={() => addPoint('p1')} className="h-20 rounded-3xl bg-secondary hover:bg-primary hover:text-black transition-all group font-black flex flex-col gap-1">
-                <span className="text-[10px] uppercase opacity-60">Point</span>
-                <span>AXELSEN</span>
-              </Button>
-              <Button onClick={() => addPoint('p2')} className="h-20 rounded-3xl bg-secondary hover:bg-primary hover:text-black transition-all group font-black flex flex-col gap-1">
-                <span className="text-[10px] uppercase opacity-60">Point</span>
-                <span>ZII JIA</span>
-              </Button>
-              <Button variant="outline" className="h-20 rounded-3xl border-white/5 bg-secondary/30 hover:bg-white/5 font-black flex flex-col gap-1">
-                <span className="text-[10px] uppercase opacity-60">Control</span>
-                <span>UNDO</span>
-              </Button>
-              <Button variant="outline" className="h-20 rounded-3xl border-white/5 bg-secondary/30 hover:bg-white/5 font-black flex flex-col gap-1">
-                <span className="text-[10px] uppercase opacity-60">Control</span>
-                <span>TIMEOFF</span>
-              </Button>
             </div>
           </div>
 
-          {/* Side Panel: Analytics */}
-          <div className="lg:col-span-4 space-y-6">
-            <div className="glass-card rounded-[2.5rem] p-8 space-y-6">
-              <h3 className="font-black text-sm uppercase tracking-[0.2em] flex items-center gap-3">
-                <Activity className="h-4 w-4 text-primary" /> Live Analytics
-              </h3>
+          {/* Broadcast Studio Sidebar */}
+          <div className="lg:col-span-4 space-y-8">
+            <div className="bg-[#0B1F3A] p-12 rounded-[4rem] text-white space-y-8 relative overflow-hidden group border border-white/5 shadow-2xl">
+              <div className="absolute -right-20 -bottom-20 opacity-10 group-hover:rotate-12 transition-transform duration-1000">
+                <Radio className="h-64 w-64" />
+              </div>
               
-              <div className="space-y-6">
-                {[
-                  { label: "Smash Accuracy", p1: 88, p2: 74 },
-                  { label: "Net Play Errors", p1: 2, p2: 5 },
-                  { label: "Longest Rally", p1: 42, p2: 42, isNeutral: true },
-                ].map((stat, i) => (
-                  <div key={i} className="space-y-3">
-                    <div className="flex justify-between text-[10px] font-black uppercase tracking-wider text-muted-foreground">
-                      <span>{stat.label}</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden flex justify-end">
-                        <div 
-                          className="h-full bg-primary" 
-                          style={{ width: `${stat.p1}%` }} 
-                        />
-                      </div>
-                      <div className="font-mono font-bold text-xs min-w-[3rem] text-center">
-                        {stat.p1} : {stat.p2}
-                      </div>
-                      <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-white/40" 
-                          style={{ width: `${stat.p2}%` }} 
-                        />
-                      </div>
-                    </div>
+              <div className="space-y-6 relative z-10">
+                <div className="h-16 w-16 bg-sky-500 rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(14,165,233,0.3)]">
+                  <Radio className="h-8 w-8 text-white animate-pulse" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-3xl font-black tracking-tighter italic leading-none">Broadcast <br /> Studio</h3>
+                  <p className="text-white/60 text-sm font-bold leading-relaxed">Broadcast professional matches with ultra-low latency and AI overlays.</p>
+                </div>
+                <Link to="/broadcast/create">
+                  <Button className="w-full h-16 bg-white text-[#0B1F3A] font-black rounded-2xl hover:bg-sky-500 hover:text-white transition-all shadow-xl border-none">
+                    START STREAMING <Zap className="ml-2 h-5 w-5 fill-current" />
+                  </Button>
+                </Link>
+              </div>
+              
+              <div className="pt-8 border-t border-white/10 relative z-10">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Studio Metrics</span>
+                  <Badge className="bg-sky-500/20 text-sky-400 border-none font-black text-[8px]">ACTIVE EDGE</Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-xl font-black">4K</p>
+                    <p className="text-[8px] font-bold text-white/40 uppercase">MAX RES</p>
                   </div>
-                ))}
+                  <div className="space-y-1">
+                    <p className="text-xl font-black">42ms</p>
+                    <p className="text-[8px] font-bold text-white/40 uppercase">LATENCY</p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="glass-card rounded-[2.5rem] p-8 space-y-4">
-              <h3 className="font-black text-sm uppercase tracking-[0.2em]">Match Momentum</h3>
-              <div className="h-32 w-full flex items-end gap-1.5 pt-4">
-                {[4, 6, 8, 3, 5, 9, 7, 4, 6, 2, 8, 10, 5, 7, 9, 3].map((h, i) => (
-                  <div 
-                    key={i} 
-                    className="flex-1 bg-primary/20 rounded-t-sm hover:bg-primary transition-colors cursor-help"
-                    style={{ height: `${h * 10}%` }}
-                  />
-                ))}
-              </div>
+            <div className="glass-panel p-10 rounded-[3.5rem] space-y-6">
+              <h3 className="text-sm font-black text-[#0B1F3A] uppercase tracking-widest flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-sky-500" /> Momentum Alert
+              </h3>
+              <p className="text-xs text-slate-500 font-bold leading-relaxed">
+                Viktor Axelsen has won 8 of the last 10 points. AI suggests a <span className="text-sky-600">84% win probability</span> for Set 2.
+              </p>
+              <Button variant="outline" className="w-full h-12 rounded-2xl border-dashed border-slate-300 font-black text-xs uppercase hover:bg-slate-50 text-[#0B1F3A]">
+                ANALYZE FULL MATCH
+              </Button>
             </div>
           </div>
         </div>

@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Zap, Twitter, Instagram, Linkedin, Facebook } from 'lucide-react';
+import { Zap, Twitter, Instagram, Linkedin, Facebook, Apple, Play } from 'lucide-react';
 
 const Footer = () => {
   return (
     <footer className="bg-white border-t border-slate-200 py-20">
       <div className="container px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           <div className="lg:col-span-2 space-y-6">
             <Link to="/" className="flex items-center gap-2">
               <div className="bg-[#0B1F3A] p-2 rounded-xl text-white">
@@ -17,7 +17,7 @@ const Footer = () => {
               </span>
             </Link>
             <p className="text-slate-500 font-medium max-w-sm leading-relaxed">
-              The world's most advanced badminton analytics and live scoring ecosystem. Empowering players and fans with real-time intelligence.
+              The world's most advanced badminton analytics and live scoring ecosystem.
             </p>
             <div className="flex gap-4">
               {[Twitter, Instagram, Linkedin, Facebook].map((Icon, i) => (
@@ -42,29 +42,23 @@ const Footer = () => {
             </ul>
           </div>
 
-          <div>
-            <h4 className="font-black text-[#0B1F3A] uppercase tracking-widest text-sm mb-6">Company</h4>
-            <ul className="space-y-4">
-              <li><Link to="#" className="text-slate-500 hover:text-sky-500 font-medium transition-colors">About Us</Link></li>
-              <li><Link to="#" className="text-slate-500 hover:text-sky-500 font-medium transition-colors">Privacy Policy</Link></li>
-              <li><Link to="#" className="text-slate-500 hover:text-sky-500 font-medium transition-colors">Terms of Service</Link></li>
-              <li><Link to="#" className="text-slate-500 hover:text-sky-500 font-medium transition-colors">Contact</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-black text-[#0B1F3A] uppercase tracking-widest text-sm mb-6">Account</h4>
+          <div className="space-y-6">
+            <h4 className="font-black text-[#0B1F3A] uppercase tracking-widest text-sm">Download App</h4>
             <div className="space-y-3">
-              <Link to="/login">
-                <button className="w-full h-12 bg-[#0B1F3A] text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#0B1F3A]/90 transition-all">
-                  Sign In
-                </button>
-              </Link>
-              <Link to="/login">
-                <button className="w-full h-12 border border-[#0B1F3A] text-[#0B1F3A] rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#0B1F3A]/5 transition-all">
-                  Create Account
-                </button>
-              </Link>
+              <button className="w-full h-14 bg-[#0B1F3A] text-white rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-[#0B1F3A]/90 transition-all shadow-xl">
+                <Apple className="h-6 w-6" />
+                <div className="text-left">
+                  <p className="text-[10px] uppercase font-bold leading-none">Download on the</p>
+                  <p className="text-lg leading-none">App Store</p>
+                </div>
+              </button>
+              <button className="w-full h-14 bg-white border-2 border-[#0B1F3A] text-[#0B1F3A] rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-slate-50 transition-all">
+                <Play className="h-6 w-6 fill-current" />
+                <div className="text-left">
+                  <p className="text-[10px] uppercase font-bold leading-none">Get it on</p>
+                  <p className="text-lg leading-none">Google Play</p>
+                </div>
+              </button>
             </div>
           </div>
         </div>
