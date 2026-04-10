@@ -2,18 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Bell, Menu, Zap, User, Settings } from 'lucide-react';
+import { Search, Bell, Menu, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -34,7 +26,6 @@ const Navbar = () => {
     { name: 'Archive', path: '/archive' },
   ];
 
-  // Logic to determine if we should show Profile instead of Login
   const isInternalPage = ['/dashboard', '/player', '/archive', '/live-match', '/tournaments'].some(path => location.pathname.startsWith(path));
 
   return (
@@ -78,29 +69,16 @@ const Navbar = () => {
           </button>
           
           {isInternalPage ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-3 group outline-none">
-                  <div className="text-right hidden sm:block">
-                    <p className="text-[10px] font-black text-[#0B1F3A] uppercase tracking-widest leading-none">V. Axelsen</p>
-                    <p className="text-[8px] font-bold text-sky-500 uppercase tracking-tighter">Pro Member</p>
-                  </div>
-                  <Avatar className="h-10 w-10 border-2 border-slate-200 group-hover:border-sky-500 transition-all ring-offset-2 group-hover:ring-2 ring-sky-500/20">
-                    <AvatarImage src="https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?q=80&w=2070&auto=format&fit=crop" />
-                    <AvatarFallback className="font-black">VA</AvatarFallback>
-                  </Avatar>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2">
-                <DropdownMenuLabel className="font-black text-[10px] uppercase tracking-widest text-slate-400 p-3">Account Intelligence</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/player/me" className="flex items-center gap-2 p-3 font-bold cursor-pointer hover:bg-slate-50 rounded-xl">
-                    <User className="h-4 w-4 text-sky-500" /> Player Profile
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Link to="/player/me" className="flex items-center gap-3 group outline-none">
+              <div className="text-right hidden sm:block">
+                <p className="text-[10px] font-black text-[#0B1F3A] uppercase tracking-widest leading-none">V. Axelsen</p>
+                <p className="text-[8px] font-bold text-sky-500 uppercase tracking-tighter">Pro Member</p>
+              </div>
+              <Avatar className="h-10 w-10 border-2 border-slate-200 group-hover:border-sky-500 transition-all ring-offset-2 group-hover:ring-2 ring-sky-500/20">
+                <AvatarImage src="https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?q=80&w=2070&auto=format&fit=crop" />
+                <AvatarFallback className="font-black">VA</AvatarFallback>
+              </Avatar>
+            </Link>
           ) : (
             <Link to="/login">
               <Button className="bg-[#0B1F3A] text-white px-8 rounded-full font-black text-sm hover:bg-[#0B1F3A]/90 transition-all shadow-lg hover:shadow-sky-500/20 border-none">

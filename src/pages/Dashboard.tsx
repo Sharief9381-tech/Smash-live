@@ -7,8 +7,8 @@ import {
   Activity, Trophy, Zap, 
   ArrowUpRight, Users, 
   History, Radio, LayoutDashboard, 
-  ChevronRight, MapPin, Star,
-  Bell, Globe
+  ChevronRight, MapPin, Target,
+  TrendingUp, Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -146,48 +146,52 @@ const Dashboard = () => {
               </div>
             </div>
 
+            {/* Personal Intelligence Panel */}
             <div className="glass-panel p-10 rounded-[3rem] space-y-6">
               <h3 className="text-sm font-black text-[#0B1F3A] uppercase tracking-widest flex items-center gap-2">
-                <Bell className="h-4 w-4 text-sky-500" /> Notifications Hub
+                <Target className="h-4 w-4 text-sky-500" /> Personal Intelligence
               </h3>
-              <div className="space-y-4">
+              <div className="space-y-6">
                  {[
-                   { text: "Your win probability simulation is ready.", time: "2m ago" },
-                   { text: "Security alert: New login from Jakarta, ID.", time: "1h ago" },
-                 ].map((notif, i) => (
-                   <div key={i} className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                      <p className="text-[11px] font-bold text-[#0B1F3A] leading-tight">{notif.text}</p>
-                      <p className="text-[9px] text-slate-400 font-black mt-1 uppercase tracking-widest">{notif.time}</p>
+                   { label: "Win Rate", val: "88.4%", icon: TrendingUp, color: "text-green-500" },
+                   { label: "Matches Today", val: "4", icon: Activity, color: "text-sky-500" },
+                   { label: "Circuit Points", val: "105.4k", icon: Trophy, color: "text-amber-500" },
+                 ].map((stat, i) => (
+                   <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                      <div className="flex items-center gap-3">
+                        <stat.icon className={cn("h-4 w-4", stat.color)} />
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</span>
+                      </div>
+                      <span className="text-lg font-black text-[#0B1F3A]">{stat.val}</span>
                    </div>
                  ))}
               </div>
-              <Button variant="outline" className="w-full h-12 rounded-xl border-dashed border-slate-300 font-black text-xs uppercase hover:bg-slate-50 text-[#0B1F3A]">
-                CLEAR ALL
-              </Button>
-            </div>
-
-            <div className="glass-panel p-10 rounded-[3rem] space-y-6">
-              <h3 className="text-sm font-black text-[#0B1F3A] uppercase tracking-widest flex items-center gap-2">
-                <Zap className="h-4 w-4 text-sky-500" /> Command Tools
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: "Sync Brackets", icon: History },
-                  { label: "AI Predictions", icon: Zap },
-                  { label: "Referee Mode", icon: Star },
-                  { label: "Match Record", icon: Activity },
-                ].map((tool, i) => (
-                  <button key={i} className="flex items-center justify-center p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-sky-500/30 hover:bg-sky-50 transition-all gap-2 group outline-none">
-                    <tool.icon className="h-5 w-5 text-slate-400 group-hover:text-sky-600 transition-colors" />
-                    <span className="text-[9px] font-black text-[#0B1F3A] uppercase tracking-widest">{tool.label}</span>
-                  </button>
-                ))}
-              </div>
-              <Link to="/live-match/create">
-                <Button variant="outline" className="w-full h-12 rounded-xl border-dashed border-slate-300 font-black text-xs uppercase hover:bg-slate-50 text-[#0B1F3A]">
-                  + INITIALIZE QUICK MATCH
+              <Link to="/player/me">
+                <Button variant="outline" className="w-full h-12 rounded-xl border-slate-200 font-black text-xs uppercase hover:bg-slate-50 text-[#0B1F3A]">
+                  VIEW FULL PERFORMANCE <ChevronRight className="ml-1 h-3 w-3" />
                 </Button>
               </Link>
+            </div>
+
+            {/* Global Reach Insights */}
+            <div className="glass-panel p-10 rounded-[3rem] space-y-6 bg-gradient-to-br from-sky-500/5 to-transparent">
+              <h3 className="text-sm font-black text-[#0B1F3A] uppercase tracking-widest flex items-center gap-2">
+                <Globe className="h-4 w-4 text-sky-500" /> Global Pulse
+              </h3>
+              <div className="space-y-4">
+                 <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm">
+                    <p className="text-[11px] font-bold text-[#0B1F3A] leading-tight italic">
+                      "Axelsen's win probability has shifted to 92% following today's warm-up session."
+                    </p>
+                    <p className="text-[9px] text-slate-400 font-black mt-2 uppercase tracking-widest">AI Analyst • 12m ago</p>
+                 </div>
+                 <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm">
+                    <p className="text-[11px] font-bold text-[#0B1F3A] leading-tight">
+                      New tournament registry open for Malaysia Open 2025.
+                    </p>
+                    <p className="text-[9px] text-slate-400 font-black mt-2 uppercase tracking-widest">Circuit News • 1h ago</p>
+                 </div>
+              </div>
             </div>
           </div>
         </div>
