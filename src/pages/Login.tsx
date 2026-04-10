@@ -1,16 +1,38 @@
 "use client";
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Zap, ArrowRight, Github, Phone, ShieldCheck } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Zap, ArrowRight, Phone, ShieldCheck, ChevronDown, Globe } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
+const countryCodes = [
+  { code: '+1', country: 'US', flag: '🇺🇸' },
+  { code: '+44', country: 'UK', flag: '🇬🇧' },
+  { code: '+91', country: 'IN', flag: '🇮🇳' },
+  { code: '+62', country: 'ID', flag: '🇮🇩' },
+  { code: '+45', country: 'DK', flag: '🇩🇰' },
+  { code: '+60', country: 'MY', flag: '🇲🇾' },
+  { code: '+86', country: 'CN', flag: '🇨🇳' },
+  { code: '+81', country: 'JP', flag: '🇯🇵' },
+  { code: '+66', country: 'TH', flag: '🇹🇭' },
+  { code: '+82', country: 'KR', flag: '🇰🇷' },
+];
+
 const Login = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); // 1: Phone, 2: OTP
+  const [step, setStep] = useState(1); // 1: Phone Entry, 2: OTP Verification
+  const [selectedCountry, setSelectedCountry] = useState(countryCodes[0]);
+
+  const handleNextStep = () => {
+    if (step === 1) {
+      setStep(2);
+    } else {
+      navigate('/');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
@@ -22,7 +44,7 @@ const Login = () => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-[480px] space-y-8 relative z-10"
+        className="w-full max-w-[440px] space-y-8 relative z-10"
       >
         <div className="text-center space-y-4">
           <Link to="/" className="inline-flex items-center gap-2">
@@ -33,73 +55,114 @@ const Login = () => {
               Smash<span className="text-sky-500">Live</span>
             </span>
           </Link>
-          <h1 className="text-3xl font-black text-[#0B1F3A] tracking-tight">Access Hub</h1>
-          <p className="text-slate-500 font-medium">Verify your identity via mobile authentication.</p>
+          <h1 className="text-3xl font-black text-[#0B1F3A] tracking-tight">
+            {step === 1 ? 'Welcome Back' : 'Verify Identity'}
+          </h1>
+          <p className="text-slate-500 font-medium">
+            {step === 1 
+              ? 'Enter your mobile number to receive a secure code.' 
+              : 'We\'ve sent a 6-digit verification code to your phone.'}
+          </p>
         </div>
 
-        <div className="glass-panel p-10 rounded-[3rem] space-y-6">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Phone Number</Label>
-              <div className="relative">
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input 
-                  type="tel" 
-                  placeholder="+1 (555) 000-0000" 
-                  className="h-14 bg-white border-slate-100 rounded-2xl pl-11 font-bold focus:border-sky-500 transition-all"
-                />
-              </div>
-            </div>
+        <div className="glass-panel p-10 rounded-[3rem] space-y-8">
+          <AnimatePresence mode="wait">
+            {step === 1 ? (
+              <motion.div 
+                key="step1"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                className="space-y-6"
+              >
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Mobile Intelligence Registry</Label>
+                  <div className="flex gap-2">
+                    <div className="relative group">
+                      <div className="h-14 w-24 bg-white border border-slate-100 rounded-2xl flex items-center justify-center gap-2 px-3 cursor-pointer group-hover:border-sky-500 transition-all">
+                        <span className="text-lg">{selectedCountry.flag}</span>
+                        <span className="text-sm font-bold text-[#0B1F3A]">{selectedCountry.code}</span>
+                      </div>
+                      <select 
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        onChange={(e) => setSelectedCountry(countryCodes.find(c => c.code === e.target.value) || countryCodes[0])}
+                        value={selectedCountry.code}
+                      >
+                        {countryCodes.map((c) => (
+                          <option key={c.code} value={c.code}>{c.flag} {c.country} ({c.code})</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="relative flex-1">
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <Input 
+                        type="tel" 
+                        placeholder="Phone Number" 
+                        className="h-14 bg-white border-slate-100 rounded-2xl pl-11 font-bold focus:border-sky-500 transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
 
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Verification Code</Label>
-                <button className="text-[10px] font-black uppercase tracking-widest text-sky-600 hover:text-sky-500">Resend?</button>
-              </div>
-              <div className="relative">
-                <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input 
-                  type="text" 
-                  placeholder="Enter 6-digit OTP" 
-                  maxLength={6}
-                  className="h-14 bg-white border-slate-100 rounded-2xl pl-11 font-bold tracking-[0.5em] focus:border-sky-500 transition-all"
-                />
-              </div>
-            </div>
-          </div>
+                <Button 
+                  onClick={handleNextStep}
+                  className="w-full h-16 bg-[#0B1F3A] text-white font-black text-lg rounded-full shadow-xl hover:bg-[#0B1F3A]/90 transition-all group"
+                >
+                  Send OTP Code <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.div 
+                key="step2"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                className="space-y-6"
+              >
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center px-1">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Security Verification</Label>
+                    <button 
+                      onClick={() => setStep(1)}
+                      className="text-[10px] font-black uppercase tracking-widest text-sky-600 hover:text-sky-500"
+                    >
+                      Change Number?
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input 
+                      type="text" 
+                      placeholder="Enter 6-digit code" 
+                      maxLength={6}
+                      className="h-14 bg-white border-slate-100 rounded-2xl pl-11 font-bold tracking-[0.5em] focus:border-sky-500 transition-all text-center"
+                    />
+                  </div>
+                  <div className="text-center">
+                    <button className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-[#0B1F3A] transition-colors">
+                      Didn't receive code? <span className="text-sky-600">Resend in 00:59</span>
+                    </button>
+                  </div>
+                </div>
 
-          <Button 
-            onClick={() => navigate('/')}
-            className="w-full h-16 bg-[#0B1F3A] text-white font-black text-lg rounded-full shadow-xl hover:bg-[#0B1F3A]/90 transition-all group"
-          >
-            Verify & Sign In <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-          </Button>
+                <Button 
+                  onClick={handleNextStep}
+                  className="w-full h-16 bg-sky-500 text-white font-black text-lg rounded-full shadow-[0_10px_30px_rgba(14,165,233,0.3)] hover:bg-sky-400 transition-all group"
+                >
+                  Verify & Continue <Zap className="ml-2 h-5 w-5 fill-current" />
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          <div className="relative py-2">
-            <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-100" /></div>
-            <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest">
-              <span className="bg-white px-4 text-slate-400">Or continue with</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="h-14 rounded-2xl border-slate-100 font-bold gap-2">
-              <Github className="h-4 w-4" /> Github
-            </Button>
-            <Button variant="outline" className="h-14 rounded-2xl border-slate-100 font-bold gap-2">
-              <svg className="h-4 w-4" viewBox="0 0 24 24">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-              </svg>
-              Google
-            </Button>
+          <div className="pt-4 flex items-center justify-center gap-2 text-slate-400">
+            <Globe className="h-3 w-3" />
+            <span className="text-[9px] font-black uppercase tracking-widest">Global Encryption Standard Secured</span>
           </div>
         </div>
 
         <p className="text-center text-sm font-medium text-slate-500">
-          Need help? <Link to="/" className="text-sky-600 font-black">Contact Support</Link>
+          Encountering issues? <Link to="/" className="text-sky-600 font-black">Contact SmashLive Support</Link>
         </p>
       </motion.div>
     </div>
