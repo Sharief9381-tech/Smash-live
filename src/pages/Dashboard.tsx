@@ -32,23 +32,6 @@ const Dashboard = () => {
           </p>
         </div>
 
-        {/* Global News Ticker */}
-        <div className="bg-[#0B1F3A] rounded-2xl py-3 px-6 overflow-hidden relative shadow-xl">
-           <div className="flex items-center gap-8 whitespace-nowrap animate-marquee">
-              {[
-                "BWF FINALS: Axelsen secures semi-final spot with dominant win over Zii Jia.",
-                "RANKING UPDATE: Shi Yuqi moves up to World No. 2 following China Masters performance.",
-                "TECH: New AI smash analysis engine deployed to all regional server nodes.",
-                "BROADCAST: Ultra-low latency mode now active for all Premium Members."
-              ].map((text, i) => (
-                <div key={i} className="flex items-center gap-3">
-                   <div className="h-1.5 w-1.5 rounded-full bg-sky-500" />
-                   <span className="text-[10px] font-black text-white uppercase tracking-widest">{text}</span>
-                </div>
-              ))}
-           </div>
-        </div>
-
         <div className="grid lg:grid-cols-12 gap-8">
           {/* Main Content Area */}
           <div className="lg:col-span-8 space-y-8">
@@ -194,7 +177,7 @@ const Dashboard = () => {
                   { label: "Referee Mode", icon: Star },
                   { label: "Match Record", icon: Activity },
                 ].map((tool, i) => (
-                  <button key={i} className="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-sky-500/30 hover:bg-sky-50 transition-all gap-2 group outline-none">
+                  <button key={i} className="flex items-center justify-center p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-sky-500/30 hover:bg-sky-50 transition-all gap-2 group outline-none">
                     <tool.icon className="h-5 w-5 text-slate-400 group-hover:text-sky-600 transition-colors" />
                     <span className="text-[9px] font-black text-[#0B1F3A] uppercase tracking-widest">{tool.label}</span>
                   </button>
