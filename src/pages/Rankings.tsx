@@ -6,16 +6,15 @@ import { motion } from 'framer-motion';
 import { 
   Trophy, TrendingUp, TrendingDown, 
   Minus, Filter, Search, Globe,
-  Medal, Star, ChevronRight
+  Medal, ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { cn } from '@/lib/utils';
 
 const Rankings = () => {
   const [activeCategory, setActiveCategory] = useState("ms");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const rankingsData = [
     { rank: 1, name: "Viktor Axelsen", country: "Denmark", points: 105400, change: "up", changeVal: 1, matches: 842, winRate: "88.4%", img: "VA" },
@@ -27,8 +26,12 @@ const Rankings = () => {
     { rank: 7, name: "Lee Zii Jia", country: "Malaysia", points: 84200, change: "up", changeVal: 3, matches: 410, winRate: "73.9%", img: "LZ" },
   ];
 
+  const filteredRankings = rankingsData.filter(p => 
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.country.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const topThree = rankingsData.slice(0, 3);
-  const others = rankingsData.slice(3);
 
   return (
     <div className="min-h-screen bg-white">
@@ -48,14 +51,6 @@ const Rankings = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center bg-slate-50 rounded-2xl px-4 h-12 border border-slate-200 focus-within:border-sky-500 transition-colors">
-              <Search className="h-4 w-4 text-slate-400" />
-              <input 
-                type="text" 
-                placeholder="Find player..." 
-                className="bg-transparent border-none outline-none text-sm font-medium px-3 w-48"
-              />
-            </div>
             <Button variant="outline" size="icon" className="h-12 w-12 rounded-2xl border-slate-200">
               <Filter className="h-4 w-4 text-[#0B1F3A]" />
             </Button>
@@ -145,15 +140,27 @@ const Rankings = () => {
         {/* Table Section */}
         <div className="space-y-8">
           <Tabs defaultValue="ms" onValueChange={setActiveCategory} className="w-full">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4 gap-4">
               <TabsList className="bg-slate-100 p-1 rounded-2xl">
-                <TabsTrigger value="ms" className="rounded-xl px-8 font-black text-xs uppercase data-[state=active]:bg-[#0B1F3A] data-[state=active]:text-white">Men's Singles</TabsTrigger>
-                <TabsTrigger value="ws" className="rounded-xl px-8 font-black text-xs uppercase data-[state=active]:bg-[#0B1F3A] data-[state=active]:text-white">Women's Singles</TabsTrigger>
-                <TabsTrigger value="md" className="rounded-xl px-8 font-black text-xs uppercase data-[state=active]:bg-[#0B1F3A] data-[state=active]:text-white">Men's Doubles</TabsTrigger>
-                <TabsTrigger value="wd" className="rounded-xl px-8 font-black text-xs uppercase data-[state=active]:bg-[#0B1F3A] data-[state=active]:text-white">Women's Doubles</TabsTrigger>
-                <TabsTrigger value="xd" className="rounded-xl px-8 font-black text-xs uppercase data-[state=active]:bg-[#0B1F3A] data-[state=active]:text-white">Mixed Doubles</TabsTrigger>
+                <TabsTrigger value="ms" className="rounded-xl px-6 font-black text-xs uppercase data-[state=active]:bg-[#0B1F3A] data-[state=active]:text-white">Men's Singles</TabsTrigger>
+                <TabsTrigger value="ws" className="rounded-xl px-6 font-black text-xs uppercase data-[state=active]:bg-[#0B1F3A] data-[state=active]:text-white">Women's Singles</TabsTrigger>
+                <TabsTrigger value="md" className="rounded-xl px-6 font-black text-xs uppercase data-[state=active]:bg-[#0B1F3A] data-[state=active]:text-white">Men's Doubles</TabsTrigger>
+                <TabsTrigger value="wd" className="rounded-xl px-6 font-black text-xs uppercase data-[state=active]:bg-[#0B1F3A] data-[state=active]:text-white">Women's Doubles</TabsTrigger>
+                <TabsTrigger value="xd" className="rounded-xl px-6 font-black text-xs uppercase data-[state=active]:bg-[#0B1F3A] data-[state=active]:text-white">Mixed Doubles</TabsTrigger>
               </TabsList>
-              <Button variant="ghost" className="text-sky-600 font-black text-xs uppercase tracking-widest">
+              
+              <div className="flex-1 max-w-xs relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                <input 
+                  type="text" 
+                  placeholder="Find player..." 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 h-10 text-xs font-bold focus:border-sky-500 outline-none transition-all"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+
+              <Button variant="ghost" className="text-sky-600 font-black text-xs uppercase tracking-widest flex-shrink-0">
                 Smash It <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
@@ -172,61 +179,47 @@ const Rankings = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {rankingsData.map((row) => (
-                      <TableRow key={row.rank} className="border-slate-100 hover:bg-slate-50/50 transition-colors group">
-                        <TableCell className="text-center font-black text-[#0B1F3A]">
-                          #{row.rank}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-4">
-                            <div className="h-10 w-10 rounded-full bg-[#0B1F3A]/5 flex items-center justify-center text-xs font-black text-[#0B1F3A]">
-                              {row.img}
+                    {filteredRankings.length > 0 ? (
+                      filteredRankings.map((row) => (
+                        <TableRow key={row.rank} className="border-slate-100 hover:bg-slate-50/50 transition-colors group">
+                          <TableCell className="text-center font-black text-[#0B1F3A]">
+                            #{row.rank}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-4">
+                              <div className="h-10 w-10 rounded-full bg-[#0B1F3A]/5 flex items-center justify-center text-xs font-black text-[#0B1F3A]">
+                                {row.img}
+                              </div>
+                              <div>
+                                <h4 className="font-black text-[#0B1F3A] group-hover:text-sky-600 transition-colors">{row.name}</h4>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{row.country}</p>
+                              </div>
                             </div>
-                            <div>
-                              <h4 className="font-black text-[#0B1F3A] group-hover:text-sky-600 transition-colors">{row.name}</h4>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{row.country}</p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {row.change === 'up' && <span className="text-green-500 flex items-center justify-center gap-1 font-bold text-xs"><TrendingUp className="h-3 w-3" /> {row.changeVal}</span>}
-                          {row.change === 'down' && <span className="text-red-500 flex items-center justify-center gap-1 font-bold text-xs"><TrendingDown className="h-3 w-3" /> {row.changeVal}</span>}
-                          {row.change === 'none' && <span className="text-slate-300 flex items-center justify-center"><Minus className="h-3 w-3" /></span>}
-                        </TableCell>
-                        <TableCell className="text-center font-bold text-slate-500">{row.matches}</TableCell>
-                        <TableCell className="text-center font-black text-sky-600">{row.winRate}</TableCell>
-                        <TableCell className="text-right pr-12">
-                          <span className="text-lg font-black text-[#0B1F3A]">{row.points.toLocaleString()}</span>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {row.change === 'up' && <span className="text-green-500 flex items-center justify-center gap-1 font-bold text-xs"><TrendingUp className="h-3 w-3" /> {row.changeVal}</span>}
+                            {row.change === 'down' && <span className="text-red-500 flex items-center justify-center gap-1 font-bold text-xs"><TrendingDown className="h-3 w-3" /> {row.changeVal}</span>}
+                            {row.change === 'none' && <span className="text-slate-300 flex items-center justify-center"><Minus className="h-3 w-3" /></span>}
+                          </TableCell>
+                          <TableCell className="text-center font-bold text-slate-500">{row.matches}</TableCell>
+                          <TableCell className="text-center font-black text-sky-600">{row.winRate}</TableCell>
+                          <TableCell className="text-right pr-12">
+                            <span className="text-lg font-black text-[#0B1F3A]">{row.points.toLocaleString()}</span>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-12 text-slate-400 font-bold italic">
+                          No players found matching your criteria.
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )}
                   </TableBody>
                 </Table>
               </div>
             </TabsContent>
           </Tabs>
-        </div>
-
-        {/* Info Grid */}
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="glass-panel p-8 rounded-[2.5rem] flex items-center gap-6">
-            <div className="h-16 w-16 rounded-2xl bg-sky-500 text-white flex items-center justify-center">
-              <Star className="h-8 w-8 fill-current" />
-            </div>
-            <div>
-              <h4 className="text-xl font-black text-[#0B1F3A]">Rising Stars</h4>
-              <p className="text-sm text-slate-500 font-medium">Tracking the fastest climbing players in the global circuit over the last 30 days.</p>
-            </div>
-          </div>
-          <div className="glass-panel p-8 rounded-[2.5rem] flex items-center gap-6">
-            <div className="h-16 w-16 rounded-2xl bg-[#0B1F3A] text-white flex items-center justify-center">
-              <Globe className="h-8 w-8" />
-            </div>
-            <div>
-              <h4 className="text-xl font-black text-[#0B1F3A]">National Dominance</h4>
-              <p className="text-sm text-slate-500 font-medium">China and Denmark continue to lead the Men's Singles category with 4 players in the Top 10.</p>
-            </div>
-          </div>
         </div>
       </main>
     </div>

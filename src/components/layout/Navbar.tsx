@@ -26,7 +26,20 @@ const Navbar = () => {
     { name: 'Archive', path: '/archive' },
   ];
 
-  const isInternalPage = ['/dashboard', '/player', '/archive', '/live-match', '/tournaments'].some(path => location.pathname.startsWith(path));
+  // List of paths where we want to show the logged-in profile instead of the login button
+  const internalPaths = [
+    '/dashboard', 
+    '/player', 
+    '/archive', 
+    '/live-match', 
+    '/tournaments', 
+    '/rankings', 
+    '/news', 
+    '/broadcast',
+    '/tournament/'
+  ];
+  
+  const isInternalPage = internalPaths.some(path => location.pathname.startsWith(path));
 
   return (
     <nav className={cn(
