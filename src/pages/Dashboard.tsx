@@ -2,14 +2,13 @@
 
 import React from 'react';
 import Navbar from '@/components/layout/Navbar';
-import StatCard from '@/components/dashboard/StatCard';
+import ProfileHero from '@/components/profile/ProfileHero';
 import { motion } from 'framer-motion';
 import { 
-  Activity, Trophy, Target, Zap, 
-  TrendingUp, Calendar, ArrowUpRight,
-  Play, Users, Star, History, Radio,
-  Globe, LayoutDashboard, ChevronRight,
-  MapPin, Timer
+  Activity, Trophy, Zap, 
+  ArrowUpRight, Play, Users, 
+  History, Radio, LayoutDashboard, 
+  ChevronRight, MapPin
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,32 +19,14 @@ const Dashboard = () => {
     <div className="min-h-screen bg-slate-50">
       <Navbar />
       
-      <main className="container px-6 py-12 space-y-10">
-        {/* Welcome Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 mb-2">
-              <LayoutDashboard className="h-4 w-4 text-sky-500" />
-              <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.3em]">Command Center</span>
-            </div>
-            <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter">Unified Intelligence Dashboard</h1>
-            <p className="text-slate-500 font-medium italic uppercase tracking-widest text-[10px]">Connected to Global Edge Nodes • Last Sync: 12s ago</p>
+      <main className="container px-6 py-12 space-y-12">
+        {/* Persistent Player Profile Identity */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-2 mb-2">
+            <LayoutDashboard className="h-4 w-4 text-sky-500" />
+            <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.3em]">Command Center</span>
           </div>
-          <div className="flex gap-4">
-            <Link to="/live-match/create">
-              <Button size="lg" className="bg-[#0B1F3A] text-white hover:bg-[#0B1F3A]/90 h-14 rounded-2xl font-black px-8 shadow-xl">
-                NEW MATCH <Play className="ml-2 h-4 w-4 fill-current" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-
-        {/* Quick Access Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard title="Active Matches" value="24" icon={Activity} trend="Live" trendUp={true} />
-          <StatCard title="Global Rank" value="#1,402" icon={Globe} trend="+12" trendUp={true} />
-          <StatCard title="Studio Quality" value="4K" icon={Radio} trend="Stable" trendUp={true} />
-          <StatCard title="Fan Reach" value="1.2M" icon={Users} trend="+5.2%" trendUp={true} />
+          <ProfileHero />
         </div>
 
         <div className="grid lg:grid-cols-12 gap-8">
@@ -84,7 +65,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Live Global Tournaments Hub (Replaced Platform Growth) */}
+            {/* Live Global Tournaments Hub */}
             <div className="glass-panel p-10 rounded-[3rem] space-y-8">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
@@ -144,10 +125,8 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Side Panel: Studio & Quick Tools */}
+          {/* Side Panel */}
           <div className="lg:col-span-4 space-y-8">
-            
-            {/* Broadcast Studio Card */}
             <div className="bg-[#0B1F3A] p-10 rounded-[3rem] text-white space-y-6 relative overflow-hidden group">
               <div className="absolute -right-10 -bottom-10 opacity-10 group-hover:rotate-12 transition-transform">
                 <Radio className="h-40 w-40" />
@@ -164,17 +143,16 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Quick Intelligence Tools */}
             <div className="glass-panel p-10 rounded-[3rem] space-y-6">
               <h3 className="text-sm font-black text-[#0B1F3A] uppercase tracking-widest flex items-center gap-2">
-                <Target className="h-4 w-4 text-sky-500" /> Command Tools
+                <Zap className="h-4 w-4 text-sky-500" /> Command Tools
               </h3>
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { label: "Sync Brackets", icon: History },
                   { label: "AI Predictions", icon: Zap },
                   { label: "Referee Mode", icon: Star },
-                  { label: "Fan Alerts", icon: Radio },
+                  { label: "Match Record", icon: Activity },
                 ].map((tool, i) => (
                   <button key={i} className="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-sky-500/30 hover:bg-sky-50 transition-all gap-2 group">
                     <tool.icon className="h-5 w-5 text-slate-400 group-hover:text-sky-600 transition-colors" />
@@ -182,9 +160,9 @@ const Dashboard = () => {
                   </button>
                 ))}
               </div>
-              <Link to="/tournaments/create">
+              <Link to="/live-match/create">
                 <Button variant="outline" className="w-full h-12 rounded-xl border-dashed border-slate-300 font-black text-xs uppercase hover:bg-slate-50">
-                  + REGISTER NEW EVENT
+                  + INITIALIZE QUICK MATCH
                 </Button>
               </Link>
             </div>
