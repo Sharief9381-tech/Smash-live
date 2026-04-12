@@ -15,22 +15,23 @@ const countryCodes = [
   { code: '+62', country: 'ID', flag: '🇮🇩' },
   { code: '+45', country: 'DK', flag: '🇩🇰' },
   { code: '+60', country: 'MY', flag: '🇲🇾' },
-  { code: '+86', country: 'CN', flag: '🇨🇳' },
-  { code: '+81', country: 'JP', flag: '🇯🇵' },
-  { code: '+66', country: 'TH', flag: '🇹🇭' },
-  { code: '+82', country: 'KR', flag: '🇰🇷' },
+  { code: '+86', country: 'CN', flag: 'CN' },
+  { code: '+81', country: 'JP', flag: 'JP' },
+  { code: '+66', country: 'TH', flag: 'TH' },
+  { code: '+82', country: 'KR', flag: 'KR' },
 ];
 
 const Login = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); // 1: Phone Entry, 2: OTP Verification
+  const [step, setStep] = useState(1);
   const [selectedCountry, setSelectedCountry] = useState(countryCodes[0]);
 
   const handleNextStep = () => {
     if (step === 1) {
       setStep(2);
     } else {
-      // Direct redirection to the Command Center (Dashboard)
+      // Set mock auth flag
+      localStorage.setItem('isLoggedIn', 'true');
       navigate('/dashboard'); 
     }
   };

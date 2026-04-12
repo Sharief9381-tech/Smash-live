@@ -6,9 +6,9 @@ import { motion } from 'framer-motion';
 import { 
   Activity, Trophy, Zap, 
   ArrowUpRight, Users, 
-  History, Radio, LayoutDashboard, 
+  LayoutDashboard, 
   ChevronRight, MapPin, Target,
-  TrendingUp, Globe
+  TrendingUp, Radio
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -172,27 +172,6 @@ const Dashboard = () => {
                   VIEW FULL PERFORMANCE <ChevronRight className="ml-1 h-3 w-3" />
                 </Button>
               </Link>
-            </div>
-
-            {/* Global Reach Insights */}
-            <div className="glass-panel p-10 rounded-[3rem] space-y-6 bg-gradient-to-br from-sky-500/5 to-transparent">
-              <h3 className="text-sm font-black text-[#0B1F3A] uppercase tracking-widest flex items-center gap-2">
-                <Globe className="h-4 w-4 text-sky-500" /> Global Pulse
-              </h3>
-              <div className="space-y-4">
-                 <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm">
-                    <p className="text-[11px] font-bold text-[#0B1F3A] leading-tight italic">
-                      "Axelsen's win probability has shifted to 92% following today's warm-up session."
-                    </p>
-                    <p className="text-[9px] text-slate-400 font-black mt-2 uppercase tracking-widest">AI Analyst • 12m ago</p>
-                 </div>
-                 <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm">
-                    <p className="text-[11px] font-bold text-[#0B1F3A] leading-tight">
-                      New tournament registry open for Malaysia Open 2025.
-                    </p>
-                    <p className="text-[9px] text-slate-400 font-black mt-2 uppercase tracking-widest">Circuit News • 1h ago</p>
-                 </div>
-              </div>
             </div>
           </div>
         </div>

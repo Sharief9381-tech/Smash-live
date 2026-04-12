@@ -9,13 +9,28 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    
+    // Check auth status from localStorage
+    const checkAuth = () => {
+      const authStatus = localStorage.getItem('isLoggedIn') === 'true';
+      setIsLoggedIn(authStatus);
+    };
+    
+    checkAuth();
+    // Also listen for storage changes in case of cross-tab login/logout
+    window.addEventListener('storage', checkAuth);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('storage', checkAuth);
+    };
+  }, [location.pathname]);
 
   const navItems = [
     { name: 'Home', path: '/' },
@@ -25,21 +40,6 @@ const Navbar = () => {
     { name: 'News', path: '/news' },
     { name: 'Archive', path: '/archive' },
   ];
-
-  // List of paths where we want to show the logged-in profile instead of the login button
-  const internalPaths = [
-    '/dashboard', 
-    '/player', 
-    '/archive', 
-    '/live-match', 
-    '/tournaments', 
-    '/rankings', 
-    '/news', 
-    '/broadcast',
-    '/tournament/'
-  ];
-  
-  const isInternalPage = internalPaths.some(path => location.pathname.startsWith(path));
 
   return (
     <nav className={cn(
@@ -81,7 +81,7 @@ const Navbar = () => {
             <Bell className="h-5 w-5" />
           </button>
           
-          {isInternalPage ? (
+          {isLoggedIn ? (
             <Link to="/player/me" className="flex items-center gap-3 group outline-none">
               <div className="text-right hidden sm:block">
                 <p className="text-[10px] font-black text-[#0B1F3A] uppercase tracking-widest leading-none">V. Axelsen</p>

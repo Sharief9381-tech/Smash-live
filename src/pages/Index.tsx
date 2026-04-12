@@ -3,11 +3,11 @@
 import React from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import DashboardPreview from '@/components/landing/DashboardPreview';
 import { motion } from 'framer-motion';
 import { 
   ArrowRight, Activity, Trophy, Users, 
-  Target, Globe, Radio, Zap, Bell, Flame
+  Target, Globe, Radio, Zap, Bell, Flame,
+  TrendingUp, ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -60,7 +60,7 @@ const Index = () => {
             </p>
             <div className="flex flex-wrap gap-4 pt-4">
               <Link to="/tournaments">
-                <Button size="lg" className="bg-[#0B1F3A] text-white rounded-full px-8 font-black text-lg h-16 hover:bg-[#0B1F3A]/90 transition-all hover:translate-y-[-2px] shadow-xl">
+                <Button size="lg" className="bg-[#0B1F3A] text-white rounded-full px-8 font-black text-lg h-16 hover:bg-[#0B1F3A]/90 transition-all hover:translate-y-[-2px] shadow-xl border-none">
                   Smash It <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
@@ -72,9 +72,65 @@ const Index = () => {
             </div>
           </motion.div>
 
-          <div className="relative">
-             <DashboardPreview />
-          </div>
+          {/* High-Impact Visual Replacement */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative"
+          >
+            <div className="glass-panel p-8 rounded-[3rem] border-sky-500/10 shadow-2xl space-y-8">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-2xl bg-[#0B1F3A] text-white flex items-center justify-center">
+                    <TrendingUp className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-[#0B1F3A] uppercase tracking-widest">Global Performance Matrix</h4>
+                    <p className="text-[10px] font-bold text-slate-400">Circuit ID: #BWF-2024-LIVE</p>
+                  </div>
+                </div>
+                <Badge className="bg-red-500 text-white animate-pulse border-none h-6 px-3 text-[10px] font-black">ULTRA LOW LATENCY</Badge>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-50 p-6 rounded-[2rem] space-y-3">
+                  <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <Users className="h-3 w-3" /> Live Reach
+                  </div>
+                  <p className="text-3xl font-black text-[#0B1F3A]">12.4M+</p>
+                  <p className="text-[10px] text-green-500 font-bold">+24% vs Last Match</p>
+                </div>
+                <div className="bg-slate-50 p-6 rounded-[2rem] space-y-3">
+                  <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <Zap className="h-3 w-3 text-sky-500" /> AI Accuracy
+                  </div>
+                  <p className="text-3xl font-black text-[#0B1F3A]">99.8%</p>
+                  <div className="flex items-center gap-1">
+                    <ShieldCheck className="h-3 w-3 text-sky-500" />
+                    <span className="text-[10px] text-slate-400 font-bold uppercase">BWF Integrated</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-[#0B1F3A] p-6 rounded-[2.5rem] relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:rotate-12 transition-transform">
+                  <Trophy className="h-32 w-32 text-white" />
+                </div>
+                <div className="space-y-4 relative z-10">
+                  <p className="text-[10px] font-black text-sky-500 uppercase tracking-[0.2em]">Next Major Event</p>
+                  <h3 className="text-xl font-black text-white italic">Malaysia Open 2025</h3>
+                  <div className="flex items-center gap-4 pt-2">
+                    <div className="flex -space-x-2">
+                      {[1, 2, 3].map(i => (
+                        <div key={i} className="h-8 w-8 rounded-full border-2 border-[#0B1F3A] bg-slate-200" />
+                      ))}
+                    </div>
+                    <span className="text-[10px] font-bold text-white/60">32 Players Seeding Complete</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -140,7 +196,7 @@ const Index = () => {
         <div className="container px-6 space-y-16 relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="space-y-4">
-              <Badge className="bg-sky-500 text-white font-black px-4 py-1">LIVE BROADCAST</Badge>
+              <Badge className="bg-sky-500 text-white font-black px-4 py-1 border-none">LIVE BROADCAST</Badge>
               <h2 className="text-4xl font-black text-white tracking-tighter uppercase">Watch Live Broadcasts</h2>
             </div>
             <Link to="/tournaments" className="text-sky-400 font-black text-sm uppercase tracking-[0.2em] flex items-center gap-2 hover:text-sky-300 transition-colors">
@@ -158,7 +214,7 @@ const Index = () => {
                 <div className="aspect-video overflow-hidden">
                   <img src={match.img} alt="" className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-700" />
                   <div className="absolute top-4 left-4">
-                    <Badge className={match.status === 'Live' ? 'bg-red-500' : 'bg-sky-500'}>{match.status}</Badge>
+                    <Badge className={match.status === 'Live' ? 'bg-red-500 border-none' : 'bg-sky-500 border-none'}>{match.status}</Badge>
                   </div>
                 </div>
                 <div className="p-8 space-y-2">
@@ -166,7 +222,7 @@ const Index = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-2xl font-mono font-black text-sky-400">{match.score}</span>
                     <Link to="/broadcast/live">
-                      <Button size="icon" className="h-10 w-10 rounded-full bg-white text-[#0B1F3A] hover:bg-sky-500 hover:text-white transition-all">
+                      <Button size="icon" className="h-10 w-10 rounded-full bg-white text-[#0B1F3A] hover:bg-sky-500 hover:text-white transition-all border-none">
                         <PlayIcon className="h-4 w-4 fill-current" />
                       </Button>
                     </Link>
