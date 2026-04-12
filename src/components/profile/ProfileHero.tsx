@@ -1,15 +1,17 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Share2, UserPlus, UserMinus, Star, GraduationCap, Edit3, LogOut, Users } from 'lucide-react';
+import { Share2, Camera, Edit3, LogOut, Star, Globe, ShieldCheck } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { showSuccess } from '@/utils/toast';
 
 const ProfileHero = () => {
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followers, setFollowers] = useState(1248200);
 
@@ -18,131 +20,125 @@ const ProfileHero = () => {
     navigate('/');
   };
 
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Viktor Axelsen - SmashLive Profile',
+          text: 'Check out this elite badminton intelligence dossier on SmashLive.',
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        showSuccess("Profile link copied to clipboard!");
+      }
+    } catch (err) {
+      console.error("Share failed", err);
+    }
+  };
+
   const toggleFollow = () => {
     setIsFollowing(!isFollowing);
     setFollowers(prev => isFollowing ? prev - 1 : prev + 1);
+    showSuccess(isFollowing ? "Unfollowed Viktor Axelsen" : "Following Viktor Axelsen");
   };
 
-  return (
-    <section className="relative glass-panel p-10 rounded-[3.5rem] border-slate-200 overflow-hidden group">
-      {/* Background Glows */}
-      <div className="absolute -top-24 -left-24 w-64 h-64 bg-sky-500/5 blur-[100px] rounded-full" />
-      <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-[#0B1F3A]/5 blur-[100px] rounded-full" />
+  const triggerImageUpload = () => fileInputRef.current?.click();
 
+  return (
+    <section className="relative glass-panel p-12 rounded-[3.5rem] border-slate-200 overflow-hidden">
+      <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
+      
       <div className="relative z-10 grid lg:grid-cols-12 gap-12 items-center">
-        {/* Left Column: Image */}
+        {/* Left Column: Avatar */}
         <div className="lg:col-span-3 flex justify-center">
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="relative"
-          >
-            <div className="h-48 w-48 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 p-1 shadow-xl">
-              <div className="h-full w-full rounded-full bg-slate-100 flex items-center justify-center text-5xl font-black text-[#0B1F3A] border-4 border-white overflow-hidden">
+          <div className="relative group cursor-pointer" onClick={triggerImageUpload}>
+            <div className="h-52 w-52 rounded-full p-1.5 bg-gradient-to-br from-sky-400 to-sky-600 shadow-2xl transition-transform hover:scale-105 duration-500">
+              <div className="h-full w-full rounded-full bg-slate-100 border-4 border-white overflow-hidden relative">
                 <img 
                   src="https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?q=80&w=2070&auto=format&fit=crop" 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-opacity group-hover:opacity-70"
                   alt="Player"
                 />
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
+                  <Camera className="h-10 w-10 text-white" />
+                </div>
               </div>
             </div>
-            <motion.div 
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="absolute -bottom-2 -right-2 bg-sky-500 text-white h-12 w-12 rounded-full flex items-center justify-center border-4 border-white shadow-lg"
-            >
-              <Star className="h-6 w-6 fill-current" />
-            </motion.div>
-          </motion.div>
+          </div>
         </div>
 
-        {/* Center Column: Info */}
-        <div className="lg:col-span-5 space-y-6 text-center lg:text-left">
-          <div>
-            <h1 className="text-5xl font-black tracking-tighter text-[#0B1F3A] mb-2">Viktor Axelsen</h1>
-            <p className="text-sky-600 font-mono text-sm tracking-[0.3em] font-bold uppercase">UID: SMASH_842_INT</p>
+        {/* Center Column: Identity */}
+        <div className="lg:col-span-5 space-y-8 text-center lg:text-left">
+          <div className="space-y-2">
+            <div className="flex items-center justify-center lg:justify-start gap-3">
+              <h1 className="text-6xl font-black tracking-tighter text-[#0B1F3A]">Viktor Axelsen</h1>
+              <ShieldCheck className="h-8 w-8 text-sky-500" />
+            </div>
+            <p className="text-sky-600 font-mono text-xs tracking-[0.4em] font-black uppercase italic">Dossier ID: SMASH_842_INT</p>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm">
-            <div className="flex items-center gap-2 text-slate-700 font-bold">
-              <span className="text-xl">🇩🇰</span> Denmark
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-8 text-sm font-bold text-slate-500">
+            <div className="flex items-center gap-2 text-[#0B1F3A]">
+              <Flag className="h-4 w-4 text-sky-500" /> Denmark
             </div>
-            <div className="h-4 w-px bg-slate-200 hidden md:block" />
-            <div className="text-slate-500 font-bold">30 Years • Male</div>
-            <div className="h-4 w-px bg-slate-200 hidden md:block" />
-            <div className="text-slate-500 font-bold italic">Right Handed</div>
+            <div className="flex items-center gap-2">
+              <Globe className="h-4 w-4 text-sky-500" /> Europe Circuit
+            </div>
+            <div className="italic">Right Handed • 194cm</div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-8 py-4 border-y border-slate-100/50">
-            <div className="text-center lg:text-left">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Followers</p>
-              <p className="text-xl font-black text-[#0B1F3A]">{(followers / 1000000).toFixed(1)}M</p>
+          <div className="flex items-center justify-center lg:justify-start gap-12 py-6 border-y border-slate-100">
+            <div className="text-center">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Followers</p>
+              <p className="text-2xl font-black text-[#0B1F3A]">{(followers / 1000000).toFixed(2)}M</p>
             </div>
-            <div className="text-center lg:text-left">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Following</p>
-              <p className="text-xl font-black text-[#0B1F3A]">142</p>
+            <div className="h-8 w-px bg-slate-100" />
+            <div className="text-center">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Following</p>
+              <p className="text-2xl font-black text-[#0B1F3A]">142</p>
             </div>
-            <div className="text-center lg:text-left">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Matches</p>
-              <p className="text-xl font-black text-[#0B1F3A]">842</p>
+            <div className="h-8 w-px bg-slate-100" />
+            <div className="text-center">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Win Rate</p>
+              <p className="text-2xl font-black text-sky-600">88.4%</p>
             </div>
           </div>
+        </div>
 
+        {/* Right Column: Key Rankings & Actions */}
+        <div className="lg:col-span-4 flex flex-col gap-8">
           <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100">
-              <Badge variant="outline" className="border-sky-200 text-sky-600 font-black uppercase text-[8px]">Category</Badge>
-              <span className="text-xs font-black text-[#0B1F3A] uppercase">Men's Singles</span>
+            <div className="bg-sky-500 p-6 rounded-[2rem] text-white text-center shadow-[0_15px_30px_rgba(14,165,233,0.2)]">
+              <p className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-1">World Rank</p>
+              <p className="text-4xl font-black">#1</p>
             </div>
-            <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100">
-              <GraduationCap className="h-4 w-4 text-sky-500" />
-              <span className="text-xs font-black text-[#0B1F3A] uppercase">Pro Academy</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Actions */}
-        <div className="lg:col-span-4 flex flex-col items-center lg:items-end gap-6">
-          <div className="flex gap-4">
-            <div className="text-center bg-white border border-slate-100 p-4 rounded-3xl min-w-[100px] shadow-sm">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">World Rank</p>
-              <p className="text-3xl font-black text-sky-600">#1</p>
-            </div>
-            <div className="text-center bg-white border border-slate-100 p-4 rounded-3xl min-w-[100px] shadow-sm">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Points</p>
-              <p className="text-3xl font-black text-[#0B1F3A]">105.4k</p>
+            <div className="bg-[#0B1F3A] p-6 rounded-[2rem] text-white text-center shadow-2xl">
+              <p className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-1">Circuit Pts</p>
+              <p className="text-4xl font-black tracking-tighter">105.4k</p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3 w-full max-w-sm lg:max-w-none">
+          <div className="flex flex-wrap gap-3">
             <Button 
               onClick={toggleFollow}
               className={cn(
-                "flex-1 h-14 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-lg border-none",
-                isFollowing 
-                  ? "bg-slate-100 text-[#0B1F3A] hover:bg-slate-200" 
-                  : "bg-sky-500 text-white hover:bg-sky-400"
+                "flex-1 h-14 rounded-2xl font-black uppercase tracking-widest transition-all text-xs",
+                isFollowing ? "bg-slate-100 text-[#0B1F3A] border-slate-200" : "bg-sky-500 text-white shadow-xl hover:bg-sky-400 border-none"
               )}
             >
-              {isFollowing ? (
-                <>FOLLOWING <UserMinus className="ml-2 h-4 w-4" /></>
-              ) : (
-                <>FOLLOW <UserPlus className="ml-2 h-4 w-4" /></>
-              )}
+              {isFollowing ? "FOLLOWING" : "FOLLOW PRO"}
             </Button>
-            <Link to="/player/edit" className="flex-1">
-              <Button variant="outline" className="w-full border-slate-200 text-[#0B1F3A] font-black h-14 rounded-2xl hover:bg-slate-50 text-sm uppercase tracking-widest">
-                EDIT <Edit3 className="ml-2 h-4 w-4" />
+            <Button onClick={handleShare} variant="outline" size="icon" className="h-14 w-14 rounded-2xl border-slate-200 hover:bg-sky-50 transition-colors">
+              <Share2 className="h-5 w-5 text-[#0B1F3A]" />
+            </Button>
+            <Link to="/player/edit" className="flex-shrink-0">
+              <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl border-slate-200 hover:bg-sky-50">
+                <Edit3 className="h-5 w-5 text-[#0B1F3A]" />
               </Button>
             </Link>
-            <Button 
-              onClick={handleSignOut}
-              variant="outline" 
-              className="flex-1 border-red-200 text-red-500 font-black h-14 rounded-2xl hover:bg-red-50 text-sm uppercase tracking-widest"
-            >
-              EXIT COURT <LogOut className="ml-2 h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl border-slate-200 hover:bg-slate-50">
-              <Share2 className="h-5 w-5 text-[#0B1F3A]" />
+            <Button onClick={handleSignOut} variant="outline" size="icon" className="h-14 w-14 rounded-2xl border-red-100 hover:bg-red-50 text-red-500">
+              <LogOut className="h-5 w-5" />
             </Button>
           </div>
         </div>
