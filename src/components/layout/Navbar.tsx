@@ -63,7 +63,7 @@ const Navbar = () => {
         <div className="container flex items-center justify-between px-6">
           <div className="flex items-center gap-12">
             <Link to="/" className="flex items-center gap-3 group">
-              <Logo className="h-10 w-10 group-hover:scale-110 transition-transform" />
+              <Logo className="h-11 w-11 group-hover:scale-105 transition-transform" />
               <span className="text-2xl font-black tracking-tighter text-[#0B1F3A] uppercase">
                 Smash<span className="text-sky-500">Live</span>
               </span>
