@@ -65,8 +65,8 @@ const Tournaments = () => {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sky-600">
-                  <Trophy className="h-4 w-4" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em]">Circuit Intelligence</span>
+                  <Globe className="h-4 w-4" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em]">Global Intelligence Hub</span>
                 </div>
                 <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter">Tournaments Dashboard</h1>
               </div>
@@ -74,7 +74,7 @@ const Tournaments = () => {
                  <div className="flex items-center bg-white border border-slate-200 rounded-2xl px-4 h-12 shadow-sm focus-within:border-sky-500 transition-all">
                     <Search className="h-4 w-4 text-slate-400" />
                     <input 
-                      placeholder="smash anything here" 
+                      placeholder="Smash Here" 
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       className="bg-transparent border-none outline-none text-sm font-bold px-3 w-40" 
@@ -120,7 +120,7 @@ const Tournaments = () => {
                 </Link>
               )) : (
                 <div className="col-span-2 py-12 text-center bg-slate-100/50 rounded-3xl border-2 border-dashed border-slate-200">
-                  <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No tournaments found in this court</p>
+                  <p className="text-sm font-black text-slate-400 uppercase tracking-widest">Nothing In This Court</p>
                 </div>
               )}
             </div>

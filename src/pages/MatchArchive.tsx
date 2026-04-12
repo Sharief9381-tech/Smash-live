@@ -50,7 +50,7 @@ const MatchArchive = () => {
             <Search className="h-5 w-5 text-slate-400" />
             <input 
               type="text" 
-              placeholder="smash anything here" 
+              placeholder="Smash Here" 
               className="bg-transparent border-none outline-none text-sm font-black px-4 w-full"
             />
           </div>

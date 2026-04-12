@@ -97,7 +97,7 @@ const Navbar = () => {
                   <Search className="absolute left-4 h-4 w-4 text-slate-400 pointer-events-none" />
                   <input 
                     autoFocus
-                    placeholder="smash anything here"
+                    placeholder="Smash Here"
                     className="w-full h-11 bg-slate-50 border border-slate-200 rounded-full pl-11 pr-10 text-xs font-bold focus:border-sky-500 outline-none shadow-sm"
                     value={searchVal}
                     onChange={(e) => setSearchVal(e.target.value)}

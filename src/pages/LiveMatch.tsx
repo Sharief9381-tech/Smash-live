@@ -58,7 +58,7 @@ const LiveMatch = () => {
                  <div className="relative flex-1 md:w-64">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input 
-                      placeholder="smash anything here" 
+                      placeholder="Smash Here" 
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       className="h-12 pl-11 bg-white border-slate-200 rounded-xl font-bold"
@@ -114,7 +114,7 @@ const LiveMatch = () => {
                 )) : (
                   <div className="py-20 text-center bg-slate-100/50 rounded-[3rem] border-2 border-dashed border-slate-200">
                     <Zap className="h-10 w-10 text-slate-200 mx-auto" />
-                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest mt-4">No matching intelligence found</p>
+                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest mt-4">Nothing In This Court</p>
                   </div>
                 )}
               </div>

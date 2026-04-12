@@ -65,7 +65,7 @@ const Court = () => {
           <div className="relative w-full md:w-96">
             <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
             <Input 
-              placeholder="smash anything here" 
+              placeholder="Smash Here" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="h-14 pl-12 bg-white border-slate-200 rounded-[2rem] font-bold focus:border-sky-500 transition-all shadow-sm"
@@ -99,7 +99,7 @@ const Court = () => {
                   </div>
                 )) : (
                   <div className="col-span-2 py-12 text-center bg-slate-100/50 rounded-3xl border-2 border-dashed border-slate-200">
-                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No player in this court</p>
+                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest">Nothing In This Court</p>
                   </div>
                 )}
               </div>
@@ -148,7 +148,7 @@ const Court = () => {
                   </motion.div>
                 )) : (
                    <div className="py-12 text-center bg-slate-100/50 rounded-3xl border-2 border-dashed border-slate-200">
-                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No tournaments found in this court</p>
+                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest">Nothing In This Court</p>
                   </div>
                 )}
               </div>

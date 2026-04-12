@@ -69,7 +69,7 @@ const RankingSection = () => {
         <div className="relative w-full md:w-72">
           <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input 
-            placeholder="smash anything here" 
+            placeholder="Smash Here" 
             className="h-12 pl-11 bg-slate-50 border-slate-100 rounded-2xl font-bold focus:border-sky-500 transition-all"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -148,7 +148,7 @@ const RankingSection = () => {
             )) : (
               <TableRow>
                 <TableCell colSpan={7} className="h-32 text-center font-bold text-slate-400 uppercase tracking-widest">
-                  No player in this court
+                  Nothing In This Court
                 </TableCell>
               </TableRow>
             )}
