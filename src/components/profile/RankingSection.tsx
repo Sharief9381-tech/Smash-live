@@ -67,7 +67,7 @@ const RankingSection = () => {
         </div>
 
         <div className="relative w-full md:w-72">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input 
             placeholder="Search players..." 
             className="h-12 pl-11 bg-slate-50 border-slate-100 rounded-2xl font-bold focus:border-sky-500 transition-all"
@@ -148,7 +148,7 @@ const RankingSection = () => {
             )) : (
               <TableRow>
                 <TableCell colSpan={7} className="h-32 text-center font-bold text-slate-400 uppercase tracking-widest">
-                  No players found in this scope.
+                  No player in this court
                 </TableCell>
               </TableRow>
             )}
@@ -158,5 +158,11 @@ const RankingSection = () => {
     </div>
   );
 };
+
+const SearchIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+  </svg>
+);
 
 export default RankingSection;

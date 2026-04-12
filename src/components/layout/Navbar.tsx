@@ -32,7 +32,6 @@ const Navbar = () => {
     
     checkAuth();
     window.addEventListener('storage', checkAuth);
-    // Poll for changes if in same tab
     const interval = setInterval(checkAuth, 1000);
     
     return () => {
@@ -92,13 +91,7 @@ const Navbar = () => {
           </button>
           
           {isLoggedIn ? (
-            <Link to="/player/me" className="flex items-center gap-3 group outline-none">
-              <div className="text-right hidden sm:block">
-                <p className="text-[10px] font-black text-[#0B1F3A] uppercase tracking-widest leading-none">
-                  {userName.split(' ')[0][0]}. {userName.split(' ').slice(-1)}
-                </p>
-                <p className="text-[8px] font-bold text-sky-500 uppercase tracking-tighter">Pro Member</p>
-              </div>
+            <Link to="/player/me" className="flex items-center group outline-none">
               <Avatar className="h-10 w-10 border-2 border-slate-200 group-hover:border-sky-500 transition-all">
                 <AvatarImage src={userImage} />
                 <AvatarFallback className="font-black bg-slate-100">{userName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
