@@ -5,10 +5,9 @@ import Navbar from '@/components/layout/Navbar';
 import { motion } from 'framer-motion';
 import { 
   Trophy, TrendingUp, TrendingDown, 
-  Minus, Filter, Search, Globe,
-  Medal, ChevronRight, Flag, MapPin, Building
+  Minus, Search, Globe,
+  Medal, Flag, MapPin, Building
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from '@/lib/utils';
@@ -34,11 +33,9 @@ const Rankings = () => {
 
   const filteredRankings = useMemo(() => {
     let list = [...fullDatabase];
-    
-    // Simple filter logic for demonstration
     if (scope === 'country') list = list.filter(p => p.country === "Denmark");
     if (scope === 'state') list = list.filter(p => p.state === "Odense");
-    if (scope === 'regional') list = list.filter(p => ["Denmark", "Japan", "Thailand"].includes(p.country));
+    if (scope === 'regional') list = list.filter(p => ["Denmark", "Japan", "Thailand", "China"].includes(p.country));
 
     return list.filter(p => 
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -60,7 +57,6 @@ const Rankings = () => {
       <Navbar />
       
       <main className="container px-6 py-16 space-y-16">
-        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-sky-500/10 text-sky-600">
@@ -92,15 +88,11 @@ const Rankings = () => {
           </div>
         </div>
 
-        {/* Podium Section (Only for World/Regional) */}
         {topThree.length >= 3 && (
           <div className="grid md:grid-cols-3 gap-8 items-end max-w-5xl mx-auto pt-8">
-            {/* Rank 2 */}
             <div className="order-2 md:order-1 flex flex-col items-center">
               <div className="relative mb-6">
-                <div className="h-24 w-24 rounded-full bg-slate-100 border-4 border-slate-200 flex items-center justify-center text-2xl font-black text-slate-400">
-                  {topThree[1].img}
-                </div>
+                <div className="h-24 w-24 rounded-full bg-slate-100 border-4 border-slate-200 flex items-center justify-center text-2xl font-black text-slate-400">{topThree[1].img}</div>
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-slate-400 text-white h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm border-4 border-white">2</div>
               </div>
               <div className="text-center space-y-1 mb-4">
@@ -113,12 +105,9 @@ const Rankings = () => {
               </div>
             </div>
 
-            {/* Rank 1 */}
             <div className="order-1 md:order-2 flex flex-col items-center">
               <div className="relative mb-8">
-                <div className="h-32 w-32 rounded-full bg-sky-500/10 border-4 border-sky-500 flex items-center justify-center text-4xl font-black text-sky-600 shadow-[0_0_30px_rgba(14,165,233,0.2)]">
-                  {topThree[0].img}
-                </div>
+                <div className="h-32 w-32 rounded-full bg-sky-500/10 border-4 border-sky-500 flex items-center justify-center text-4xl font-black text-sky-600 shadow-[0_0_30px_rgba(14,165,233,0.2)]">{topThree[0].img}</div>
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-sky-500 text-white h-10 w-10 rounded-full flex items-center justify-center font-bold text-lg border-4 border-white shadow-lg">1</div>
                 <div className="absolute -top-6 left-1/2 -translate-x-1/2">
                   <Medal className="h-8 w-8 text-yellow-500 fill-current animate-bounce" />
@@ -134,12 +123,9 @@ const Rankings = () => {
               </div>
             </div>
 
-            {/* Rank 3 */}
             <div className="order-3 flex flex-col items-center">
               <div className="relative mb-6">
-                <div className="h-20 w-20 rounded-full bg-orange-50 border-4 border-orange-100 flex items-center justify-center text-xl font-black text-orange-400">
-                  {topThree[2].img}
-                </div>
+                <div className="h-20 w-20 rounded-full bg-orange-50 border-4 border-orange-100 flex items-center justify-center text-xl font-black text-orange-400">{topThree[2].img}</div>
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-orange-400 text-white h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm border-4 border-white">3</div>
               </div>
               <div className="text-center space-y-1 mb-4">
@@ -154,7 +140,6 @@ const Rankings = () => {
           </div>
         )}
 
-        {/* Table Section */}
         <div className="space-y-8">
           <Tabs defaultValue="ms" onValueChange={setActiveCategory} className="w-full">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4 gap-4">
@@ -182,7 +167,7 @@ const Rankings = () => {
                     <TableRow className="hover:bg-transparent border-slate-100">
                       <TableHead className="w-20 text-center font-black text-[10px] uppercase tracking-widest">Rank</TableHead>
                       <TableHead className="font-black text-[10px] uppercase tracking-widest">Player Intelligence</TableHead>
-                      {scope === 'world' && <TableHead className="font-black text-[10px] uppercase tracking-widest">Country</TableHead>}
+                      <TableHead className="font-black text-[10px] uppercase tracking-widest">Country</TableHead>
                       <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">Move</TableHead>
                       <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">Win Rate</TableHead>
                       <TableHead className="text-right font-black text-[10px] uppercase tracking-widest pr-12">Rating Points</TableHead>
@@ -201,9 +186,7 @@ const Rankings = () => {
                             </div>
                           </div>
                         </TableCell>
-                        {scope === 'world' && (
-                          <TableCell className="font-bold text-[#0B1F3A] text-sm uppercase tracking-tight">{row.country}</TableCell>
-                        )}
+                        <TableCell className="font-bold text-[#0B1F3A] text-sm uppercase tracking-tight">{row.country}</TableCell>
                         <TableCell className="text-center">
                           {row.change === 'up' ? <TrendingUp className="h-4 w-4 text-green-500 mx-auto" /> : row.change === 'down' ? <TrendingDown className="h-4 w-4 text-red-500 mx-auto" /> : <Minus className="h-4 w-4 text-slate-300 mx-auto" />}
                         </TableCell>
