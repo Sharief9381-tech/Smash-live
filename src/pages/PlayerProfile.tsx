@@ -12,6 +12,7 @@ import AchievementSection from '@/components/profile/AchievementSection';
 import RankingSection from '@/components/profile/RankingSection';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, Zap, Activity, Target } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const PlayerProfile = () => {
   const [activeTab, setActiveTab] = useState('analytics');
