@@ -10,25 +10,35 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState("V. Axelsen");
+  const [userImage, setUserImage] = useState("");
   const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     
-    // Check auth status from localStorage
     const checkAuth = () => {
       const authStatus = localStorage.getItem('isLoggedIn') === 'true';
       setIsLoggedIn(authStatus);
+      
+      const saved = localStorage.getItem('userProfile');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setUserName(parsed.name);
+        setUserImage(parsed.image);
+      }
     };
     
     checkAuth();
-    // Also listen for storage changes in case of cross-tab login/logout
     window.addEventListener('storage', checkAuth);
+    // Poll for changes if in same tab
+    const interval = setInterval(checkAuth, 1000);
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('storage', checkAuth);
+      clearInterval(interval);
     };
   }, [location.pathname]);
 
@@ -84,17 +94,19 @@ const Navbar = () => {
           {isLoggedIn ? (
             <Link to="/player/me" className="flex items-center gap-3 group outline-none">
               <div className="text-right hidden sm:block">
-                <p className="text-[10px] font-black text-[#0B1F3A] uppercase tracking-widest leading-none">V. Axelsen</p>
+                <p className="text-[10px] font-black text-[#0B1F3A] uppercase tracking-widest leading-none">
+                  {userName.split(' ')[0][0]}. {userName.split(' ').slice(-1)}
+                </p>
                 <p className="text-[8px] font-bold text-sky-500 uppercase tracking-tighter">Pro Member</p>
               </div>
-              <Avatar className="h-10 w-10 border-2 border-slate-200 group-hover:border-sky-500 transition-all ring-offset-2 group-hover:ring-2 ring-sky-500/20">
-                <AvatarImage src="https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?q=80&w=2070&auto=format&fit=crop" />
-                <AvatarFallback className="font-black">VA</AvatarFallback>
+              <Avatar className="h-10 w-10 border-2 border-slate-200 group-hover:border-sky-500 transition-all">
+                <AvatarImage src={userImage} />
+                <AvatarFallback className="font-black bg-slate-100">{userName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
               </Avatar>
             </Link>
           ) : (
             <Link to="/login">
-              <Button className="bg-[#0B1F3A] text-white px-8 rounded-full font-black text-sm hover:bg-[#0B1F3A]/90 transition-all shadow-lg hover:shadow-sky-500/20 border-none">
+              <Button className="bg-[#0B1F3A] text-white px-8 rounded-full font-black text-sm hover:bg-[#0B1F3A]/90 transition-all border-none">
                 Login
               </Button>
             </Link>

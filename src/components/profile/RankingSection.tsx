@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Search, Trophy, TrendingUp, TrendingDown, Minus, Globe, MapPin, Building, Flag, Target, Zap } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Trophy, Globe, Flag, MapPin, Building, Target, Zap, ChevronUp, ChevronDown, ChevronsDown, Minus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from '@/lib/utils';
@@ -9,20 +9,30 @@ import { cn } from '@/lib/utils';
 const RankingSection = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [scope, setScope] = useState("world");
+  const [userProfile, setUserProfile] = useState<any>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('userProfile');
+    if (saved) setUserProfile(JSON.parse(saved));
+  }, []);
 
   const rankingData = [
-    { rank: 1, name: "Viktor Axelsen", country: "Denmark", points: 105400, change: "up", matches: 842, winRate: "88", smashAcc: "94" },
-    { rank: 2, name: "Shi Yuqi", country: "China", points: 98200, change: "down", matches: 620, winRate: "82", smashAcc: "89" },
-    { rank: 3, name: "Jonatan Christie", country: "Indonesia", points: 92150, change: "none", matches: 580, winRate: "79", smashAcc: "85" },
-    { rank: 4, name: "Anders Antonsen", country: "Denmark", points: 89400, change: "up", matches: 512, winRate: "76", smashAcc: "82" },
-    { rank: 5, name: "Kunlavut Vitidsarn", country: "Thailand", points: 87600, change: "down", matches: 440, winRate: "75", smashAcc: "80" },
-    { rank: 6, name: "Kodai Naraoka", country: "Japan", points: 85900, change: "none", matches: 390, winRate: "74", smashAcc: "79" },
-    { rank: 7, name: "Lee Zii Jia", country: "Malaysia", points: 84200, change: "up", matches: 410, winRate: "73", smashAcc: "91" },
+    { rank: 1, name: "Viktor Axelsen", country: "Denmark", state: "Hovedstaden", points: 105400, change: "up", diff: 1, matches: 842, winRate: "88", smashAcc: "94" },
+    { rank: 2, name: "Shi Yuqi", country: "China", state: "Guangdong", points: 98200, change: "down", diff: 1, matches: 620, winRate: "82", smashAcc: "89" },
+    { rank: 3, name: "Jonatan Christie", country: "Indonesia", state: "Jakarta", points: 92150, change: "none", diff: 0, matches: 580, winRate: "79", smashAcc: "85" },
+    { rank: 4, name: "Anders Antonsen", country: "Denmark", state: "Hovedstaden", points: 89400, change: "up", diff: 2, matches: 512, winRate: "76", smashAcc: "82" },
+    { rank: 5, name: "Kunlavut Vitidsarn", country: "Thailand", state: "Bangkok", points: 87600, change: "down", diff: 2, matches: 440, winRate: "75", smashAcc: "80" },
+    { rank: 6, name: "Kodai Naraoka", country: "Japan", state: "Tokyo", points: 85900, change: "none", matches: 390, winRate: "74", smashAcc: "79" },
+    { rank: 7, name: "Lee Zii Jia", country: "Malaysia", state: "Selangor", points: 84200, change: "up", diff: 1, matches: 410, winRate: "73", smashAcc: "91" },
   ];
 
-  const filteredRankings = rankingData.filter(p => 
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredRankings = rankingData.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+    let matchesScope = true;
+    if (scope === 'country' && userProfile) matchesScope = p.country === userProfile.country;
+    else if (scope === 'state' && userProfile) matchesScope = p.state === userProfile.state;
+    return matchesSearch && matchesScope;
+  });
 
   const scopes = [
     { id: 'world', label: 'World', icon: Globe },
@@ -81,8 +91,8 @@ const RankingSection = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredRankings.map((p) => (
-              <TableRow key={p.rank} className={p.name === "Viktor Axelsen" ? "bg-sky-50/50 border-slate-100 h-20" : "border-slate-100 h-20"}>
+            {filteredRankings.length > 0 ? filteredRankings.map((p) => (
+              <TableRow key={p.rank} className={cn("border-slate-100 h-20", p.name === userProfile?.name && "bg-sky-50/30")}>
                 <TableCell className="text-center">
                   <div className={cn(
                     "inline-flex items-center justify-center w-8 h-8 rounded-lg font-black text-xs text-white",
@@ -100,7 +110,7 @@ const RankingSection = () => {
                     </div>
                     <div>
                       <p className="font-bold text-[#0B1F3A]">{p.name}</p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase">{p.country}</p>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase">{p.country} • {p.state}</p>
                     </div>
                   </div>
                 </TableCell>
@@ -119,14 +129,29 @@ const RankingSection = () => {
                 </TableCell>
                 <TableCell className="text-center font-black text-[#0B1F3A]">{p.points.toLocaleString()}</TableCell>
                 <TableCell className="text-right pr-10">
-                  <div className="flex justify-end">
-                    {p.change === "up" && <TrendingUp className="h-5 w-5 text-green-500" />}
-                    {p.change === "down" && <TrendingDown className="h-5 w-5 text-red-500" />}
-                    {p.change === "none" && <Minus className="h-5 w-5 text-slate-300" />}
+                  <div className="flex items-center justify-end gap-1">
+                    {p.change === 'up' && (
+                      <div className="flex items-center text-green-500 font-black">
+                        <ChevronUp className="h-4 w-4" /> <span className="text-xs">{p.diff || 1}</span>
+                      </div>
+                    )}
+                    {p.change === 'down' && (
+                      <div className="flex items-center text-red-500 font-black">
+                        {p.diff && p.diff >= 2 ? <ChevronsDown className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        <span className="text-xs">{p.diff || 1}</span>
+                      </div>
+                    )}
+                    {p.change === 'none' && <Minus className="h-4 w-4 text-slate-300" />}
                   </div>
                 </TableCell>
               </TableRow>
-            ))}
+            )) : (
+              <TableRow>
+                <TableCell colSpan={7} className="h-32 text-center font-bold text-slate-400 uppercase tracking-widest">
+                  No players found in this scope.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
