@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from '@/lib/utils';
 import { showSuccess } from '@/utils/toast';
+import { playersDatabase, Player } from '@/data/players';
 
 const Rankings = () => {
   const [activeCategory, setActiveCategory] = useState("ms");
@@ -25,52 +26,29 @@ const Rankings = () => {
     if (saved) setUserProfile(JSON.parse(saved));
   }, []);
 
-  const fullDatabase = [
-    // Denmark
-    { id: 1, rank: 1, name: "Viktor Axelsen", country: "Denmark", state: "Hovedstaden", points: 105400, change: "up", diff: 1, matches: 842, winRate: "88", smashAcc: "94", img: "VA" },
-    { id: 4, rank: 4, name: "Anders Antonsen", country: "Denmark", state: "Hovedstaden", points: 89400, change: "up", diff: 2, matches: 512, winRate: "76", smashAcc: "82", img: "AA" },
-    { id: 11, rank: 15, name: "Rasmus Gemke", country: "Denmark", state: "Sjælland", points: 68400, change: "none", matches: 420, winRate: "70", smashAcc: "80", img: "RG" },
-    // China
-    { id: 2, rank: 2, name: "Shi Yuqi", country: "China", state: "Guangdong", points: 98200, change: "down", diff: 1, matches: 620, winRate: "82", smashAcc: "89", img: "SY" },
-    { id: 12, rank: 12, name: "Li Shifeng", country: "China", state: "Zhejiang", points: 72400, change: "up", diff: 3, matches: 310, winRate: "74", smashAcc: "83", img: "LS" },
-    // Indonesia
-    { id: 3, rank: 3, name: "Jonatan Christie", country: "Indonesia", state: "Jakarta", points: 92150, change: "none", matches: 580, winRate: "79", smashAcc: "85", img: "JC" },
-    { id: 10, rank: 10, name: "Anthony Ginting", country: "Indonesia", state: "Jakarta", points: 78500, change: "none", matches: 520, winRate: "72", smashAcc: "81", img: "AG" },
-    // Thailand
-    { id: 5, rank: 5, name: "Kunlavut Vitidsarn", country: "Thailand", state: "Bangkok", points: 87600, change: "down", diff: 2, matches: 440, winRate: "75", smashAcc: "80", img: "KV" },
-    // Japan
-    { id: 6, rank: 6, name: "Kodai Naraoka", country: "Japan", state: "Tokyo", points: 85900, change: "none", matches: 390, winRate: "74", smashAcc: "79", img: "KN" },
-    // Malaysia
-    { id: 7, rank: 7, name: "Lee Zii Jia", country: "Malaysia", state: "Selangor", points: 84200, change: "up", diff: 1, matches: 410, winRate: "73", smashAcc: "91", img: "LZ" },
-    { id: 13, rank: 18, name: "Ng Tze Yong", country: "Malaysia", state: "Johor", points: 58400, change: "down", diff: 1, matches: 280, winRate: "68", smashAcc: "82", img: "NY" },
-    // India
-    { id: 8, rank: 8, name: "Prannoy H.S.", country: "India", state: "Maharashtra", points: 81500, change: "up", diff: 1, matches: 450, winRate: "71", smashAcc: "78", img: "PH" },
-    { id: 14, rank: 22, name: "Lakshya Sen", country: "India", state: "Karnataka", points: 52400, change: "up", diff: 4, matches: 320, winRate: "72", smashAcc: "88", img: "LS" },
-    // Singapore
-    { id: 9, rank: 9, name: "Loh Kean Yew", country: "Singapore", state: "Central", points: 79800, change: "down", diff: 1, matches: 380, winRate: "70", smashAcc: "84", img: "LK" },
-  ];
-
   const filteredRankings = useMemo(() => {
-    let list = [...fullDatabase];
+    let list = [...playersDatabase];
     
     if (userProfile) {
+      const userEntry: Player = {
+        id: 9999,
+        rank: 1,
+        name: userProfile.name,
+        country: userProfile.country,
+        state: userProfile.state,
+        points: 115000,
+        change: "up",
+        diff: 1,
+        matches: 842,
+        winRate: "88.4",
+        smashAcc: "94.2",
+        img: userProfile.name.split(' ').map((n: string) => n[0]).join(''),
+        isUser: true
+      };
+
       const userExists = list.some(p => p.name === userProfile.name);
       if (!userExists) {
-        list.push({
-          id: 999,
-          rank: 1,
-          name: userProfile.name,
-          country: userProfile.country,
-          state: userProfile.state,
-          points: 105400,
-          change: "up",
-          diff: 1,
-          matches: 842,
-          winRate: "88",
-          smashAcc: "94",
-          img: userProfile.name.split(' ').map((n: string) => n[0]).join(''),
-          isUser: true
-        });
+        list.push(userEntry);
       }
     }
 
@@ -78,13 +56,16 @@ const Rankings = () => {
       list = list.filter(p => p.country === userProfile.country);
     } else if (scope === 'state' && userProfile) {
       list = list.filter(p => p.state === userProfile.state);
+    } else if (scope === 'regional' && userProfile) {
+      list = list.filter(p => p.state === userProfile.state);
     }
 
     list.sort((a, b) => b.points - a.points);
 
     return list.filter(p => 
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.country.toLowerCase().includes(searchQuery.toLowerCase())
+      p.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.state.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [searchQuery, scope, userProfile]);
 
@@ -103,6 +84,7 @@ const Rankings = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="space-y-4">
             <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter">Live Rankings</h1>
+            <p className="text-slate-500 font-medium">Global intelligence database containing 100+ professional athletes.</p>
           </div>
           <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl">
             {scopes.map((s) => (
@@ -111,7 +93,7 @@ const Rankings = () => {
                 onClick={() => setScope(s.id)}
                 className={cn(
                   "flex items-center gap-2 px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all",
-                  scope === s.id ? "bg-[#0B1F3A] text-white shadow-lg" : "text-slate-400"
+                  scope === s.id ? "bg-[#0B1F3A] text-white shadow-lg" : "text-slate-400 hover:text-[#0B1F3A]"
                 )}
               >
                 <s.icon className="h-3.5 w-3.5" /> {s.label}
