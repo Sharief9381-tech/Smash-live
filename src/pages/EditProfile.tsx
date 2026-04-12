@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
-  User, Camera, Globe, Shield, 
-  ChevronLeft, Save, Zap, AlertCircle 
+  User, Camera, Globe, Shield, Trophy,
+  ChevronLeft, Save, Zap, AlertCircle, 
+  MapPin, Activity, GraduationCap
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,7 +21,7 @@ const EditProfile = () => {
     <div className="min-h-screen bg-slate-50 text-[#0B1F3A]">
       <Navbar />
       
-      <main className="container max-w-4xl px-6 py-12">
+      <main className="container max-w-5xl px-6 py-12">
         <div className="space-y-12">
           {/* Header */}
           <div className="flex items-center justify-between">
@@ -37,10 +39,10 @@ const EditProfile = () => {
             </Button>
           </div>
 
-          <div className="grid md:grid-cols-12 gap-12">
-            {/* Sidebar Controls */}
-            <div className="md:col-span-4 space-y-8">
-              <div className="glass-panel p-8 rounded-[3rem] text-center space-y-6 border-slate-200">
+          <div className="grid lg:grid-cols-12 gap-12">
+            {/* Left Column: Image & Status */}
+            <div className="lg:col-span-4 space-y-8">
+              <div className="glass-panel p-8 rounded-[3rem] text-center space-y-6 border-slate-200 sticky top-24">
                 <div className="relative inline-block group">
                   <div className="h-32 w-32 rounded-full border-4 border-white shadow-xl overflow-hidden bg-slate-100">
                     <img 
@@ -58,91 +60,133 @@ const EditProfile = () => {
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Public Identifier: VA_01</p>
                 </div>
                 <div className="pt-4 border-t border-slate-100 space-y-3">
-                   <Badge className="w-full justify-center bg-sky-500/10 text-sky-600 border-none h-8 font-black">PRO VERIFIED</Badge>
+                   <div className="w-full inline-flex justify-center items-center h-8 bg-sky-500/10 text-sky-600 rounded-full font-black text-[10px] uppercase tracking-widest">PRO VERIFIED</div>
                    <p className="text-[9px] font-medium text-slate-400 leading-relaxed px-4">Your account is verified by BWF regional systems. Certain fields are locked.</p>
                 </div>
               </div>
             </div>
 
-            {/* Form Fields */}
-            <div className="md:col-span-8 space-y-8">
+            {/* Right Column: Form Fields */}
+            <div className="lg:col-span-8 space-y-10">
+              
+              {/* Identity Section */}
               <section className="glass-panel p-10 rounded-[3rem] space-y-8 border-slate-200">
-                <h3 className="text-xl font-black flex items-center gap-3">
+                <h3 className="text-xl font-black flex items-center gap-3 italic">
                   <User className="h-5 w-5 text-sky-500" /> Identity Intelligence
                 </h3>
                 
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Display Name</Label>
-                    <Input defaultValue="Viktor Axelsen" className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold focus:border-sky-500 transition-all" />
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Player Name</Label>
+                    <Input defaultValue="Viktor Axelsen" className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Public Handle</Label>
-                    <Input defaultValue="@vaxelsen" className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold focus:border-sky-500 transition-all" />
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Country</Label>
+                    <Input defaultValue="Denmark" className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold" />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Professional Bio</Label>
-                  <Textarea 
-                    className="min-h-[120px] bg-slate-50 border-slate-100 rounded-2xl p-6 font-bold focus:border-sky-500 transition-all resize-none"
-                    placeholder="Describe your career milestones..."
-                    defaultValue="Professional badminton player from Denmark. Currently ranked World No. 1. Multiple-time World Champion and Olympic Gold Medalist."
-                  />
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Gender</Label>
+                    <Select defaultValue="men">
+                      <SelectTrigger className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold">
+                        <SelectValue placeholder="Select gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="men">Men</SelectItem>
+                        <SelectItem value="women">Women</SelectItem>
+                        <SelectItem value="mixed">Mixed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Date of Birth</Label>
+                    <Input type="date" defaultValue="1994-01-04" className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold" />
+                  </div>
                 </div>
               </section>
 
+              {/* Professional Configuration */}
               <section className="glass-panel p-10 rounded-[3rem] space-y-8 border-slate-200">
-                <h3 className="text-xl font-black flex items-center gap-3">
-                  <Globe className="h-5 w-5 text-sky-500" /> Career Configuration
+                <h3 className="text-xl font-black flex items-center gap-3 italic">
+                  <Activity className="h-5 w-5 text-sky-500" /> Professional Setup
                 </h3>
                 
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Nationality</Label>
-                    <Input disabled defaultValue="Denmark" className="h-14 bg-slate-100 border-slate-200 rounded-2xl px-6 font-bold text-slate-500 cursor-not-allowed" />
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Main Category</Label>
+                    <Select defaultValue="singles">
+                      <SelectTrigger className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="singles">Singles</SelectItem>
+                        <SelectItem value="doubles">Doubles</SelectItem>
+                        <SelectItem value="mixed">Mixed Doubles</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Playing Hand</Label>
-                    <Input defaultValue="Right" className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold focus:border-sky-500 transition-all" />
+                    <Select defaultValue="right">
+                      <SelectTrigger className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold">
+                        <SelectValue placeholder="Select hand" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="right">Right-hand</SelectItem>
+                        <SelectItem value="left">Left-hand</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
-                <div className="bg-amber-50 rounded-2xl p-4 flex items-start gap-4 border border-amber-100">
-                   <AlertCircle className="h-5 w-5 text-amber-500 mt-1" />
-                   <p className="text-[10px] font-bold text-amber-600 leading-relaxed uppercase tracking-wider">
-                     Nationality and Date of Birth can only be modified via official BWF documentation submission.
-                   </p>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Height (cm) <span className="text-[8px] font-normal opacity-50 italic">Optional</span></Label>
+                    <Input placeholder="e.g. 194" defaultValue="194" className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Coach / Institute <span className="text-[8px] font-normal opacity-50 italic">Optional</span></Label>
+                    <Input placeholder="Current coach name" defaultValue="Kenneth Jonassen" className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold" />
+                  </div>
                 </div>
               </section>
 
+              {/* Ranking Matrix */}
               <section className="glass-panel p-10 rounded-[3rem] space-y-8 border-slate-200">
-                <h3 className="text-xl font-black flex items-center gap-3">
-                  <Shield className="h-5 w-5 text-sky-500" /> Visibility Preferences
+                <h3 className="text-xl font-black flex items-center gap-3 italic">
+                  <Trophy className="h-5 w-5 text-sky-500" /> Ranking Intelligence
                 </h3>
                 
-                <div className="space-y-4">
-                  {[
-                    { label: "Public Profile Indexing", desc: "Allow your profile to be discovered via global rankings." },
-                    { label: "Live Momentum Tracking", desc: "Share real-time match analytics with your followers." },
-                    { label: "Broadcast Commentary Access", desc: "Allow AI analysts to access your historical data during live streams." }
-                  ].map((pref, i) => (
-                    <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
-                      <div>
-                        <p className="text-sm font-black text-[#0B1F3A]">{pref.label}</p>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{pref.desc}</p>
-                      </div>
-                      <div className="h-6 w-12 bg-sky-500 rounded-full relative p-1 cursor-pointer">
-                        <div className="h-4 w-4 bg-white rounded-full absolute right-1" />
-                      </div>
-                    </div>
-                  ))}
+                <div className="grid grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">World Rank</Label>
+                    <Input defaultValue="#1" className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-black text-sky-600" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">State Rank</Label>
+                    <Input defaultValue="#1" className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-black" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Regional Rank</Label>
+                    <Input defaultValue="#1" className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-black" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">State / Club Affiliation</Label>
+                  <div className="relative">
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input defaultValue="Odense Badminton Klub" className="h-14 bg-slate-50 border-slate-100 rounded-2xl pl-11 font-bold" />
+                  </div>
                 </div>
               </section>
 
-              <div className="pt-4 flex gap-4">
+              {/* Action Buttons */}
+              <div className="pt-6 flex gap-4">
                 <Button className="flex-1 bg-[#0B1F3A] text-white font-black h-16 rounded-2xl shadow-xl hover:bg-[#0B1F3A]/90 border-none">
-                  Save Evolution <Zap className="ml-2 h-4 w-4 fill-current" />
+                  Sync Intelligence <Zap className="ml-2 h-4 w-4 fill-current" />
                 </Button>
                 <Button 
                   variant="outline" 
@@ -159,11 +203,5 @@ const EditProfile = () => {
     </div>
   );
 };
-
-const Badge = ({ children, className }: { children: React.ReactNode, className?: string }) => (
-  <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${className}`}>
-    {children}
-  </div>
-);
 
 export default EditProfile;

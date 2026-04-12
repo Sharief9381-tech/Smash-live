@@ -1,22 +1,30 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Share2, UserPlus, Star, GraduationCap, Edit3, LogOut } from 'lucide-react';
+import { Share2, UserPlus, UserMinus, Star, GraduationCap, Edit3, LogOut, Users } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
 const ProfileHero = () => {
   const navigate = useNavigate();
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followers, setFollowers] = useState(1248200);
 
   const handleSignOut = () => {
-    // In a real app, you'd clear session/tokens here
+    localStorage.removeItem('isLoggedIn');
     navigate('/');
   };
 
+  const toggleFollow = () => {
+    setIsFollowing(!isFollowing);
+    setFollowers(prev => isFollowing ? prev - 1 : prev + 1);
+  };
+
   return (
-    <section className="relative glass-panel p-10 rounded-[3rem] border-slate-200 overflow-hidden group">
+    <section className="relative glass-panel p-10 rounded-[3.5rem] border-slate-200 overflow-hidden group">
       {/* Background Glows */}
       <div className="absolute -top-24 -left-24 w-64 h-64 bg-sky-500/5 blur-[100px] rounded-full" />
       <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-[#0B1F3A]/5 blur-[100px] rounded-full" />
@@ -65,6 +73,21 @@ const ProfileHero = () => {
             <div className="text-slate-500 font-bold italic">Right Handed</div>
           </div>
 
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-8 py-4 border-y border-slate-100/50">
+            <div className="text-center lg:text-left">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Followers</p>
+              <p className="text-xl font-black text-[#0B1F3A]">{(followers / 1000000).toFixed(1)}M</p>
+            </div>
+            <div className="text-center lg:text-left">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Following</p>
+              <p className="text-xl font-black text-[#0B1F3A]">142</p>
+            </div>
+            <div className="text-center lg:text-left">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Matches</p>
+              <p className="text-xl font-black text-[#0B1F3A]">842</p>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100">
               <Badge variant="outline" className="border-sky-200 text-sky-600 font-black uppercase text-[8px]">Category</Badge>
@@ -91,8 +114,20 @@ const ProfileHero = () => {
           </div>
 
           <div className="flex flex-wrap gap-3 w-full max-w-sm lg:max-w-none">
-            <Button className="flex-1 bg-sky-500 text-white font-black h-14 rounded-2xl hover:bg-sky-400 shadow-lg transition-all text-sm uppercase tracking-widest border-none">
-              FOLLOW <UserPlus className="ml-2 h-4 w-4" />
+            <Button 
+              onClick={toggleFollow}
+              className={cn(
+                "flex-1 h-14 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-lg border-none",
+                isFollowing 
+                  ? "bg-slate-100 text-[#0B1F3A] hover:bg-slate-200" 
+                  : "bg-sky-500 text-white hover:bg-sky-400"
+              )}
+            >
+              {isFollowing ? (
+                <>FOLLOWING <UserMinus className="ml-2 h-4 w-4" /></>
+              ) : (
+                <>FOLLOW <UserPlus className="ml-2 h-4 w-4" /></>
+              )}
             </Button>
             <Link to="/player/edit" className="flex-1">
               <Button variant="outline" className="w-full border-slate-200 text-[#0B1F3A] font-black h-14 rounded-2xl hover:bg-slate-50 text-sm uppercase tracking-widest">
