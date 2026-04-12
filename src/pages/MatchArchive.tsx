@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { 
   History, Search, Filter, Calendar, 
   MapPin, Play, ChevronRight, Download,
-  BarChart2, Star
+  BarChart2, Star, Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,15 +34,12 @@ const MatchArchive = () => {
               <History className="h-4 w-4" />
               <span className="text-xs font-black uppercase tracking-widest">Global Match Database</span>
             </div>
-            <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter">Match Archive</h1>
-            <p className="text-slate-500 font-medium max-w-lg">Explore the complete history of SmashLive tracked matches with full replay and data access.</p>
+            <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter italic uppercase">Score Archive</h1>
+            <p className="text-slate-500 font-medium max-w-lg">Complete history of final scores and match results across the global circuit.</p>
           </div>
           <div className="flex gap-4">
             <Button variant="outline" className="h-12 rounded-xl border-slate-200 font-bold px-6">
-              Batch Download
-            </Button>
-            <Button className="bg-[#0B1F3A] text-white hover:bg-[#0B1F3A]/90 h-12 rounded-xl font-bold px-8 shadow-xl">
-              Advanced Filter
+              Export CSV
             </Button>
           </div>
         </div>
@@ -53,19 +50,9 @@ const MatchArchive = () => {
             <Search className="h-5 w-5 text-slate-400" />
             <input 
               type="text" 
-              placeholder="Search by player name, tournament, or region..." 
-              className="bg-transparent border-none outline-none text-sm font-semibold px-4 w-full"
+              placeholder="Filter by player or matchup..." 
+              className="bg-transparent border-none outline-none text-sm font-black px-4 w-full"
             />
-          </div>
-          <div className="flex gap-3 w-full md:w-auto">
-             <div className="h-14 bg-white border border-slate-100 rounded-2xl px-6 flex items-center gap-3 shadow-sm min-w-[180px]">
-               <Calendar className="h-4 w-4 text-slate-400" />
-               <span className="text-sm font-bold text-[#0B1F3A]">All Seasons</span>
-             </div>
-             <div className="h-14 bg-white border border-slate-100 rounded-2xl px-6 flex items-center gap-3 shadow-sm min-w-[180px]">
-               <Filter className="h-4 w-4 text-slate-400" />
-               <span className="text-sm font-bold text-[#0B1F3A]">All Categories</span>
-             </div>
           </div>
         </div>
 
@@ -74,46 +61,38 @@ const MatchArchive = () => {
           <Table>
             <TableHeader className="bg-slate-50">
               <TableRow className="hover:bg-transparent border-slate-100">
-                <TableHead className="w-12 text-center"></TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest py-6">Event Details</TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest">Matchup</TableHead>
-                <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">Final Score</TableHead>
-                <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">Duration</TableHead>
-                <TableHead className="text-right font-black text-[10px] uppercase tracking-widest pr-12">Actions</TableHead>
+                <TableHead className="font-black text-[10px] uppercase tracking-widest py-8 px-10">Matchup Profile</TableHead>
+                <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">Final Match Score</TableHead>
+                <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">Tournament</TableHead>
+                <TableHead className="text-right font-black text-[10px] uppercase tracking-widest pr-12">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {archives.map((row) => (
-                <TableRow key={row.id} className="border-slate-100 hover:bg-slate-50/50 transition-colors group">
-                  <TableCell className="text-center">
-                    <button className="text-slate-300 hover:text-yellow-500 transition-colors"><Star className="h-4 w-4" /></button>
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <p className="font-black text-[#0B1F3A]">{row.tournament}</p>
-                      <div className="flex items-center gap-3">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{row.date}</span>
-                        <Badge variant="outline" className="text-[8px] font-black border-slate-200 h-4">{row.cat}</Badge>
+                <TableRow key={row.id} className="border-slate-100 hover:bg-sky-50/50 transition-all group h-24">
+                  <TableCell className="px-10">
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 rounded-xl bg-[#0B1F3A] flex items-center justify-center text-sky-500">
+                        <Zap className="h-5 w-5 fill-current" />
+                      </div>
+                      <div>
+                        <p className="font-black text-[#0B1F3A] text-lg leading-tight">{row.matchup}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{row.date}</p>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="font-bold text-[#0B1F3A]">{row.matchup}</TableCell>
                   <TableCell className="text-center">
-                    <span className="font-mono font-black text-sky-600 text-lg">{row.score}</span>
+                    <span className="font-mono font-black text-sky-600 text-2xl tracking-tighter">{row.score}</span>
                   </TableCell>
-                  <TableCell className="text-center font-bold text-slate-500">{row.dur}</TableCell>
+                  <TableCell className="text-center">
+                    <Badge variant="outline" className="font-black text-[10px] border-slate-200 uppercase px-3 py-1">
+                      {row.tournament}
+                    </Badge>
+                  </TableCell>
                   <TableCell className="text-right pr-12">
-                    <div className="flex items-center justify-end gap-2">
-                       <Button size="icon" variant="ghost" className="h-10 w-10 rounded-full hover:bg-sky-500 hover:text-white transition-all">
-                         <Play className="h-4 w-4 fill-current" />
-                       </Button>
-                       <Button size="icon" variant="ghost" className="h-10 w-10 rounded-full hover:bg-slate-100">
-                         <BarChart2 className="h-4 w-4" />
-                       </Button>
-                       <Button size="icon" variant="ghost" className="h-10 w-10 rounded-full hover:bg-slate-100">
-                         <Download className="h-4 w-4" />
-                       </Button>
-                    </div>
+                    <Button variant="ghost" className="h-12 w-12 rounded-2xl hover:bg-[#0B1F3A] hover:text-white transition-all">
+                      <Play className="h-5 w-5 fill-current" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -123,10 +102,10 @@ const MatchArchive = () => {
 
         {/* Load More */}
         <div className="flex flex-col items-center gap-4 py-8">
-           <Button variant="outline" className="rounded-full px-12 h-14 font-black text-[#0B1F3A] border-slate-200 hover:bg-slate-50">
-             SMASH IT
+           <Button variant="outline" className="rounded-full px-12 h-16 font-black text-[#0B1F3A] border-slate-200 hover:bg-slate-50 text-lg uppercase tracking-widest italic shadow-sm">
+             LOAD MORE SCORES
            </Button>
-           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Showing 5 of 14,242 records</p>
+           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Showing historical score data for 2024 circuit</p>
         </div>
       </main>
     </div>

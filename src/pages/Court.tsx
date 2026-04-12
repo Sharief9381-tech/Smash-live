@@ -57,7 +57,7 @@ const Court = () => {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Zap className="h-4 w-4 text-sky-500 fill-current" />
-              <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.3em]">Operational Core</span>
+              <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.3em]">SMASHED</span>
             </div>
             <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic">COURT</h1>
           </div>
