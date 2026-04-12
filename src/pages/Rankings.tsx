@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { motion } from 'framer-motion';
 import { 
   Trophy, TrendingUp, TrendingDown, 
   Minus, Search, Globe,
-  Medal, Flag, MapPin, Building,
-  Target, Zap, Activity
+  Flag, MapPin, Building,
+  Target, Zap
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -18,27 +18,45 @@ const Rankings = () => {
   const [activeCategory, setActiveCategory] = useState("ms");
   const [searchQuery, setSearchQuery] = useState("");
   const [scope, setScope] = useState("world");
+  const [userProfile, setUserProfile] = useState<any>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('userProfile');
+    if (saved) setUserProfile(JSON.parse(saved));
+  }, []);
 
   const fullDatabase = [
-    { id: 1, rank: 1, name: "Viktor Axelsen", country: "Denmark", points: 105400, change: "up", matches: 842, winRate: "88", smashAcc: "94", img: "VA" },
-    { id: 2, rank: 2, name: "Shi Yuqi", country: "China", points: 98200, change: "down", matches: 620, winRate: "82", smashAcc: "89", img: "SY" },
-    { id: 3, rank: 3, name: "Jonatan Christie", country: "Indonesia", points: 92150, change: "none", matches: 580, winRate: "79", smashAcc: "85", img: "JC" },
-    { id: 4, rank: 4, name: "Anders Antonsen", country: "Denmark", points: 89400, change: "up", matches: 512, winRate: "76", smashAcc: "82", img: "AA" },
-    { id: 5, rank: 5, name: "Kunlavut Vitidsarn", country: "Thailand", points: 87600, change: "down", matches: 440, winRate: "75", smashAcc: "80", img: "KV" },
-    { id: 6, rank: 6, name: "Kodai Naraoka", country: "Japan", points: 85900, change: "none", matches: 390, winRate: "74", smashAcc: "79", img: "KN" },
-    { id: 7, rank: 7, name: "Lee Zii Jia", country: "Malaysia", points: 84200, change: "up", matches: 410, winRate: "73", smashAcc: "91", img: "LZ" },
-    { id: 8, rank: 8, name: "Prannoy H.S.", country: "India", points: 81500, change: "up", matches: 450, winRate: "71", smashAcc: "78", img: "PH" },
-    { id: 9, rank: 9, name: "Loh Kean Yew", country: "Singapore", points: 79800, change: "down", matches: 380, winRate: "70", smashAcc: "84", img: "LK" },
-    { id: 10, rank: 10, name: "Anthony Ginting", country: "Indonesia", points: 78500, change: "none", matches: 520, winRate: "72", smashAcc: "81", img: "AG" },
+    { id: 1, rank: 1, name: "Viktor Axelsen", country: "Denmark", state: "Hovedstaden", points: 105400, change: "up", matches: 842, winRate: "88", smashAcc: "94", img: "VA" },
+    { id: 2, rank: 2, name: "Shi Yuqi", country: "China", state: "Guangdong", points: 98200, change: "down", matches: 620, winRate: "82", smashAcc: "89", img: "SY" },
+    { id: 3, rank: 3, name: "Jonatan Christie", country: "Indonesia", state: "Jakarta", points: 92150, change: "none", matches: 580, winRate: "79", smashAcc: "85", img: "JC" },
+    { id: 4, rank: 4, name: "Anders Antonsen", country: "Denmark", state: "Hovedstaden", points: 89400, change: "up", matches: 512, winRate: "76", smashAcc: "82", img: "AA" },
+    { id: 5, rank: 5, name: "Kunlavut Vitidsarn", country: "Thailand", state: "Bangkok", points: 87600, change: "down", matches: 440, winRate: "75", smashAcc: "80", img: "KV" },
+    { id: 6, rank: 6, name: "Kodai Naraoka", country: "Japan", state: "Tokyo", points: 85900, change: "none", matches: 390, winRate: "74", smashAcc: "79", img: "KN" },
+    { id: 7, rank: 7, name: "Lee Zii Jia", country: "Malaysia", state: "Selangor", points: 84200, change: "up", matches: 410, winRate: "73", smashAcc: "91", img: "LZ" },
+    { id: 8, rank: 8, name: "Prannoy H.S.", country: "India", state: "Maharashtra", points: 81500, change: "up", matches: 450, winRate: "71", smashAcc: "78", img: "PH" },
+    { id: 9, rank: 9, name: "Loh Kean Yew", country: "Singapore", state: "Central", points: 79800, change: "down", matches: 380, winRate: "70", smashAcc: "84", img: "LK" },
+    { id: 10, rank: 10, name: "Anthony Ginting", country: "Indonesia", state: "Jakarta", points: 78500, change: "none", matches: 520, winRate: "72", smashAcc: "81", img: "AG" },
   ];
 
   const filteredRankings = useMemo(() => {
     let list = [...fullDatabase];
+    
+    // Apply Scope Filtering
+    if (scope === 'country' && userProfile) {
+      list = list.filter(p => p.country === userProfile.country);
+    } else if (scope === 'state' && userProfile) {
+      list = list.filter(p => p.state === userProfile.state);
+    } else if (scope === 'regional' && userProfile) {
+      // Logic for regional can be defined as needed; here we use state as a proxy
+      list = list.filter(p => p.state === userProfile.state);
+    }
+
+    // Apply Search Filtering
     return list.filter(p => 
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.country.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, scope, userProfile]);
 
   const scopes = [
     { id: 'world', label: 'World', icon: Globe },
@@ -60,7 +78,8 @@ const Rankings = () => {
             </div>
             <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter">Live Rankings</h1>
             <p className="text-slate-500 font-medium max-w-lg">
-              Dynamic global standings synchronized in real-time with professional performance metrics.
+              Dynamic standings for <span className="text-sky-500 font-black">{scope.toUpperCase()}</span> scope.
+              {userProfile && scope !== 'world' && ` Showing data for ${userProfile.country}${scope === 'state' ? `, ${userProfile.state}` : ''}.`}
             </p>
           </div>
           
@@ -70,7 +89,7 @@ const Rankings = () => {
                 key={s.id}
                 onClick={() => {
                   setScope(s.id);
-                  showSuccess(`Switched to ${s.label} view`);
+                  showSuccess(`Viewing ${s.label} Rankings`);
                 }}
                 className={cn(
                   "flex items-center gap-2 px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all",
@@ -118,17 +137,16 @@ const Rankings = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredRankings.map((row) => (
+                    {filteredRankings.length > 0 ? filteredRankings.map((row, idx) => (
                       <TableRow key={row.id} className="border-slate-100 hover:bg-slate-50/50 transition-colors group h-24">
                         <TableCell className="text-center">
                           <div className={cn(
                             "inline-flex items-center justify-center w-10 h-10 rounded-lg font-black text-sm text-white",
-                            row.rank === 1 ? "bg-amber-500 shadow-lg shadow-amber-500/20" :
-                            row.rank === 2 ? "bg-slate-400 shadow-lg shadow-slate-400/20" :
-                            row.rank === 3 ? "bg-orange-500 shadow-lg shadow-orange-500/20" :
-                            row.rank <= 5 ? "bg-sky-500 shadow-lg shadow-sky-500/20" : "bg-slate-200 text-slate-500"
+                            idx === 0 ? "bg-amber-500 shadow-lg" :
+                            idx === 1 ? "bg-slate-400 shadow-lg" :
+                            idx === 2 ? "bg-orange-500 shadow-lg" : "bg-slate-200 text-slate-500"
                           )}>
-                            #{row.rank}
+                            #{idx + 1}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -136,7 +154,7 @@ const Rankings = () => {
                             <div className="h-12 w-12 rounded-full bg-[#0B1F3A] flex items-center justify-center text-xs font-black text-sky-500 border-2 border-slate-100 shadow-sm">{row.img}</div>
                             <div>
                               <h4 className="font-black text-[#0B1F3A] group-hover:text-sky-600 transition-colors text-base">{row.name}</h4>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{row.country}</p>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{row.country} • {row.state}</p>
                             </div>
                           </div>
                         </TableCell>
@@ -171,7 +189,13 @@ const Rankings = () => {
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )) : (
+                      <TableRow>
+                        <TableCell colSpan={7} className="h-32 text-center font-bold text-slate-400 uppercase tracking-widest">
+                          No players found in this scope.
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </div>

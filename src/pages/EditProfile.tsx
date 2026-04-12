@@ -13,6 +13,17 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { showSuccess } from '@/utils/toast';
 
+const LOCATION_DATA: Record<string, string[]> = {
+  "Denmark": ["Hovedstaden", "Sjælland", "Syddanmark", "Midtjylland", "Nordjylland"],
+  "China": ["Guangdong", "Beijing", "Shanghai", "Zhejiang", "Fujian"],
+  "Indonesia": ["Jakarta", "West Java", "East Java", "Central Java", "Bali"],
+  "Thailand": ["Bangkok", "Chiang Mai", "Phuket", "Chonburi"],
+  "Malaysia": ["Selangor", "Penang", "Johor", "Kuala Lumpur"],
+  "India": ["Maharashtra", "Karnataka", "Delhi", "Tamil Nadu", "Telangana"],
+  "Japan": ["Tokyo", "Osaka", "Kyoto", "Aichi", "Hokkaido"],
+  "Singapore": ["Central", "North", "North-East", "East", "West"]
+};
+
 const EditProfile = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -20,6 +31,7 @@ const EditProfile = () => {
   const [formData, setFormData] = useState({
     name: "Viktor Axelsen",
     country: "Denmark",
+    state: "Hovedstaden",
     image: "https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?q=80&w=2070&auto=format&fit=crop",
     gender: "men",
     dob: "1994-01-04",
@@ -52,6 +64,14 @@ const EditProfile = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleCountryChange = (country: string) => {
+    setFormData({ 
+      ...formData, 
+      country, 
+      state: LOCATION_DATA[country]?.[0] || "" 
+    });
   };
 
   return (
@@ -120,11 +140,36 @@ const EditProfile = () => {
                   </div>
                   <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Country</Label>
-                    <Input 
-                      value={formData.country} 
-                      onChange={(e) => setFormData({...formData, country: e.target.value})}
-                      className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold" 
-                    />
+                    <Select value={formData.country} onValueChange={handleCountryChange}>
+                      <SelectTrigger className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold">
+                        <SelectValue placeholder="Select Country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.keys(LOCATION_DATA).map(country => (
+                          <SelectItem key={country} value={country}>{country}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">State / Region</Label>
+                    <Select value={formData.state} onValueChange={(state) => setFormData({...formData, state})}>
+                      <SelectTrigger className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold">
+                        <SelectValue placeholder="Select State" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {formData.country && LOCATION_DATA[formData.country] ? (
+                          LOCATION_DATA[formData.country].map(state => (
+                            <SelectItem key={state} value={state}>{state}</SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="none" disabled>Select country first</SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </section>
