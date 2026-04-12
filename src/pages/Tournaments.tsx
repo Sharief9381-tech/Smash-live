@@ -74,7 +74,7 @@ const Tournaments = () => {
                  <div className="flex items-center bg-white border border-slate-200 rounded-2xl px-4 h-12 shadow-sm focus-within:border-sky-500 transition-all">
                     <Search className="h-4 w-4 text-slate-400" />
                     <input 
-                      placeholder="Search Event..." 
+                      placeholder="smash anything here" 
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       className="bg-transparent border-none outline-none text-sm font-bold px-3 w-40" 

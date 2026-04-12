@@ -65,7 +65,7 @@ const Court = () => {
           <div className="relative w-full md:w-96">
             <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
             <Input 
-              placeholder="Search Matches, Events, or Smash ID..." 
+              placeholder="smash anything here" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="h-14 pl-12 bg-white border-slate-200 rounded-[2rem] font-bold focus:border-sky-500 transition-all shadow-sm"

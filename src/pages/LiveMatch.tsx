@@ -58,7 +58,7 @@ const LiveMatch = () => {
                  <div className="relative flex-1 md:w-64">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input 
-                      placeholder="Find Match..." 
+                      placeholder="smash anything here" 
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       className="h-12 pl-11 bg-white border-slate-200 rounded-xl font-bold"
