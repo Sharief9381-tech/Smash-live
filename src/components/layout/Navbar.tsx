@@ -2,22 +2,31 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, Bell, Menu, Zap, X, Trophy, Activity, Users } from 'lucide-react';
+import { Search, Bell, Menu, X, Trophy, Activity, Users, Zap, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion, AnimatePresence } from 'framer-motion';
+import Logo from './Logo';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("V. Axelsen");
   const [userImage, setUserImage] = useState("");
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [globalSearch, setGlobalSearch] = useState("");
+  const [searchVal, setSearchVal] = useState("");
+  
   const location = useLocation();
   const navigate = useNavigate();
+
+  const notifications = [
+    { id: 1, text: "Viktor Axelsen just won Set 1 (21-19)", time: "2m ago", unread: true },
+    { id: 2, text: "Tournament 'BWF Finals' is now LIVE", time: "15m ago", unread: true },
+    { id: 3, text: "Match Alert: Ginting vs Christie starting soon", time: "1h ago", unread: false },
+  ];
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -35,36 +44,14 @@ const Navbar = () => {
     };
     
     checkAuth();
-    window.addEventListener('storage', checkAuth);
-    const interval = setInterval(checkAuth, 1000);
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('storage', checkAuth);
-      clearInterval(interval);
-    };
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // Close mobile menu when route changes
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location.pathname]);
-
-  const handleGlobalSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (globalSearch.trim()) {
-      setIsSearchOpen(false);
-      navigate(`/rankings?q=${encodeURIComponent(globalSearch)}`);
-    }
-  };
 
   const navItems = [
     { name: isLoggedIn ? 'COURT' : 'Home', path: isLoggedIn ? '/court' : '/' },
     { name: 'Live', path: '/live-match/active' },
     { name: 'Tournaments', path: '/tournaments' },
     { name: 'Rankings', path: '/rankings' },
-    { name: 'News', path: '/news' },
-    { name: 'Archive', path: '/archive' },
   ];
 
   return (
@@ -75,10 +62,8 @@ const Navbar = () => {
       )}>
         <div className="container flex items-center justify-between px-6">
           <div className="flex items-center gap-12">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="bg-[#0B1F3A] p-2 rounded-xl text-white">
-                <Zap className="h-5 w-5 fill-current" />
-              </div>
+            <Link to="/" className="flex items-center gap-3 group">
+              <Logo className="h-10 w-10 group-hover:scale-110 transition-transform" />
               <span className="text-2xl font-black tracking-tighter text-[#0B1F3A] uppercase">
                 Smash<span className="text-sky-500">Live</span>
               </span>
@@ -101,15 +86,63 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setIsSearchOpen(true)}
-              className="p-2 text-[#0B1F3A]/60 hover:text-sky-500 transition-colors"
-            >
-              <Search className="h-5 w-5" />
-            </button>
-            <button className="hidden md:block p-2 text-[#0B1F3A]/60 hover:text-sky-500 transition-colors">
-              <Bell className="h-5 w-5" />
-            </button>
+            {/* Casual Inline Search */}
+            <div className={cn(
+              "relative flex items-center transition-all duration-300",
+              isSearchExpanded ? "w-64" : "w-10"
+            )}>
+              <button 
+                onClick={() => setIsSearchExpanded(!isSearchExpanded)}
+                className="p-2 text-[#0B1F3A]/60 hover:text-sky-500 transition-colors z-10"
+              >
+                <Search className="h-5 w-5" />
+              </button>
+              <AnimatePresence>
+                {isSearchExpanded && (
+                  <motion.input 
+                    initial={{ width: 0, opacity: 0 }}
+                    animate={{ width: "100%", opacity: 1 }}
+                    exit={{ width: 0, opacity: 0 }}
+                    placeholder="Search intelligence..."
+                    className="absolute right-0 h-10 bg-slate-50 border border-slate-200 rounded-full pl-4 pr-10 text-xs font-bold focus:border-sky-500 outline-none"
+                    value={searchVal}
+                    onChange={(e) => setSearchVal(e.target.value)}
+                  />
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Active Notifications */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="relative p-2 text-[#0B1F3A]/60 hover:text-sky-500 transition-colors">
+                  <Bell className="h-5 w-5" />
+                  <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full border-2 border-white" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-0 rounded-3xl border-slate-200 shadow-2xl">
+                <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-[#0B1F3A]">Live Alerts</span>
+                  <button className="text-[10px] font-bold text-sky-500 uppercase">Mark All Read</button>
+                </div>
+                <div className="max-h-96 overflow-y-auto">
+                  {notifications.map((n) => (
+                    <div key={n.id} className={cn("p-4 flex gap-4 hover:bg-slate-50 transition-colors cursor-pointer", n.unread && "bg-sky-50/30")}>
+                      <div className="h-8 w-8 rounded-full bg-sky-500/10 flex items-center justify-center text-sky-500 shrink-0">
+                        <Zap className="h-4 w-4 fill-current" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-[#0B1F3A] leading-tight">{n.text}</p>
+                        <p className="text-[10px] text-slate-400 font-medium">{n.time}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="p-4 border-t border-slate-100 text-center">
+                  <Link to="/news" className="text-[10px] font-black text-[#0B1F3A] uppercase tracking-widest hover:text-sky-500">View All Updates</Link>
+                </div>
+              </PopoverContent>
+            </Popover>
             
             {isLoggedIn ? (
               <Link to="/player/me" className="flex items-center group outline-none">
@@ -125,123 +158,9 @@ const Navbar = () => {
                 </Button>
               </Link>
             )}
-
-            <button 
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="lg:hidden p-2 text-[#0B1F3A] hover:text-sky-500 transition-colors"
-            >
-              <Menu className="h-6 w-6" />
-            </button>
           </div>
         </div>
       </nav>
-
-      {/* Mobile Menu Overlay */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div 
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-[110] bg-white lg:hidden"
-          >
-            <div className="flex flex-col h-full">
-              <div className="h-20 flex items-center justify-between px-6 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                  <div className="bg-[#0B1F3A] p-2 rounded-xl text-white">
-                    <Zap className="h-5 w-5 fill-current" />
-                  </div>
-                  <span className="text-xl font-black tracking-tighter text-[#0B1F3A] uppercase">SmashLive</span>
-                </div>
-                <button 
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-2 text-[#0B1F3A] hover:text-sky-500 transition-colors"
-                >
-                  <X className="h-7 w-7" />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-8 space-y-8">
-                <div className="flex flex-col gap-6">
-                  {navItems.map((item) => (
-                    <Link 
-                      key={item.name} 
-                      to={item.path}
-                      className={cn(
-                        "text-3xl font-black uppercase tracking-tighter transition-colors",
-                        location.pathname === item.path ? "text-sky-500" : "text-[#0B1F3A]"
-                      )}
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
-                </div>
-
-                <div className="pt-8 border-t border-slate-100 space-y-6">
-                  {!isLoggedIn && (
-                    <Link to="/login">
-                      <Button className="w-full h-16 bg-[#0B1F3A] text-white rounded-2xl font-black text-lg">
-                        Login to Court
-                      </Button>
-                    </Link>
-                  )}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-slate-50 rounded-2xl space-y-2">
-                      <Trophy className="h-5 w-5 text-sky-500" />
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Events</p>
-                    </div>
-                    <div className="p-4 bg-slate-50 rounded-2xl space-y-2">
-                      <Activity className="h-5 w-5 text-red-500" />
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Live</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Casual Global Search Modal */}
-      {isSearchOpen && (
-        <div className="fixed inset-0 z-[100] bg-[#0B1F3A]/95 backdrop-blur-xl flex items-center justify-center p-6">
-          <button 
-            onClick={() => setIsSearchOpen(false)}
-            className="absolute top-8 right-8 text-white/40 hover:text-white transition-colors"
-          >
-            <X className="h-8 w-8" />
-          </button>
-          <div className="w-full max-w-2xl space-y-12">
-            <div className="text-center space-y-4">
-              <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic">QUICK FIND</h2>
-              <p className="text-white/40 font-bold uppercase tracking-widest text-[10px]">Access global intelligence database</p>
-            </div>
-            <form onSubmit={handleGlobalSearch} className="relative">
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-sky-500" />
-              <input 
-                autoFocus
-                placeholder="Search Players, Tournaments, or Smash ID..." 
-                className="w-full h-20 bg-white/5 border border-white/10 rounded-[2rem] pl-16 pr-8 text-2xl font-black text-white outline-none focus:border-sky-500 transition-all"
-                value={globalSearch}
-                onChange={(e) => setGlobalSearch(e.target.value)}
-              />
-            </form>
-            <div className="grid grid-cols-3 gap-6">
-              {[
-                { label: "Live Courts", icon: Activity },
-                { label: "Event Studio", icon: Trophy },
-                { label: "Pro Registry", icon: Users },
-              ].map((item, i) => (
-                <div key={i} className="bg-white/5 p-6 rounded-[2rem] border border-white/5 hover:border-sky-500/30 transition-all cursor-pointer text-center group">
-                  <item.icon className="h-6 w-6 text-white/40 group-hover:text-sky-500 mx-auto mb-3" />
-                  <p className="text-[10px] font-black text-white/60 uppercase tracking-widest">{item.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };

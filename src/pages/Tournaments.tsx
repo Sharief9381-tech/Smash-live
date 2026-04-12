@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Trophy, Calendar, MapPin, 
   Search, ListFilter, ArrowRight,
-  Zap, Filter
+  Zap, Filter, Star, Globe, Award
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -41,6 +41,12 @@ const Tournaments = () => {
     }
   ];
 
+  const leaderboard = [
+    { name: "Viktor Axelsen", pts: "105.4k", rank: 1 },
+    { name: "Shi Yuqi", pts: "98.2k", rank: 2 },
+    { name: "Jonatan Christie", pts: "92.1k", rank: 3 },
+  ];
+
   const filtered = useMemo(() => {
     return tournaments.filter(t => 
       t.name.toLowerCase().includes(query.toLowerCase()) || 
@@ -52,33 +58,34 @@ const Tournaments = () => {
     <div className="min-h-screen bg-slate-50">
       <Navbar />
       
-      <main className="container px-6 py-12 space-y-12">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sky-600">
-              <Trophy className="h-4 w-4" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Circuit Intelligence</span>
+      <main className="container px-6 py-12">
+        <div className="grid lg:grid-cols-12 gap-12">
+          {/* Main Content */}
+          <div className="lg:col-span-8 space-y-12">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sky-600">
+                  <Trophy className="h-4 w-4" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em]">Circuit Intelligence</span>
+                </div>
+                <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter">Tournaments Dashboard</h1>
+              </div>
+              <div className="flex gap-3">
+                 <div className="flex items-center bg-white border border-slate-200 rounded-2xl px-4 h-12 shadow-sm focus-within:border-sky-500 transition-all">
+                    <Search className="h-4 w-4 text-slate-400" />
+                    <input 
+                      placeholder="Search Event..." 
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      className="bg-transparent border-none outline-none text-sm font-bold px-3 w-40" 
+                    />
+                 </div>
+                 <Button variant="outline" size="icon" className="h-12 w-12 rounded-2xl border-slate-200 bg-white shadow-sm">
+                    <Filter className="h-4 w-4 text-[#0B1F3A]" />
+                 </Button>
+              </div>
             </div>
-            <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter">Tournaments Dashboard</h1>
-          </div>
-          <div className="flex gap-3">
-             <div className="flex items-center bg-white border border-slate-200 rounded-2xl px-4 h-12 shadow-sm focus-within:border-sky-500 transition-all">
-                <Search className="h-4 w-4 text-slate-400" />
-                <input 
-                  placeholder="Search Event..." 
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  className="bg-transparent border-none outline-none text-sm font-bold px-3 w-40" 
-                />
-             </div>
-             <Button variant="outline" size="icon" className="h-12 w-12 rounded-2xl border-slate-200 bg-white shadow-sm">
-                <Filter className="h-4 w-4 text-[#0B1F3A]" />
-             </Button>
-          </div>
-        </div>
 
-        <div className="grid lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-8 space-y-8">
             <div className="grid md:grid-cols-2 gap-8">
               {filtered.length > 0 ? filtered.map((t) => (
                 <Link key={t.id} to={`/tournament/${t.id}`}>
@@ -116,6 +123,72 @@ const Tournaments = () => {
                   <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No tournaments found in this court</p>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Right Sidebar - Circuit Leaderboard */}
+          <div className="lg:col-span-4 space-y-8">
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="glass-panel p-8 rounded-[3rem] space-y-8"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-black uppercase tracking-[0.2em] text-[#0B1F3A]">Circuit Leaderboard</h3>
+                <Globe className="h-4 w-4 text-sky-500" />
+              </div>
+
+              <div className="space-y-4">
+                {leaderboard.map((player) => (
+                  <div key={player.rank} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-sky-500/30 transition-all group cursor-pointer">
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 rounded-full bg-[#0B1F3A] flex items-center justify-center text-xs font-black text-white group-hover:bg-sky-500 transition-colors">
+                        #{player.rank}
+                      </div>
+                      <div>
+                        <p className="text-xs font-black text-[#0B1F3A]">{player.name}</p>
+                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">BWF Certified</p>
+                      </div>
+                    </div>
+                    <span className="text-xs font-black text-sky-600">{player.pts}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-[#0B1F3A] p-6 rounded-[2rem] text-white relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform">
+                  <Star className="h-20 w-20 text-white fill-current" />
+                </div>
+                <div className="space-y-2 relative z-10">
+                  <p className="text-[10px] font-black text-sky-400 uppercase tracking-widest">Hall of Fame</p>
+                  <h4 className="text-lg font-black italic">Legacy Brackets</h4>
+                  <p className="text-[10px] text-white/60 leading-relaxed">Access historical tournament paths of world champions.</p>
+                </div>
+              </div>
+            </motion.div>
+
+            <div className="glass-panel p-8 rounded-[3rem] space-y-6">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#0B1F3A]">Event Intelligence</h4>
+              <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-2xl bg-sky-50 flex items-center justify-center text-sky-500">
+                    <Award className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-black text-[#0B1F3A]">$12M+</p>
+                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Total Prize Pool 2024</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-2xl bg-sky-50 flex items-center justify-center text-sky-500">
+                    <Zap className="h-6 w-6 fill-current" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-black text-[#0B1F3A]">128</p>
+                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Professional Circuits</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
