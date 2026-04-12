@@ -62,7 +62,7 @@ const Navbar = () => {
       <div className="container flex items-center justify-between px-6">
         <div className="flex items-center gap-10">
           <Link to="/" className="flex items-center gap-3 shrink-0 group">
-            <Logo className="h-11 w-11 group-hover:scale-105 transition-transform" />
+            <Logo className="h-11 w-11" />
             <span className="text-2xl font-black tracking-tighter text-[#0B1F3A] uppercase">
               Smash<span className="text-sky-500">Live</span>
             </span>
@@ -85,42 +85,47 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          {/* Improved Casual Search Container */}
-          <div className="flex items-center relative">
+          {/* Integrated Search Container to prevent overlapping */}
+          <div className="flex items-center relative group">
             <AnimatePresence>
-              {isSearchExpanded && (
+              {isSearchExpanded ? (
                 <motion.div
-                  initial={{ width: 0, opacity: 0 }}
-                  animate={{ width: 240, opacity: 1 }}
-                  exit={{ width: 0, opacity: 0 }}
-                  className="mr-2"
+                  initial={{ width: 40, opacity: 0 }}
+                  animate={{ width: 260, opacity: 1 }}
+                  exit={{ width: 40, opacity: 0 }}
+                  className="relative flex items-center"
                 >
+                  <Search className="absolute left-4 h-4 w-4 text-slate-400 pointer-events-none" />
                   <input 
                     autoFocus
-                    placeholder="Search..."
-                    className="w-full h-10 bg-slate-50 border border-slate-200 rounded-full pl-4 pr-4 text-xs font-bold focus:border-sky-500 outline-none"
+                    placeholder="Search intelligence..."
+                    className="w-full h-11 bg-slate-50 border border-slate-200 rounded-full pl-11 pr-10 text-xs font-bold focus:border-sky-500 outline-none shadow-sm"
                     value={searchVal}
                     onChange={(e) => setSearchVal(e.target.value)}
                   />
+                  <button 
+                    onClick={() => setIsSearchExpanded(false)}
+                    className="absolute right-3 p-1 hover:bg-slate-200 rounded-full transition-colors"
+                  >
+                    <X className="h-4 w-4 text-slate-400" />
+                  </button>
                 </motion.div>
+              ) : (
+                <button 
+                  onClick={() => setIsSearchExpanded(true)}
+                  className="p-2.5 text-[#0B1F3A]/60 hover:text-sky-500 hover:bg-sky-50 rounded-full transition-all"
+                >
+                  <Search className="h-5 w-5" />
+                </button>
               )}
             </AnimatePresence>
-            <button 
-              onClick={() => setIsSearchExpanded(!isSearchExpanded)}
-              className={cn(
-                "p-2 rounded-full transition-colors",
-                isSearchExpanded ? "bg-sky-50 text-sky-500" : "text-[#0B1F3A]/60 hover:text-sky-500"
-              )}
-            >
-              <Search className="h-5 w-5" />
-            </button>
           </div>
 
           <Popover>
             <PopoverTrigger asChild>
-              <button className="relative p-2 text-[#0B1F3A]/60 hover:text-sky-500 transition-colors">
+              <button className="relative p-2.5 text-[#0B1F3A]/60 hover:text-sky-500 hover:bg-sky-50 rounded-full transition-all">
                 <Bell className="h-5 w-5" />
-                <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full border-2 border-white" />
+                <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full border-2 border-white" />
               </button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-0 rounded-3xl border-slate-200 shadow-2xl mr-4 mt-2">
@@ -148,15 +153,15 @@ const Navbar = () => {
           </Popover>
           
           {isLoggedIn ? (
-            <Link to="/player/me" className="flex items-center group">
-              <Avatar className="h-10 w-10 border-2 border-slate-200 group-hover:border-sky-500 transition-all">
+            <Link to="/player/me" className="flex items-center group ml-2">
+              <Avatar className="h-10 w-10 border-2 border-slate-200 group-hover:border-sky-500 transition-all shadow-sm">
                 <AvatarImage src={userImage} />
                 <AvatarFallback className="font-black bg-slate-100">{userName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
               </Avatar>
             </Link>
           ) : (
-            <Link to="/login">
-              <Button className="bg-[#0B1F3A] text-white px-6 rounded-full font-black text-xs hover:bg-[#0B1F3A]/90 transition-all border-none h-10">
+            <Link to="/login" className="ml-2">
+              <Button className="bg-[#0B1F3A] text-white px-7 rounded-full font-black text-xs hover:bg-[#0B1F3A]/90 transition-all border-none h-11 shadow-lg shadow-navy/10">
                 Login
               </Button>
             </Link>
