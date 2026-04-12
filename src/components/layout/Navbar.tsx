@@ -6,6 +6,7 @@ import { Search, Bell, Menu, Zap, X, Trophy, Activity, Users } from 'lucide-reac
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -13,6 +14,7 @@ const Navbar = () => {
   const [userName, setUserName] = useState("V. Axelsen");
   const [userImage, setUserImage] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
@@ -42,6 +44,11 @@ const Navbar = () => {
       clearInterval(interval);
     };
   }, []);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
 
   const handleGlobalSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,7 +107,7 @@ const Navbar = () => {
             >
               <Search className="h-5 w-5" />
             </button>
-            <button className="p-2 text-[#0B1F3A]/60 hover:text-sky-500 transition-colors">
+            <button className="hidden md:block p-2 text-[#0B1F3A]/60 hover:text-sky-500 transition-colors">
               <Bell className="h-5 w-5" />
             </button>
             
@@ -112,19 +119,89 @@ const Navbar = () => {
                 </Avatar>
               </Link>
             ) : (
-              <Link to="/login">
+              <Link to="/login" className="hidden md:block">
                 <Button className="bg-[#0B1F3A] text-white px-8 rounded-full font-black text-sm hover:bg-[#0B1F3A]/90 transition-all border-none">
                   Login
                 </Button>
               </Link>
             )}
 
-            <button className="lg:hidden p-2">
-              <Menu className="h-6 w-6 text-[#0B1F3A]" />
+            <button 
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="lg:hidden p-2 text-[#0B1F3A] hover:text-sky-500 transition-colors"
+            >
+              <Menu className="h-6 w-6" />
             </button>
           </div>
         </div>
       </nav>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed inset-0 z-[110] bg-white lg:hidden"
+          >
+            <div className="flex flex-col h-full">
+              <div className="h-20 flex items-center justify-between px-6 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <div className="bg-[#0B1F3A] p-2 rounded-xl text-white">
+                    <Zap className="h-5 w-5 fill-current" />
+                  </div>
+                  <span className="text-xl font-black tracking-tighter text-[#0B1F3A] uppercase">SmashLive</span>
+                </div>
+                <button 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-2 text-[#0B1F3A] hover:text-sky-500 transition-colors"
+                >
+                  <X className="h-7 w-7" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                <div className="flex flex-col gap-6">
+                  {navItems.map((item) => (
+                    <Link 
+                      key={item.name} 
+                      to={item.path}
+                      className={cn(
+                        "text-3xl font-black uppercase tracking-tighter transition-colors",
+                        location.pathname === item.path ? "text-sky-500" : "text-[#0B1F3A]"
+                      )}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
+
+                <div className="pt-8 border-t border-slate-100 space-y-6">
+                  {!isLoggedIn && (
+                    <Link to="/login">
+                      <Button className="w-full h-16 bg-[#0B1F3A] text-white rounded-2xl font-black text-lg">
+                        Login to Court
+                      </Button>
+                    </Link>
+                  )}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-slate-50 rounded-2xl space-y-2">
+                      <Trophy className="h-5 w-5 text-sky-500" />
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Events</p>
+                    </div>
+                    <div className="p-4 bg-slate-50 rounded-2xl space-y-2">
+                      <Activity className="h-5 w-5 text-red-500" />
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Live</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Casual Global Search Modal */}
       {isSearchOpen && (

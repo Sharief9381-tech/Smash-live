@@ -10,23 +10,30 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 const LiveMatch = () => {
   const [query, setQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
   
+  const categories = ["All", "Men's Singles", "Women's Singles", "Men's Doubles", "Women's Doubles", "Mixed Doubles"];
+
   const matches = [
-    { p1: "Viktor Axelsen", p2: "Lee Zii Jia", score: "21-19, 14-11", tournament: "BWF Finals", viewers: "12.4k", status: "Live" },
-    { p1: "An Se-young", p2: "Tai Tzu-ying", score: "21-12, 18-15", tournament: "Jakarta Open", viewers: "8.2k", status: "Live" },
-    { p1: "Jonatan Christie", p2: "Anthony Ginting", score: "0-0", tournament: "Indonesia Master", viewers: "3.1k", status: "Warm-up" },
+    { p1: "Viktor Axelsen", p2: "Lee Zii Jia", score: "21-19, 14-11", tournament: "BWF Finals", viewers: "12.4k", status: "Live", category: "Men's Singles" },
+    { p1: "An Se-young", p2: "Tai Tzu-ying", score: "21-12, 18-15", tournament: "Jakarta Open", viewers: "8.2k", status: "Live", category: "Women's Singles" },
+    { p1: "Jonatan Christie", p2: "Anthony Ginting", score: "0-0", tournament: "Indonesia Master", viewers: "3.1k", status: "Warm-up", category: "Men's Singles" },
+    { p1: "Chen/Jia", p2: "Baek/Lee", score: "21-18", tournament: "China Masters", viewers: "5.5k", status: "Live", category: "Women's Doubles" },
   ];
 
   const filtered = useMemo(() => {
-    return matches.filter(m => 
-      m.p1.toLowerCase().includes(query.toLowerCase()) || 
-      m.p2.toLowerCase().includes(query.toLowerCase()) ||
-      m.tournament.toLowerCase().includes(query.toLowerCase())
-    );
-  }, [query]);
+    return matches.filter(m => {
+      const matchesSearch = m.p1.toLowerCase().includes(query.toLowerCase()) || 
+                           m.p2.toLowerCase().includes(query.toLowerCase()) ||
+                           m.tournament.toLowerCase().includes(query.toLowerCase());
+      const matchesCategory = activeCategory === "All" || m.category === activeCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [query, activeCategory]);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -58,18 +65,42 @@ const LiveMatch = () => {
           </div>
         </div>
 
+        {/* Category Nav Bar */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-hide">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={cn(
+                "whitespace-nowrap px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all",
+                activeCategory === cat 
+                  ? "bg-[#0B1F3A] text-white border-[#0B1F3A] shadow-lg" 
+                  : "bg-white text-slate-400 border-slate-200 hover:border-sky-500 hover:text-sky-500"
+              )}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
         <div className="grid lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 space-y-8">
             <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 border-sky-500/10 shadow-sky-500/5">
-              <h3 className="text-xl font-black text-[#0B1F3A] flex items-center gap-3 italic">
-                <Activity className="h-5 w-5 text-red-500" /> Active Global Courts
-              </h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-black text-[#0B1F3A] flex items-center gap-3 italic">
+                  <Activity className="h-5 w-5 text-red-500" /> Active Global Courts
+                </h3>
+                <Badge variant="outline" className="border-slate-200 text-[8px] font-black">{filtered.length} Courts Match</Badge>
+              </div>
 
               <div className="space-y-4">
                 {filtered.length > 0 ? filtered.map((match, i) => (
                   <div key={i} className="flex flex-col md:flex-row items-center justify-between p-8 rounded-[2.5rem] bg-slate-50 border border-slate-100 hover:border-sky-500/30 transition-all group cursor-pointer">
                     <div className="space-y-1">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{match.tournament}</p>
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{match.tournament}</p>
+                        <Badge className="bg-sky-500/10 text-sky-600 border-none text-[8px] font-black">{match.category}</Badge>
+                      </div>
                       <div className="font-black text-xl text-[#0B1F3A]">{match.p1} <span className="text-sky-500">vs</span> {match.p2}</div>
                       <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase">
                         <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {match.viewers}</span>
@@ -87,8 +118,11 @@ const LiveMatch = () => {
                     </div>
                   </div>
                 )) : (
-                  <div className="py-12 text-center bg-slate-100/50 rounded-3xl border-2 border-dashed border-slate-200">
-                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No player in this court</p>
+                  <div className="py-20 text-center bg-slate-100/50 rounded-[3rem] border-2 border-dashed border-slate-200">
+                    <div className="flex flex-col items-center gap-4">
+                      <Zap className="h-10 w-10 text-slate-200" />
+                      <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No matching intelligence found</p>
+                    </div>
                   </div>
                 )}
               </div>
