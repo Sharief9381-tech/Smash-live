@@ -47,7 +47,6 @@ const Rankings = () => {
     } else if (scope === 'state' && userProfile) {
       list = list.filter(p => p.state === userProfile.state);
     } else if (scope === 'regional' && userProfile) {
-      // Logic for regional can be defined as needed; here we use state as a proxy
       list = list.filter(p => p.state === userProfile.state);
     }
 
@@ -180,11 +179,20 @@ const Rankings = () => {
                         <TableCell className="text-right pr-12">
                           <div className="flex items-center justify-end">
                             {row.change === 'up' ? (
-                              <TrendingUp className="h-6 w-6 text-green-500" />
+                              <div className="flex flex-col items-center">
+                                <TrendingUp className="h-5 w-5 text-green-500" />
+                                <span className="text-[8px] font-black text-green-500 uppercase">Gaining</span>
+                              </div>
                             ) : row.change === 'down' ? (
-                              <TrendingDown className="h-6 w-6 text-red-500" />
+                              <div className="flex flex-col items-center">
+                                <TrendingDown className="h-5 w-5 text-red-500" />
+                                <span className="text-[8px] font-black text-red-500 uppercase">Dropping</span>
+                              </div>
                             ) : (
-                              <Minus className="h-6 w-6 text-slate-300" />
+                              <div className="flex flex-col items-center">
+                                <Minus className="h-5 w-5 text-slate-300" />
+                                <span className="text-[8px] font-black text-slate-300 uppercase">Stable</span>
+                              </div>
                             )}
                           </div>
                         </TableCell>

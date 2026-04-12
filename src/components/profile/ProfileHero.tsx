@@ -108,7 +108,7 @@ const ProfileHero = () => {
               <h1 className="text-6xl font-black tracking-tighter text-[#0B1F3A]">{profileData.name}</h1>
               <ShieldCheck className="h-8 w-8 text-sky-500" />
             </div>
-            <p className="text-sky-600 font-mono text-xs tracking-[0.4em] font-black uppercase italic">Dossier ID: SMASH_842_INT</p>
+            <p className="text-sky-600 font-mono text-xs tracking-[0.4em] font-black uppercase italic">SMASH ID: LIVE_001</p>
           </div>
 
           <div className="flex flex-wrap items-center justify-center lg:justify-start gap-8 text-sm font-bold text-slate-500">
