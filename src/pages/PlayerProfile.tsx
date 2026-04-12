@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import ProfileHero from '@/components/profile/ProfileHero';
 import ProfileNavigation from '@/components/profile/ProfileNavigation';
@@ -10,16 +10,17 @@ import TeamSection from '@/components/profile/TeamSection';
 import AnalyticsSection from '@/components/profile/AnalyticsSection';
 import AchievementSection from '@/components/profile/AchievementSection';
 import RankingSection from '@/components/profile/RankingSection';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, Zap } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 const PlayerProfile = () => {
+  const [activeTab, setActiveTab] = useState('analytics');
+
   return (
     <div className="min-h-screen bg-slate-50 text-[#0B1F3A] selection:bg-sky-500/30">
       <Navbar />
       
-      <main className="container px-6 py-12 space-y-24">
+      <main className="container px-6 py-12 space-y-12">
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -33,13 +34,13 @@ const PlayerProfile = () => {
           
           <ProfileHero />
           
-          <ProfileNavigation />
+          <ProfileNavigation activeTab={activeTab} onTabChange={setActiveTab} />
         </motion.div>
 
-        {/* Core Stats Section */}
-        <section id="performance-core" className="space-y-10 scroll-mt-32">
+        {/* Common Section: Performance Core (Always Visible) */}
+        <section className="space-y-10">
           <div className="flex items-center justify-between">
-            <h2 className="text-3xl font-black tracking-tighter uppercase">Performance Core</h2>
+            <h2 className="text-2xl font-black tracking-tighter uppercase">Performance Core</h2>
             <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
               <ShieldCheck className="h-4 w-4 text-sky-500" /> Verified Statistics
             </div>
@@ -47,37 +48,51 @@ const PlayerProfile = () => {
           <PerformanceStats />
         </section>
 
-        {/* Analytics Section */}
-        <section id="strategic-analytics" className="space-y-10 scroll-mt-32">
-          <h2 className="text-3xl font-black tracking-tighter uppercase">Strategic Analytics</h2>
-          <AnalyticsSection />
-        </section>
-
-        {/* Rankings Section */}
-        <section id="global-rankings" className="space-y-10 scroll-mt-32">
-          <h2 className="text-3xl font-black tracking-tighter uppercase">Global Rankings</h2>
-          <RankingSection />
-        </section>
-
-        {/* Tournaments Section */}
-        <section id="circuit-history" className="space-y-10 scroll-mt-32">
-          <h2 className="text-3xl font-black tracking-tighter uppercase">Circuit History</h2>
-          <TournamentSection />
-        </section>
-
-        {/* Teams Section */}
-        <section id="team-intelligence" className="space-y-10 scroll-mt-32">
-          <TeamSection />
-        </section>
-
-        {/* Achievements Section */}
-        <section id="hall-of-fame" className="space-y-12 scroll-mt-32">
-          <div className="text-center space-y-4">
-            <h2 className="text-4xl font-black tracking-tighter uppercase italic">Hall of Fame</h2>
-            <p className="text-slate-400 font-medium uppercase text-xs tracking-widest">Global career milestones and verified badges</p>
-          </div>
-          <AchievementSection />
-        </section>
+        {/* Dynamic Content Area */}
+        <div className="pt-8">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {activeTab === 'analytics' && (
+                <div className="space-y-10">
+                  <h2 className="text-3xl font-black tracking-tighter uppercase">Strategic Analytics</h2>
+                  <AnalyticsSection />
+                </div>
+              )}
+              {activeTab === 'rankings' && (
+                <div className="space-y-10">
+                  <h2 className="text-3xl font-black tracking-tighter uppercase">Global Rankings</h2>
+                  <RankingSection />
+                </div>
+              )}
+              {activeTab === 'history' && (
+                <div className="space-y-10">
+                  <h2 className="text-3xl font-black tracking-tighter uppercase">Circuit History</h2>
+                  <TournamentSection />
+                </div>
+              )}
+              {activeTab === 'teams' && (
+                <div className="space-y-10">
+                  <TeamSection />
+                </div>
+              )}
+              {activeTab === 'achievements' && (
+                <div className="space-y-12">
+                  <div className="text-center space-y-4">
+                    <h2 className="text-4xl font-black tracking-tighter uppercase italic">Hall of Fame</h2>
+                    <p className="text-slate-400 font-medium uppercase text-xs tracking-widest">Global career milestones and verified badges</p>
+                  </div>
+                  <AchievementSection />
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
 
         {/* Bottom CTA Banner */}
         <section className="glass-panel p-12 rounded-[4rem] bg-gradient-to-br from-sky-500/10 via-transparent to-[#0B1F3A]/5 border-slate-200 flex flex-col md:flex-row items-center justify-between gap-12 relative overflow-hidden group">

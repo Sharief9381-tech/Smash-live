@@ -6,15 +6,17 @@ import { motion } from 'framer-motion';
 import { 
   Trophy, TrendingUp, TrendingDown, 
   Minus, Filter, Search, Globe,
-  Medal, ChevronRight
+  Medal, ChevronRight, Flag, MapPin, Building
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { cn } from '@/lib/utils';
 
 const Rankings = () => {
   const [activeCategory, setActiveCategory] = useState("ms");
   const [searchQuery, setSearchQuery] = useState("");
+  const [scope, setScope] = useState("world");
 
   const rankingsData = [
     { rank: 1, name: "Viktor Axelsen", country: "Denmark", points: 105400, change: "up", changeVal: 1, matches: 842, winRate: "88.4%", img: "VA" },
@@ -33,6 +35,13 @@ const Rankings = () => {
 
   const topThree = rankingsData.slice(0, 3);
 
+  const scopes = [
+    { id: 'world', label: 'World', icon: Globe },
+    { id: 'country', label: 'Country', icon: Flag },
+    { id: 'state', label: 'State', icon: MapPin },
+    { id: 'regional', label: 'Regional', icon: Building },
+  ];
+
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -50,10 +59,20 @@ const Rankings = () => {
               Dynamic world rankings synchronized in real-time with international tournament performance data.
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="icon" className="h-12 w-12 rounded-2xl border-slate-200">
-              <Filter className="h-4 w-4 text-[#0B1F3A]" />
-            </Button>
+          
+          <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl">
+            {scopes.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setScope(s.id)}
+                className={cn(
+                  "flex items-center gap-2 px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all",
+                  scope === s.id ? "bg-[#0B1F3A] text-white shadow-lg" : "text-slate-400 hover:text-[#0B1F3A]"
+                )}
+              >
+                <s.icon className="h-3.5 w-3.5" /> {s.label}
+              </button>
+            ))}
           </div>
         </div>
 

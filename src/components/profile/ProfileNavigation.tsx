@@ -5,43 +5,40 @@ import {
   Trophy, Activity, Target, 
   Users, Award, BarChart3, ListOrdered 
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-const ProfileNavigation = () => {
+interface ProfileNavigationProps {
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+}
+
+const ProfileNavigation = ({ activeTab, onTabChange }: ProfileNavigationProps) => {
   const sections = [
-    { name: 'Performance', target: 'performance-core', icon: Activity },
-    { name: 'Analytics', target: 'strategic-analytics', icon: BarChart3 },
-    { name: 'Rankings', target: 'global-rankings', icon: ListOrdered },
-    { name: 'History', target: 'circuit-history', icon: Trophy },
-    { name: 'Teams', target: 'team-intelligence', icon: Users },
-    { name: 'Achievements', target: 'hall-of-fame', icon: Award },
+    { name: 'Analytics', id: 'analytics', icon: BarChart3 },
+    { name: 'Rankings', id: 'rankings', icon: ListOrdered },
+    { name: 'History', id: 'history', icon: Trophy },
+    { name: 'Teams', id: 'teams', icon: Users },
+    { name: 'Achievements', id: 'achievements', icon: Award },
   ];
-
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      const offset = 100; // Account for sticky navbar
-      const bodyRect = document.body.getBoundingClientRect().top;
-      const elementRect = element.getBoundingClientRect().top;
-      const elementPosition = elementRect - bodyRect;
-      const offsetPosition = elementPosition - offset;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
-    }
-  };
 
   return (
     <div className="glass-panel p-2 rounded-[2rem] border-slate-200 sticky top-24 z-30 shadow-sm overflow-x-auto">
       <div className="flex items-center justify-between gap-1 min-w-max">
         {sections.map((item) => (
           <button 
-            key={item.name} 
-            onClick={() => scrollToSection(item.target)}
-            className="flex items-center justify-center gap-3 py-4 px-6 rounded-2xl transition-all duration-300 group text-[#0B1F3A]/60 hover:bg-sky-50 hover:text-sky-600"
+            key={item.id} 
+            onClick={() => onTabChange(item.id)}
+            className={cn(
+              "flex items-center justify-center gap-3 py-4 px-6 rounded-2xl transition-all duration-300 group",
+              activeTab === item.id 
+                ? "bg-[#0B1F3A] text-white shadow-lg" 
+                : "text-[#0B1F3A]/60 hover:bg-sky-50 hover:text-sky-600"
+            )}
           >
-            <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
+            <item.icon className={cn(
+              "h-5 w-5 transition-transform group-hover:scale-110",
+              activeTab === item.id ? "text-sky-400" : ""
+            )} />
             <span className="text-xs font-black uppercase tracking-widest">{item.name}</span>
           </button>
         ))}
