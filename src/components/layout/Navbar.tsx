@@ -157,7 +157,7 @@ const Navbar = () => {
                 { label: "Pro Registry", icon: Users },
               ].map((item, i) => (
                 <div key={i} className="bg-white/5 p-6 rounded-[2rem] border border-white/5 hover:border-sky-500/30 transition-all cursor-pointer text-center group">
-                  <item.icon className="h-6 w-6 text-white/40 group-hover:text-sky-50" mx-auto mb-3" />
+                  <item.icon className="h-6 w-6 text-white/40 group-hover:text-sky-500 mx-auto mb-3" />
                   <p className="text-[10px] font-black text-white/60 uppercase tracking-widest">{item.label}</p>
                 </div>
               ))}
