@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Share2, Camera, Edit3, LogOut, Star, Globe, ShieldCheck } from 'lucide-react';
+import { Share2, Camera, Edit3, LogOut, Globe, ShieldCheck, Flag } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { showSuccess } from '@/utils/toast';
