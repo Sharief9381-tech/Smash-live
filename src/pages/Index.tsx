@@ -66,12 +66,12 @@ const Index = () => {
 
             <div className="flex flex-wrap gap-4 pt-6">
               <Link to="/tournaments">
-                <Button size="lg" className="bg-[#0B1F3A] text-white rounded-[2rem] px-10 font-black text-xl h-20 hover:bg-[#0B1F3A]/90 transition-all hover:translate-y-[-4px] shadow-2xl border-none group">
-                  EXPLORE CIRCUIT <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform" />
+                <Button size="lg" className="bg-[#0B1F3A] text-white rounded-[1.5rem] px-8 font-black text-lg h-16 hover:bg-[#0B1F3A]/90 transition-all hover:translate-y-[-4px] shadow-2xl border-none group">
+                  SMASH IT <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-2 transition-transform" />
                 </Button>
               </Link>
               <Link to="/login">
-                <Button size="lg" variant="outline" className="border-slate-200 text-[#0B1F3A] rounded-[2rem] px-10 font-black text-xl h-20 hover:bg-white hover:border-sky-500 transition-all">
+                <Button size="lg" variant="outline" className="border-slate-200 text-[#0B1F3A] rounded-[1.5rem] px-8 font-black text-lg h-16 hover:bg-white hover:border-sky-500 transition-all">
                   JOIN NOW
                 </Button>
               </Link>
