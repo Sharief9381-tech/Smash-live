@@ -6,7 +6,6 @@ import { Search, Bell, Menu, Zap, X, Trophy, Activity, Users } from 'lucide-reac
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from '@/components/ui/input';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -53,7 +52,7 @@ const Navbar = () => {
   };
 
   const navItems = [
-    { name: 'Home', path: '/' },
+    { name: isLoggedIn ? 'COURT' : 'Home', path: isLoggedIn ? '/court' : '/' },
     { name: 'Live', path: '/live-match/active' },
     { name: 'Tournaments', path: '/tournaments' },
     { name: 'Rankings', path: '/rankings' },
@@ -127,7 +126,7 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Global Search Modal */}
+      {/* Casual Global Search Modal */}
       {isSearchOpen && (
         <div className="fixed inset-0 z-[100] bg-[#0B1F3A]/95 backdrop-blur-xl flex items-center justify-center p-6">
           <button 
@@ -138,7 +137,7 @@ const Navbar = () => {
           </button>
           <div className="w-full max-w-2xl space-y-12">
             <div className="text-center space-y-4">
-              <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic">Smashed Search</h2>
+              <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic">QUICK FIND</h2>
               <p className="text-white/40 font-bold uppercase tracking-widest text-[10px]">Access global intelligence database</p>
             </div>
             <form onSubmit={handleGlobalSearch} className="relative">
@@ -153,12 +152,12 @@ const Navbar = () => {
             </form>
             <div className="grid grid-cols-3 gap-6">
               {[
-                { label: "Quick Matches", icon: Activity },
-                { label: "Tournaments", icon: Trophy },
-                { label: "Pro Players", icon: Users },
+                { label: "Live Courts", icon: Activity },
+                { label: "Event Studio", icon: Trophy },
+                { label: "Pro Registry", icon: Users },
               ].map((item, i) => (
                 <div key={i} className="bg-white/5 p-6 rounded-[2rem] border border-white/5 hover:border-sky-500/30 transition-all cursor-pointer text-center group">
-                  <item.icon className="h-6 w-6 text-white/40 group-hover:text-sky-500 mx-auto mb-3" />
+                  <item.icon className="h-6 w-6 text-white/40 group-hover:text-sky-50" mx-auto mb-3" />
                   <p className="text-[10px] font-black text-white/60 uppercase tracking-widest">{item.label}</p>
                 </div>
               ))}

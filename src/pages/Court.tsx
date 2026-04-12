@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
-const Smashed = () => {
+const Court = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const matches = [
@@ -59,7 +59,7 @@ const Smashed = () => {
               <Zap className="h-4 w-4 text-sky-500 fill-current" />
               <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.3em]">Operational Core</span>
             </div>
-            <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic">Smashed</h1>
+            <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic">COURT</h1>
           </div>
           
           <div className="relative w-full md:w-96">
@@ -197,4 +197,4 @@ const Smashed = () => {
   );
 };
 
-export default Smashed;
+export default Court;

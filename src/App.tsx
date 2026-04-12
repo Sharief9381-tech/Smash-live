@@ -17,7 +17,7 @@ import Rankings from "./pages/Rankings";
 import News from "./pages/News";
 import MatchArchive from "./pages/MatchArchive";
 import Login from "./pages/Login";
-import Smashed from "./pages/Smashed";
+import Court from "./pages/Court";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,7 +30,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const AuthCheck = ({ children }: { children: React.ReactNode }) => {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  if (isLoggedIn) return <Navigate to="/smashed" replace />;
+  if (isLoggedIn) return <Navigate to="/court" replace />;
   return <>{children}</>;
 };
 
@@ -43,8 +43,9 @@ const App = () => (
         <Routes>
           <Route path="/" element={<AuthCheck><Index /></AuthCheck>} />
           <Route path="/login" element={<AuthCheck><Login /></AuthCheck>} />
-          <Route path="/smashed" element={<ProtectedRoute><Smashed /></ProtectedRoute>} />
-          <Route path="/dashboard" element={<Navigate to="/smashed" replace />} />
+          <Route path="/court" element={<ProtectedRoute><Court /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<Navigate to="/court" replace />} />
+          <Route path="/smashed" element={<Navigate to="/court" replace />} />
           <Route path="/live-match/active" element={<LiveMatch />} />
           <Route path="/live-match/active-:id" element={<LiveMatch />} />
           <Route path="/live-match/create" element={<ProtectedRoute><CreateMatch /></ProtectedRoute>} />

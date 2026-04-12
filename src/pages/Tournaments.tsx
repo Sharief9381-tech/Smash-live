@@ -1,18 +1,20 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   Trophy, Calendar, MapPin, 
   Search, ListFilter, ArrowRight,
-  Globe, Zap, Filter, Play
+  Zap, Filter
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const Tournaments = () => {
+  const [query, setQuery] = useState("");
+  
   const tournaments = [
     {
       id: "bwf-finals-2024",
@@ -38,6 +40,13 @@ const Tournaments = () => {
     }
   ];
 
+  const filtered = useMemo(() => {
+    return tournaments.filter(t => 
+      t.name.toLowerCase().includes(query.toLowerCase()) || 
+      t.location.toLowerCase().includes(query.toLowerCase())
+    );
+  }, [query]);
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
@@ -50,12 +59,16 @@ const Tournaments = () => {
               <span className="text-[10px] font-black uppercase tracking-[0.3em]">Circuit Intelligence</span>
             </div>
             <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter">Tournaments Dashboard</h1>
-            <p className="text-slate-500 font-bold">Manage global brackets or initialize professional tournament environments.</p>
           </div>
           <div className="flex gap-3">
              <div className="flex items-center bg-white border border-slate-200 rounded-2xl px-4 h-12 shadow-sm focus-within:border-sky-500 transition-all">
                 <Search className="h-4 w-4 text-slate-400" />
-                <input placeholder="Search Event..." className="bg-transparent border-none outline-none text-sm font-bold px-3 w-40" />
+                <input 
+                  placeholder="Search Event..." 
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="bg-transparent border-none outline-none text-sm font-bold px-3 w-40" 
+                />
              </div>
              <Button variant="outline" size="icon" className="h-12 w-12 rounded-2xl border-slate-200 bg-white shadow-sm">
                 <Filter className="h-4 w-4 text-[#0B1F3A]" />
@@ -64,10 +77,9 @@ const Tournaments = () => {
         </div>
 
         <div className="grid lg:grid-cols-12 gap-8">
-          {/* Main Tournament Feed */}
           <div className="lg:col-span-8 space-y-8">
             <div className="grid md:grid-cols-2 gap-8">
-              {tournaments.map((t) => (
+              {filtered.length > 0 ? filtered.map((t) => (
                 <Link key={t.id} to={`/tournament/${t.id}`}>
                   <motion.div 
                     whileHover={{ y: -10 }}
@@ -75,7 +87,7 @@ const Tournaments = () => {
                   >
                     <div className="aspect-[16/10] overflow-hidden">
                       <img src={t.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80" alt="" />
-                      <Badge className="absolute top-6 left-6 bg-red-500 text-white animate-pulse font-black px-4 h-7 border-none">{t.status}</Badge>
+                      <Badge className={cn("absolute top-6 left-6 font-black px-4 h-7 border-none", t.status === 'Live' ? 'bg-red-500 text-white animate-pulse' : 'bg-sky-500 text-white')}>{t.status}</Badge>
                     </div>
                     <div className="p-8 space-y-6">
                        <div>
@@ -98,42 +110,11 @@ const Tournaments = () => {
                     </div>
                   </motion.div>
                 </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Tournament Studio Sidebar */}
-          <div className="lg:col-span-4 space-y-8">
-            <div className="bg-[#0B1F3A] p-12 rounded-[4rem] text-white space-y-8 relative overflow-hidden group shadow-2xl">
-              <div className="absolute -right-16 -top-16 opacity-10 group-hover:rotate-45 transition-transform duration-1000">
-                <Trophy className="h-64 w-64" />
-              </div>
-
-              <div className="space-y-6 relative z-10">
-                 <div className="h-16 w-16 bg-sky-500 rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(14,165,233,0.3)]">
-                    <Trophy className="h-8 w-8 text-white" />
-                 </div>
-                 <div className="space-y-2">
-                    <h3 className="text-3xl font-black tracking-tighter italic leading-none">Event <br /> Studio</h3>
-                    <p className="text-white/60 text-sm font-bold leading-relaxed">Initialize full-scale tournament brackets and broadcast live rounds.</p>
-                 </div>
-                 <Link to="/tournaments/create">
-                    <Button className="w-full h-16 bg-white text-[#0B1F3A] font-black rounded-2xl hover:bg-sky-500 hover:text-white transition-all shadow-xl border-none">
-                       START TOURNAMENT <Zap className="ml-2 h-5 w-5 fill-current" />
-                    </Button>
-                 </Link>
-              </div>
-
-              <div className="pt-8 border-t border-white/10 relative z-10 space-y-4">
-                 <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Ready Modules</span>
-                 </div>
-                 <div className="grid grid-cols-2 gap-3">
-                    {['Brackets', 'Seeding', 'Scoring', 'Live TV'].map((m) => (
-                      <div key={m} className="bg-white/5 p-3 rounded-xl border border-white/10 text-[10px] font-black text-center uppercase tracking-widest">{m}</div>
-                    ))}
-                 </div>
-              </div>
+              )) : (
+                <div className="col-span-2 py-12 text-center bg-slate-100/50 rounded-3xl border-2 border-dashed border-slate-200">
+                  <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No tournaments found in this court</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -12,43 +12,46 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from '@/lib/utils';
-import { showSuccess } from '@/utils/toast';
 import { playersDatabase, Player } from '@/data/players';
 
 const Rankings = () => {
   const [activeCategory, setActiveCategory] = useState("ms");
   const [searchQuery, setSearchQuery] = useState("");
   const [scope, setScope] = useState("world");
+  const [visibleCount, setVisibleCount] = useState(7);
   const [userProfile, setUserProfile] = useState<any>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('userProfile');
     if (saved) setUserProfile(JSON.parse(saved));
+    
+    // Check for search query in URL
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    if (q) setSearchQuery(q);
   }, []);
 
   const filteredRankings = useMemo(() => {
     let list = [...playersDatabase];
     
     if (userProfile) {
-      const userEntry: Player = {
-        id: 9999,
-        rank: 1,
-        name: userProfile.name,
-        country: userProfile.country,
-        state: userProfile.state,
-        points: 115000,
-        change: "up",
-        diff: 1,
-        matches: 842,
-        winRate: "88.4",
-        smashAcc: "94.2",
-        img: userProfile.name.split(' ').map((n: string) => n[0]).join(''),
-        isUser: true
-      };
-
       const userExists = list.some(p => p.name === userProfile.name);
       if (!userExists) {
-        list.push(userEntry);
+        list.push({
+          id: 9999,
+          rank: 1,
+          name: userProfile.name,
+          country: userProfile.country,
+          state: userProfile.state,
+          points: 115000,
+          change: "up",
+          diff: 1,
+          matches: 842,
+          winRate: "88.4",
+          smashAcc: "94.2",
+          img: userProfile.name.split(' ').map((n: string) => n[0]).join(''),
+          isUser: true
+        });
       }
     }
 
@@ -56,18 +59,23 @@ const Rankings = () => {
       list = list.filter(p => p.country === userProfile.country);
     } else if (scope === 'state' && userProfile) {
       list = list.filter(p => p.state === userProfile.state);
-    } else if (scope === 'regional' && userProfile) {
-      list = list.filter(p => p.state === userProfile.state);
     }
 
     list.sort((a, b) => b.points - a.points);
 
     return list.filter(p => 
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.state.toLowerCase().includes(searchQuery.toLowerCase())
+      p.country.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [searchQuery, scope, userProfile]);
+
+  const displayedRankings = useMemo(() => {
+    return filteredRankings.slice(0, visibleCount);
+  }, [filteredRankings, visibleCount]);
+
+  const handleSmashIt = () => {
+    setVisibleCount(filteredRankings.length);
+  };
 
   const scopes = [
     { id: 'world', label: 'World', icon: Globe },
@@ -93,7 +101,7 @@ const Rankings = () => {
                 onClick={() => setScope(s.id)}
                 className={cn(
                   "flex items-center gap-2 px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all",
-                  scope === s.id ? "bg-[#0B1F3A] text-white shadow-lg" : "text-slate-400 hover:text-[#0B1F3A]"
+                  scope === s.id ? "bg-[#0B1F3A] text-white shadow-lg" : "text-slate-400"
                 )}
               >
                 <s.icon className="h-3.5 w-3.5" /> {s.label}
@@ -122,7 +130,7 @@ const Rankings = () => {
               </div>
             </div>
 
-            <TabsContent value="ms" className="mt-8">
+            <TabsContent value="ms" className="mt-8 space-y-12">
               <div className="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm">
                 <Table>
                   <TableHeader className="bg-slate-50">
@@ -137,7 +145,7 @@ const Rankings = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredRankings.length > 0 ? filteredRankings.map((row, idx) => (
+                    {displayedRankings.length > 0 ? displayedRankings.map((row, idx) => (
                       <TableRow key={row.id} className={cn("border-slate-100 h-24", row.isUser && "bg-sky-50/30")}>
                         <TableCell className="text-center">
                           <div className={cn(
@@ -193,6 +201,18 @@ const Rankings = () => {
                   </TableBody>
                 </Table>
               </div>
+
+              {visibleCount < filteredRankings.length && (
+                <div className="flex flex-col items-center gap-4">
+                   <Button 
+                    onClick={handleSmashIt}
+                    className="rounded-full px-12 h-16 bg-[#0B1F3A] text-white font-black text-lg hover:bg-sky-500 transition-all shadow-2xl"
+                   >
+                     SMASH IT
+                   </Button>
+                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Explore all {filteredRankings.length} intelligence entries</p>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>
