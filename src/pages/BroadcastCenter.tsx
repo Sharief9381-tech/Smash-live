@@ -67,11 +67,6 @@ const BroadcastCenter = () => {
       <main className="container px-6 py-12 space-y-12">
         {/* Hero Section */}
         <section className="relative glass-panel p-12 rounded-[4rem] border-slate-200 overflow-hidden bg-[#0B1F3A] text-white">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0 bg-grid-white/[0.1] bg-[size:40px_40px]" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] border-2 border-white rounded-[200px] rotate-12" />
-          </div>
-          
           <div className="relative z-10 max-w-2xl space-y-6">
             <Badge className="bg-sky-500 text-white border-none font-black px-4 py-1">COMMAND CONSOLE</Badge>
             <h2 className="text-5xl md:text-6xl font-black tracking-tighter italic leading-[0.9]">
@@ -91,7 +86,8 @@ const BroadcastCenter = () => {
             title="Start Live Match"
             description="Initialize a quick individual singles or doubles match for immediate broadcasting."
             icon={Target}
-            buttonText="Start Individual Match"            onClick={() => navigate('/live-match/create')}
+            buttonText="Start Individual Match"
+            onClick={() => navigate('/live-match/create')}
             variant="primary"
           />
           <BroadcastActionCard 
@@ -193,105 +189,7 @@ const BroadcastCenter = () => {
           </div>
         </section>
 
-        {/* Live Preview Section */}
-        <section className="space-y-8">
-          <div className="flex items-center justify-between">
-            <h2 className="text-3xl font-black text-[#0B1F3A] tracking-tighter uppercase italic">Active Live Matches</h2>
-            <Button variant="link" className="text-sky-500 font-bold">View Global Grid</Button>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              { p1: "V. Axelsen", p2: "L. Zii Jia", score: "21-19, 14-11", viewers: "12k", status: "In Progress", id: "001" },
-              { p1: "An Se-young", p2: "Tai Tzu-ying", score: "21-12, 18-15", viewers: "8k", status: "In Progress", id: "002" },
-              { p1: "Chen/Jia", p2: "Baek/Lee", score: "14-11", viewers: "5k", status: "In Progress", id: "003" },
-            ].map((match) => (
-              <div key={match.id} className="glass-panel p-8 rounded-[3rem] border-slate-200 space-y-6 group hover:border-sky-500/30 transition-all">
-                <div className="flex justify-between items-start">
-                   <Badge className="bg-red-500 text-white animate-pulse border-none h-6 px-3 text-[8px] font-black">LIVE</Badge>
-                   <div className="flex items-center gap-1.5 text-slate-400">
-                      <Users className="h-3 w-3" />
-                      <span className="text-[10px] font-bold">{match.viewers}</span>
-                   </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-black text-xl text-[#0B1F3A]">{match.p1}</h4>
-                    <span className="text-sky-500 font-black text-lg">21</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-black text-xl text-[#0B1F3A]">{match.p2}</h4>
-                    <span className="text-slate-300 font-black text-lg">19</span>
-                  </div>
-                </div>
-                <div className="flex gap-2 pt-4 border-t border-slate-100">
-                  <Button className="flex-1 bg-[#0B1F3A] text-white rounded-xl font-bold text-[10px] h-11">BROADCAST</Button>
-                  <Button variant="outline" className="h-11 w-11 rounded-xl border-slate-200">
-                    <Edit3 className="h-4 w-4 text-slate-400" />
-                  </Button>
-                  <Button variant="outline" className="h-11 w-11 rounded-xl border-red-100 hover:bg-red-50 text-red-500">
-                    <Square className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Tournament Overview */}
-        <section className="space-y-8">
-           <h2 className="text-3xl font-black text-[#0B1F3A] tracking-tighter uppercase italic">Tournament Overview</h2>
-           <div className="glass-panel p-10 rounded-[3rem] border-slate-200">
-              <div className="grid lg:grid-cols-4 gap-12">
-                <div className="space-y-6">
-                  <div className="h-20 w-20 rounded-3xl bg-sky-500 text-white flex items-center justify-center shadow-xl shadow-sky-500/20">
-                    <Trophy className="h-10 w-10" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black text-[#0B1F3A]">BWF Finals 2024</h3>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Major Circuit • Jakarta</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline" className="border-slate-200 text-[8px] font-black uppercase">32 Players</Badge>
-                    <Badge variant="outline" className="border-slate-200 text-[8px] font-black uppercase">15 Matches Left</Badge>
-                  </div>
-                </div>
-
-                <div className="lg:col-span-2 space-y-6">
-                   <div className="flex items-center justify-between">
-                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Bracket Intelligence Preview</h4>
-                      <Badge className="bg-sky-500/10 text-sky-600 border-none font-black text-[8px]">SEMI FINALS READY</Badge>
-                   </div>
-                   <div className="flex gap-4 overflow-x-auto pb-4">
-                      {[1, 2, 3].map(i => (
-                        <div key={i} className="min-w-[180px] p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-3">
-                           <div className="flex justify-between text-[10px] font-bold">
-                              <span>Player {i}A</span>
-                              <span className="text-sky-500">21</span>
-                           </div>
-                           <div className="flex justify-between text-[10px] font-bold">
-                              <span>Player {i}B</span>
-                              <span className="text-slate-300">14</span>
-                           </div>
-                        </div>
-                      ))}
-                   </div>
-                </div>
-
-                <div className="flex flex-col justify-end space-y-4">
-                   <div className="p-4 bg-sky-50 rounded-2xl border border-sky-100 flex items-center justify-between">
-                      <span className="text-[10px] font-black text-sky-600 uppercase">Next Match</span>
-                      <span className="text-sm font-black text-[#0B1F3A]">14:30 PM</span>
-                   </div>
-                   <Button className="w-full h-14 bg-[#0B1F3A] text-white rounded-2xl font-black text-xs uppercase tracking-widest">
-                      Start Next Match
-                   </Button>
-                </div>
-              </div>
-           </div>
-        </section>
-
-        {/* Recent Broadcasts */}
+        {/* Recent Intelligence logs */}
         <section className="space-y-8">
            <h2 className="text-3xl font-black text-[#0B1F3A] tracking-tighter uppercase italic">Recent Intelligence logs</h2>
            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">

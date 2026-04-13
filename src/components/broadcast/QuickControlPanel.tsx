@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Play, Pause, Square, Zap, Bell, RefreshCw } from 'lucide-react';
+import { Play, Pause, Square, Zap, Bell, RefreshCw, Trophy, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { showSuccess } from '@/utils/toast';
 
@@ -13,6 +13,24 @@ const QuickControlPanel = () => {
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
           <span className="text-[10px] font-black text-slate-400 uppercase">Live Buffer Active</span>
+        </div>
+      </div>
+
+      {/* Initialization Stats */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2">
+          <Target className="h-5 w-5 text-sky-500" />
+          <div className="space-y-0.5">
+            <p className="text-2xl font-black text-[#0B1F3A]">124</p>
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Matches Initialized</p>
+          </div>
+        </div>
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2">
+          <Trophy className="h-5 w-5 text-amber-500" />
+          <div className="space-y-0.5">
+            <p className="text-2xl font-black text-[#0B1F3A]">12</p>
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Tourneys Initialized</p>
+          </div>
         </div>
       </div>
 

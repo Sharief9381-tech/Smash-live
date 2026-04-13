@@ -50,6 +50,7 @@ const Navbar = () => {
     { name: isLoggedIn ? 'COURT' : 'Home', path: isLoggedIn ? '/court' : '/' },
     { name: 'Live', path: '/live-match/active' },
     { name: 'Tournaments', path: '/tournaments' },
+    { name: 'Studio', path: '/broadcast/center' },
     { name: 'Rankings', path: '/rankings' },
     { name: 'News', path: '/news' },
   ];
