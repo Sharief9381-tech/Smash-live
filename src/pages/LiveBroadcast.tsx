@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import PremiumScoreboard from '@/components/broadcast/PremiumScoreboard';
 import CommentaryFeed from '@/components/broadcast/CommentaryFeed';
@@ -11,13 +11,26 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Trophy, Clock, Activity, 
   Zap, Bell, Check, Target, Droplets,
-  TrendingUp, Timer, Flame, MapPin
+  TrendingUp, Timer, Flame, MapPin, X
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { showSuccess } from '@/utils/toast';
 
 const LiveBroadcast = () => {
   const [isFollowing, setIsFollowing] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
+
+  const handleFollow = () => {
+    const newState = !isFollowing;
+    setIsFollowing(newState);
+    if (newState) {
+      setShowNotification(true);
+      showSuccess("Intelligence alerts active for this match.");
+    } else {
+      setShowNotification(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 text-[#0B1F3A]">
@@ -43,7 +56,7 @@ const LiveBroadcast = () => {
           
           <div className="flex items-center gap-4">
              <Button 
-                onClick={() => setIsFollowing(!isFollowing)}
+                onClick={handleFollow}
                 variant={isFollowing ? "default" : "outline"} 
                 className={cn(
                   "h-11 rounded-xl text-xs font-black uppercase tracking-widest gap-2 transition-all",
@@ -60,7 +73,34 @@ const LiveBroadcast = () => {
         </div>
       </div>
 
-      <main className="container px-6 py-10 space-y-10">
+      <main className="container px-6 py-6 space-y-6">
+        {/* Intelligence Notification Bar */}
+        <AnimatePresence>
+          {showNotification && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0, y: -20 }}
+              animate={{ height: 'auto', opacity: 1, y: 0 }}
+              exit={{ height: 0, opacity: 0, y: -20 }}
+              className="overflow-hidden"
+            >
+              <div className="bg-[#0B1F3A] text-white p-4 rounded-2xl flex items-center justify-between shadow-xl border border-sky-500/30">
+                <div className="flex items-center gap-4">
+                  <div className="h-8 w-8 rounded-lg bg-sky-500 flex items-center justify-center">
+                    <Zap className="h-4 w-4 fill-current text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-widest">Global Sync Active</p>
+                    <p className="text-[10px] text-white/60 font-bold uppercase">You will receive real-time intelligence alerts for every smash and score update.</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowNotification(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Top Row: Massive Scoreboard and Commentary */}
         <div className="grid lg:grid-cols-12 gap-8 items-stretch">
           <div className="lg:col-span-8">
@@ -80,126 +120,96 @@ const LiveBroadcast = () => {
           </div>
         </div>
 
-        {/* Mid Row: Half-width Timeline and Match Summary */}
+        {/* Mid Row: Timeline and Strategic Comparison (Upgraded Position) */}
         <div className="grid lg:grid-cols-2 gap-8">
-          <div className="glass-panel rounded-[3rem] p-8 border-slate-200 overflow-hidden">
+          <div className="glass-panel rounded-[3rem] p-8 border-slate-200 overflow-hidden flex flex-col justify-center">
             <MatchTimeline />
           </div>
-          <div className="flex items-center justify-between glass-panel rounded-[3rem] p-8 bg-[#0B1F3A] text-white relative overflow-hidden group">
-            <div className="space-y-2 relative z-10">
-              <Badge className="bg-sky-500 border-none font-black text-[10px]">MATCH MOMENTUM</Badge>
-              <h3 className="text-3xl font-black italic tracking-tighter">Axelsen Leading</h3>
-              <p className="text-xs text-white/60 font-medium">Predicted Win Probability: 84.2%</p>
+          
+          <div className="glass-panel rounded-[3rem] p-8 border-slate-200 grid grid-cols-2 gap-8 bg-white relative overflow-hidden group">
+            {/* Axelsen Stats */}
+            <div className="space-y-6 relative z-10">
+              <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+                <div className="h-8 w-8 rounded-full bg-sky-500 flex items-center justify-center text-[10px] font-black text-white">VA</div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#0B1F3A]">Axelsen</span>
+              </div>
+              <div className="space-y-4">
+                {[
+                  { label: "Shots Acc.", val: 94, color: "bg-sky-500" },
+                  { label: "Net Drops", val: 88, color: "bg-sky-600" },
+                  { label: "Rally Dom.", val: 76, color: "bg-sky-400" },
+                  { label: "Coverage", val: 91, color: "bg-sky-700" },
+                ].map((s, i) => (
+                  <div key={i} className="space-y-1.5">
+                    <div className="flex justify-between text-[8px] font-black text-slate-400 uppercase tracking-widest">
+                      <span>{s.label}</span>
+                      <span className="text-[#0B1F3A]">{s.val}%</span>
+                    </div>
+                    <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${s.val}%` }} className={cn("h-full", s.color)} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-between pt-2 border-t border-slate-50">
+                <div className="text-center">
+                  <p className="text-[8px] font-black text-slate-400 uppercase">Reaction</p>
+                  <p className="text-sm font-black text-[#0B1F3A]">184ms</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-[8px] font-black text-slate-400 uppercase">Stamina</p>
+                  <p className="text-sm font-black text-sky-600">82%</p>
+                </div>
+              </div>
             </div>
-            <div className="absolute -right-10 -bottom-10 opacity-10 group-hover:scale-125 transition-transform duration-1000">
-               <TrendingUp className="h-40 w-40" />
+
+            {/* Lee Zii Jia Stats */}
+            <div className="space-y-6 relative z-10">
+              <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+                <div className="h-8 w-8 rounded-full bg-[#0B1F3A] flex items-center justify-center text-[10px] font-black text-white">LZ</div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#0B1F3A]">Zii Jia</span>
+              </div>
+              <div className="space-y-4">
+                {[
+                  { label: "Shots Acc.", val: 82, color: "bg-[#0B1F3A]" },
+                  { label: "Net Drops", val: 76, color: "bg-[#1a3a5f]" },
+                  { label: "Rally Dom.", val: 64, color: "bg-[#254b7a]" },
+                  { label: "Coverage", val: 85, color: "bg-[#2f5c94]" },
+                ].map((s, i) => (
+                  <div key={i} className="space-y-1.5">
+                    <div className="flex justify-between text-[8px] font-black text-slate-400 uppercase tracking-widest">
+                      <span>{s.label}</span>
+                      <span className="text-[#0B1F3A]">{s.val}%</span>
+                    </div>
+                    <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${s.val}%` }} className={cn("h-full", s.color)} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-between pt-2 border-t border-slate-50">
+                <div className="text-center">
+                  <p className="text-[8px] font-black text-slate-400 uppercase">Reaction</p>
+                  <p className="text-sm font-black text-[#0B1F3A]">212ms</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-[8px] font-black text-slate-400 uppercase">Stamina</p>
+                  <p className="text-sm font-black text-red-500">74%</p>
+                </div>
+              </div>
             </div>
-            <Button className="bg-white text-[#0B1F3A] rounded-2xl h-14 font-black px-8 hover:bg-sky-500 hover:text-white transition-all z-10">
-              PRO ANALYTICS
-            </Button>
           </div>
         </div>
 
-        {/* Bottom Section: Technical Stats & Comparison Intel */}
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Technical Intelligence */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between px-2">
-              <h2 className="text-xl font-black tracking-tight uppercase italic flex items-center gap-3">
-                <Activity className="h-5 w-5 text-sky-500" /> Technical Intelligence
-              </h2>
-              <Badge variant="outline" className="text-[9px] font-black border-slate-200 uppercase">Match Core</Badge>
-            </div>
-            <MatchStatGrid />
+        {/* Bottom Section: Technical Stats */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-xl font-black tracking-tight uppercase italic flex items-center gap-3">
+              <Activity className="h-5 w-5 text-sky-500" /> Technical Intelligence
+            </h2>
+            <Badge variant="outline" className="text-[9px] font-black border-slate-200 uppercase">Match Core Feed</Badge>
           </div>
-
-          {/* Strategic Comparison (Side by side) */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between px-2">
-              <h2 className="text-xl font-black tracking-tight uppercase italic flex items-center gap-3">
-                <Zap className="h-5 w-5 text-sky-500" /> Strategic Comparison
-              </h2>
-              <Badge className="bg-sky-500/10 text-sky-600 border-none text-[8px] font-black uppercase">AI Analytics</Badge>
-            </div>
-
-            <div className="glass-panel rounded-[3rem] p-10 border-slate-200 grid grid-cols-2 gap-12 bg-white">
-              {/* Axelsen Stats */}
-              <div className="space-y-8">
-                <div className="flex items-center gap-3 border-b border-slate-100 pb-5">
-                  <div className="h-10 w-10 rounded-full bg-sky-500 flex items-center justify-center text-xs font-black text-white">VA</div>
-                  <span className="text-sm font-black uppercase tracking-widest text-[#0B1F3A]">Axelsen</span>
-                </div>
-                
-                <div className="space-y-6">
-                  {[
-                    { label: "Shots Acc.", val: 94, color: "bg-sky-500" },
-                    { label: "Net Drops", val: 88, color: "bg-sky-600" },
-                    { label: "Dominance", val: 76, color: "bg-sky-400" },
-                    { label: "Coverage", val: 91, color: "bg-sky-700" },
-                  ].map((s, i) => (
-                    <div key={i} className="space-y-2">
-                      <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        <span>{s.label}</span>
-                        <span className="text-[#0B1F3A]">{s.val}%</span>
-                      </div>
-                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <motion.div initial={{ width: 0 }} animate={{ width: `${s.val}%` }} className={cn("h-full", s.color)} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 pt-6 border-t border-slate-100">
-                  <div className="text-center">
-                    <p className="text-[10px] font-black text-slate-400 uppercase">Reaction</p>
-                    <p className="text-xl font-black text-[#0B1F3A]">184ms</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-[10px] font-black text-slate-400 uppercase">Stamina</p>
-                    <p className="text-xl font-black text-sky-600">82%</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Lee Zii Jia Stats */}
-              <div className="space-y-8">
-                <div className="flex items-center gap-3 border-b border-slate-100 pb-5">
-                  <div className="h-10 w-10 rounded-full bg-[#0B1F3A] flex items-center justify-center text-xs font-black text-white">LZ</div>
-                  <span className="text-sm font-black uppercase tracking-widest text-[#0B1F3A]">Zii Jia</span>
-                </div>
-
-                <div className="space-y-6">
-                  {[
-                    { label: "Shots Acc.", val: 82, color: "bg-[#0B1F3A]" },
-                    { label: "Net Drops", val: 76, color: "bg-[#1a3a5f]" },
-                    { label: "Dominance", val: 64, color: "bg-[#254b7a]" },
-                    { label: "Coverage", val: 85, color: "bg-[#2f5c94]" },
-                  ].map((s, i) => (
-                    <div key={i} className="space-y-2">
-                      <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        <span>{s.label}</span>
-                        <span className="text-[#0B1F3A]">{s.val}%</span>
-                      </div>
-                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <motion.div initial={{ width: 0 }} animate={{ width: `${s.val}%` }} className={cn("h-full", s.color)} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 pt-6 border-t border-slate-100">
-                  <div className="text-center">
-                    <p className="text-[10px] font-black text-slate-400 uppercase">Reaction</p>
-                    <p className="text-xl font-black text-[#0B1F3A]">212ms</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-[10px] font-black text-slate-400 uppercase">Stamina</p>
-                    <p className="text-xl font-black text-red-500">74%</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <MatchStatGrid />
         </div>
       </main>
     </div>
