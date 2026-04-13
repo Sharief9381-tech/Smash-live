@@ -6,7 +6,6 @@ import PremiumScoreboard from '@/components/broadcast/PremiumScoreboard';
 import CommentaryFeed from '@/components/broadcast/CommentaryFeed';
 import MatchStatGrid from '@/components/broadcast/MatchStatGrid';
 import MatchTimeline from '@/components/broadcast/MatchTimeline';
-import IntelligenceStats from '@/components/broadcast/IntelligenceStats';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -14,8 +13,19 @@ import {
   Share2, Bell, TrendingUp, Activity, 
   Zap, ChevronRight, Check
 } from 'lucide-react';
+import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+
+const momentumData = [
+  { time: '0m', p1: 50, p2: 50 },
+  { time: '5m', p1: 60, p2: 40 },
+  { time: '10m', p1: 45, p2: 55 },
+  { time: '15m', p1: 70, p2: 30 },
+  { time: '20m', p1: 55, p2: 45 },
+  { time: '25m', p1: 85, p2: 15 },
+  { time: '30m', p1: 78, p2: 22 },
+];
 
 const LiveBroadcast = () => {
   const [isFollowing, setIsFollowing] = useState(false);
@@ -63,26 +73,17 @@ const LiveBroadcast = () => {
 
       <main className="container px-6 py-12 space-y-12">
         
-        {/* Top Intelligence Row: Score & Commentary in one frame */}
-        <div className="grid lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-5">
-            <PremiumScoreboard 
-              p1={{ name: "Viktor Axelsen", country: "Denmark", flag: "🇩🇰", sets: [21, 14] }}
-              p2={{ name: "Lee Zii Jia", country: "Malaysia", flag: "🇲🇾", sets: [19, 11] }}
-              currentScore={[18, 14]}
-              serving={1}
-            />
-          </div>
-          <div className="lg:col-span-7">
-            <CommentaryFeed events={[
-              { id: '1', text: "Powerful cross-court smash from Axelsen leaves Lee with no response.", type: 'highlight', time: '14:42' },
-              { id: '2', text: "Fantastic defensive rally of 24 shots. Axelsen holds his ground.", type: 'analysis', time: '14:40' },
-              { id: '3', text: "Point to Axelsen. He leads 18-14 in the second set.", type: 'score', time: '14:38' },
-            ]} />
-          </div>
-        </div>
+        {/* Live Match Hero Section */}
+        <section className="relative">
+          <PremiumScoreboard 
+            p1={{ name: "Viktor Axelsen", country: "Denmark", flag: "🇩🇰", sets: [21, 14] }}
+            p2={{ name: "Lee Zii Jia", country: "Malaysia", flag: "🇲🇾", sets: [19, 11] }}
+            currentScore={[18, 14]}
+            serving={1}
+          />
+        </section>
 
-        {/* Technical Modules Section */}
+        {/* Intelligence Modules Section */}
         <section className="grid xl:grid-cols-12 gap-10">
           <div className="xl:col-span-8 space-y-10">
             {/* Match Timeline Module */}
@@ -96,20 +97,31 @@ const LiveBroadcast = () => {
                 <h2 className="text-2xl font-black tracking-tight uppercase italic flex items-center gap-3">
                   <Activity className="h-6 w-6 text-sky-500" /> Technical Intelligence
                 </h2>
+                <Button variant="link" className="text-sky-600 font-black uppercase tracking-widest text-[10px]">Compare History</Button>
               </div>
               <MatchStatGrid />
             </div>
           </div>
 
-          {/* Side Panel: Win Prob & Detailed Intelligence */}
+          {/* Side Panel: Commentary & Intelligence */}
           <div className="xl:col-span-4 space-y-10">
-            <div className="glass-panel rounded-[3rem] p-8 border-slate-200 space-y-10">
-              {/* Win Probability */}
+            {/* Commentary Feed (Moved Up) */}
+            <CommentaryFeed events={[
+              { id: '1', text: "Powerful cross-court smash from Axelsen leaves Lee with no response.", type: 'highlight', time: '14:42' },
+              { id: '2', text: "Fantastic defensive rally of 24 shots. Axelsen holds his ground.", type: 'analysis', time: '14:40' },
+              { id: '3', text: "Point to Axelsen. He leads 18-14 in the second set.", type: 'score', time: '14:38' },
+              { id: '4', text: "Unforced error from Lee Zii Jia at the net.", type: 'score', time: '14:35' },
+              { id: '5', text: "Axelsen takes total control of the front court.", type: 'analysis', time: '14:32' },
+            ]} />
+
+            {/* Momentum & Win Prob (Moved Down) */}
+            <div className="glass-panel rounded-[3rem] p-8 border-slate-200 space-y-8">
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-black uppercase tracking-[0.2em] flex items-center gap-2">
                     <TrendingUp className="h-4 w-4 text-sky-500" /> Win Probability
                   </h3>
+                  <Badge className="bg-sky-500/10 text-sky-600 border-none text-[8px] font-black">AI ANALYTICS</Badge>
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
@@ -122,13 +134,24 @@ const LiveBroadcast = () => {
                 </div>
               </div>
 
-              <div className="h-px bg-slate-100" />
-
-              {/* Shot Intelligence (New) */}
-              <IntelligenceStats 
-                p1={{ name: "Axelsen", accuracy: 94, netDrops: 12, color: "sky-500" }}
-                p2={{ name: "Lee Z.J.", accuracy: 82, netDrops: 8, color: "slate-400" }}
-              />
+              <div className="space-y-4">
+                <h3 className="text-sm font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-sky-500" /> Match Momentum
+                </h3>
+                <div className="h-[140px] w-full pt-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={momentumData}>
+                      <defs>
+                        <linearGradient id="colorMomentum" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.2}/>
+                          <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <Area type="monotone" dataKey="p1" stroke="#0ea5e9" strokeWidth={3} fillOpacity={1} fill="url(#colorMomentum)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
             </div>
           </div>
         </section>
