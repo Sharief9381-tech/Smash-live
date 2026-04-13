@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Activity, Zap, Target, Timer, Flame, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Activity, Zap, Target, Timer, Flame, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -16,22 +16,22 @@ const MatchStatGrid = () => {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {stats.map((stat, i) => (
         <motion.div 
           key={i}
-          whileHover={{ y: -8 }}
-          className="bg-white border border-slate-100 p-8 rounded-[3rem] space-y-6 hover:border-sky-500/30 transition-all shadow-sm group"
+          whileHover={{ y: -4 }}
+          className="bg-white border border-slate-100 p-5 rounded-[2rem] space-y-4 hover:border-sky-500/30 transition-all shadow-sm group"
         >
           <div className="flex items-center justify-between">
-            <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform", stat.bg, stat.color)}>
-              <stat.icon className="h-7 w-7" />
+            <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform", stat.bg, stat.color)}>
+              <stat.icon className="h-5 w-5" />
             </div>
-            <TrendingUp className="h-4 w-4 text-slate-200 group-hover:text-sky-500 transition-colors" />
+            <span className="text-[10px] font-black text-slate-300 group-hover:text-sky-500">LIVE</span>
           </div>
           <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
-            <h4 className="text-4xl font-black text-[#0B1F3A] tracking-tighter mt-1">{stat.val}</h4>
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
+            <h4 className="text-2xl font-black text-[#0B1F3A] tracking-tighter mt-0.5">{stat.val}</h4>
           </div>
         </motion.div>
       ))}
