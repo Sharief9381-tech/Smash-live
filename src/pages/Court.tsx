@@ -163,7 +163,7 @@ const Court = () => {
               <div className="space-y-4 relative z-10">
                 <Badge className="bg-sky-500 text-white border-none font-black px-4 py-1 text-[10px]">STUDIO READY</Badge>
                 <h3 className="text-2xl font-black tracking-tight italic">Broadcast Studio</h3>
-                <Link to="/broadcast/create" className="block pt-4">
+                <Link to="/broadcast/center" className="block pt-4">
                   <Button className="w-full h-14 bg-white text-[#0B1F3A] font-black rounded-2xl hover:bg-sky-500 hover:text-white transition-all shadow-xl border-none">
                     LAUNCH STUDIO <ArrowUpRight className="ml-2 h-4 w-4" />
                   </Button>

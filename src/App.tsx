@@ -18,6 +18,7 @@ import News from "./pages/News";
 import MatchArchive from "./pages/MatchArchive";
 import Login from "./pages/Login";
 import Court from "./pages/Court";
+import BroadcastCenter from "./pages/BroadcastCenter";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,6 +59,7 @@ const App = () => (
           <Route path="/news" element={<News />} />
           <Route path="/archive" element={<MatchArchive />} />
           <Route path="/broadcast/create" element={<ProtectedRoute><CreateBroadcast /></ProtectedRoute>} />
+          <Route path="/broadcast/center" element={<ProtectedRoute><BroadcastCenter /></ProtectedRoute>} />
           <Route path="/broadcast/:id" element={<LiveBroadcast />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
