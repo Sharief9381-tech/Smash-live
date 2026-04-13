@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Navbar from '@/components/layout/Navbar';
 import PremiumScoreboard from '@/components/broadcast/PremiumScoreboard';
 import LiveVideoPlayer from '@/components/broadcast/LiveVideoPlayer';
@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 const momentumData = [
   { time: '0m', p1: 50, p2: 50 },

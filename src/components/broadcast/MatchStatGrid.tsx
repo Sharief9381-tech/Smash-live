@@ -3,6 +3,7 @@
 import React from 'react';
 import { Activity, Zap, Target, Timer, Flame, TrendingUp, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 const MatchStatGrid = () => {
   const stats = [
