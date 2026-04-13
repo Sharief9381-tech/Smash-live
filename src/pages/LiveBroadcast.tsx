@@ -11,37 +11,13 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Trophy, Clock, Activity, 
   Zap, Bell, Check, Target, Droplets,
-  TrendingUp, Timer, Flame, MapPin
+  TrendingUp, Timer, Flame, MapPin, Users
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 const LiveBroadcast = () => {
   const [isFollowing, setIsFollowing] = useState(false);
-
-  const ComparisonBar = ({ label, v1, v2, icon: Icon }: { label: string, v1: number, v2: number, icon: any }) => (
-    <div className="space-y-3">
-      <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-        <span className="flex items-center gap-2"><Icon className="h-3 w-3 text-sky-500" /> {label}</span>
-        <div className="flex gap-4">
-          <span className="text-sky-600">VA: {v1}%</span>
-          <span className="text-slate-400">LZ: {v2}%</span>
-        </div>
-      </div>
-      <div className="h-2 bg-slate-100 rounded-full overflow-hidden flex">
-        <motion.div 
-          initial={{ width: 0 }} 
-          animate={{ width: `${(v1 / (v1 + v2)) * 100}%` }} 
-          className="h-full bg-sky-500" 
-        />
-        <motion.div 
-          initial={{ width: 0 }} 
-          animate={{ width: `${(v2 / (v1 + v2)) * 100}%` }} 
-          className="h-full bg-slate-300" 
-        />
-      </div>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-slate-50 text-[#0B1F3A]">
@@ -84,99 +60,126 @@ const LiveBroadcast = () => {
         </div>
       </div>
 
-      <main className="container px-6 py-10">
-        <div className="grid lg:grid-cols-12 gap-8 items-start">
-          {/* Main Content Column */}
-          <div className="lg:col-span-8 space-y-8">
-            <section className="relative">
-              <PremiumScoreboard 
-                p1={{ name: "Viktor Axelsen", country: "Denmark", flag: "🇩🇰", sets: [21, 14] }}
-                p2={{ name: "Lee Zii Jia", country: "Malaysia", flag: "🇲🇾", sets: [19, 11] }}
-                currentScore={[18, 14]}
-                serving={1}
-              />
-            </section>
-
-            {/* Match Timeline Module */}
-            <div className="glass-panel rounded-[2.5rem] p-8 border-slate-200 overflow-hidden">
-              <MatchTimeline />
-            </div>
-
-            {/* Statistics Grid */}
-            <div className="space-y-6">
-              <div className="flex items-center justify-between px-2">
-                <h2 className="text-xl font-black tracking-tight uppercase italic flex items-center gap-3">
-                  <Activity className="h-5 w-5 text-sky-500" /> Technical Intelligence
-                </h2>
-                <Button variant="link" className="text-sky-600 font-black uppercase tracking-widest text-[9px]">Full History</Button>
-              </div>
-              <MatchStatGrid />
-            </div>
+      <main className="container px-6 py-12 space-y-8">
+        {/* Top Row: Scoreboard and Commentary */}
+        <div className="grid lg:grid-cols-12 gap-8 h-full">
+          <div className="lg:col-span-8">
+            <PremiumScoreboard 
+              p1={{ name: "Viktor Axelsen", country: "Denmark", flag: "🇩🇰", sets: [21, 14] }}
+              p2={{ name: "Lee Zii Jia", country: "Malaysia", flag: "🇲🇾", sets: [19, 11] }}
+              currentScore={[18, 14]}
+              serving={1}
+            />
           </div>
-
-          {/* Sidebar Column */}
-          <div className="lg:col-span-4 space-y-8">
-            {/* Commentary Feed */}
+          <div className="lg:col-span-4">
             <CommentaryFeed events={[
               { id: '1', text: "Powerful cross-court smash from Axelsen leaves Lee with no response.", type: 'highlight', time: '14:42' },
               { id: '2', text: "Fantastic defensive rally of 24 shots. Axelsen holds his ground.", type: 'analysis', time: '14:40' },
               { id: '3', text: "Point to Axelsen. He leads 18-14 in the second set.", type: 'score', time: '14:38' },
-              { id: '4', text: "Unforced error from Lee Zii Jia at the net.", type: 'score', time: '14:35' },
-              { id: '5', text: "Axelsen takes total control of the front court.", type: 'analysis', time: '14:32' },
             ]} />
+          </div>
+        </div>
 
-            {/* Strategic Metrics (Dual Comparison) */}
-            <div className="glass-panel rounded-[2.5rem] p-7 border-slate-200 space-y-7">
-              <div className="flex items-center justify-between">
-                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-2">
-                  <Zap className="h-3.5 w-3.5 text-sky-500" /> Comparison Intel
-                </h3>
-                <Badge className="bg-sky-500/10 text-sky-600 border-none text-[8px] font-black">AI ANALYTICS</Badge>
-              </div>
+        {/* Match Timeline Module */}
+        <div className="glass-panel rounded-[3rem] p-8 border-slate-200 overflow-hidden">
+          <MatchTimeline />
+        </div>
 
-              <div className="space-y-5">
-                <ComparisonBar label="Shots Accuracy" v1={94} v2={82} icon={Target} />
-                <ComparisonBar label="Net Drops" v1={88} v2={76} icon={Droplets} />
-                <ComparisonBar label="Rally Dominance" v1={76} v2={64} icon={TrendingUp} />
-                <ComparisonBar label="Court Coverage" v1={91} v2={85} icon={MapPin} />
+        {/* Bottom Section: Technical Stats & Comparison Intel */}
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Technical Intelligence */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between px-2">
+              <h2 className="text-xl font-black tracking-tight uppercase italic flex items-center gap-3">
+                <Activity className="h-5 w-5 text-sky-500" /> Technical Intelligence
+              </h2>
+              <Badge variant="outline" className="text-[9px] font-black border-slate-200">MATCH CORE</Badge>
+            </div>
+            <MatchStatGrid />
+          </div>
 
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
-                  <div className="space-y-1">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                      <Timer className="h-3 w-3" /> VA Reaction
-                    </p>
-                    <p className="text-lg font-black text-[#0B1F3A]">184ms</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 text-right justify-end">
-                      LZ Reaction <Timer className="h-3 w-3" />
-                    </p>
-                    <p className="text-lg font-black text-[#0B1F3A] text-right">212ms</p>
-                  </div>
+          {/* Comparison Intel (One side per player) */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between px-2">
+              <h2 className="text-xl font-black tracking-tight uppercase italic flex items-center gap-3">
+                <Zap className="h-5 w-5 text-sky-500" /> Strategic Comparison
+              </h2>
+              <Badge className="bg-sky-500/10 text-sky-600 border-none text-[8px] font-black">AI ANALYTICS</Badge>
+            </div>
+
+            <div className="glass-panel rounded-[2rem] p-8 border-slate-200 grid grid-cols-2 gap-10">
+              {/* Axelsen Stats */}
+              <div className="space-y-8">
+                <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+                  <div className="h-8 w-8 rounded-full bg-sky-500 flex items-center justify-center text-xs font-black text-white">VA</div>
+                  <span className="text-xs font-black uppercase tracking-widest text-[#0B1F3A]">Axelsen</span>
+                </div>
+                
+                <div className="space-y-6">
+                  {[
+                    { label: "Shots Acc.", val: 94, icon: Target, color: "bg-sky-500" },
+                    { label: "Net Drops", val: 88, icon: Droplets, color: "bg-sky-600" },
+                    { label: "Dominance", val: 76, icon: TrendingUp, color: "bg-sky-400" },
+                    { label: "Coverage", val: 91, icon: MapPin, color: "bg-sky-700" },
+                  ].map((s, i) => (
+                    <div key={i} className="space-y-2">
+                      <div className="flex justify-between text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                        <span>{s.label}</span>
+                        <span className="text-[#0B1F3A]">{s.val}%</span>
+                      </div>
+                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <motion.div initial={{ width: 0 }} animate={{ width: `${s.val}%` }} className={cn("h-full", s.color)} />
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                      <Flame className="h-3 w-3 text-sky-500" /> VA Stamina
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <div className="h-1 flex-1 bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-sky-500" style={{ width: '82%' }} />
-                      </div>
-                      <span className="text-[10px] font-black">82%</span>
-                    </div>
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+                  <div className="text-center">
+                    <p className="text-[9px] font-black text-slate-400 uppercase">Reaction</p>
+                    <p className="text-lg font-black text-[#0B1F3A]">184ms</p>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 text-right justify-end">
-                      LZ Stamina <Flame className="h-3 w-3 text-red-400" />
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black">74%</span>
-                      <div className="h-1 flex-1 bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-red-400" style={{ width: '74%' }} />
+                  <div className="text-center">
+                    <p className="text-[9px] font-black text-slate-400 uppercase">Stamina</p>
+                    <p className="text-lg font-black text-sky-600">82%</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Lee Zii Jia Stats */}
+              <div className="space-y-8">
+                <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+                  <div className="h-8 w-8 rounded-full bg-[#0B1F3A] flex items-center justify-center text-xs font-black text-white">LZ</div>
+                  <span className="text-xs font-black uppercase tracking-widest text-[#0B1F3A]">Zii Jia</span>
+                </div>
+
+                <div className="space-y-6">
+                  {[
+                    { label: "Shots Acc.", val: 82, icon: Target, color: "bg-[#0B1F3A]" },
+                    { label: "Net Drops", val: 76, icon: Droplets, color: "bg-[#1a3a5f]" },
+                    { label: "Dominance", val: 64, icon: TrendingUp, color: "bg-[#254b7a]" },
+                    { label: "Coverage", val: 85, icon: MapPin, color: "bg-[#2f5c94]" },
+                  ].map((s, i) => (
+                    <div key={i} className="space-y-2">
+                      <div className="flex justify-between text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                        <span>{s.label}</span>
+                        <span className="text-[#0B1F3A]">{s.val}%</span>
+                      </div>
+                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <motion.div initial={{ width: 0 }} animate={{ width: `${s.val}%` }} className={cn("h-full", s.color)} />
                       </div>
                     </div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+                  <div className="text-center">
+                    <p className="text-[9px] font-black text-slate-400 uppercase">Reaction</p>
+                    <p className="text-lg font-black text-[#0B1F3A]">212ms</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[9px] font-black text-slate-400 uppercase">Stamina</p>
+                    <p className="text-lg font-black text-red-500">74%</p>
                   </div>
                 </div>
               </div>
