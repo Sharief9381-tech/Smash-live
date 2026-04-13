@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 const momentumData = [
   { time: '0m', p1: 50, p2: 50 },
