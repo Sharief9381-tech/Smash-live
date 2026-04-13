@@ -9,23 +9,11 @@ import MatchTimeline from '@/components/broadcast/MatchTimeline';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Trophy, Clock, Timer, Users, 
-  Share2, Bell, TrendingUp, Activity, 
-  Zap, ChevronRight, Check
+  Trophy, Clock, Activity, 
+  Zap, Bell, Check, Target, Droplets
 } from 'lucide-react';
-import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-
-const momentumData = [
-  { time: '0m', p1: 50, p2: 50 },
-  { time: '5m', p1: 60, p2: 40 },
-  { time: '10m', p1: 45, p2: 55 },
-  { time: '15m', p1: 70, p2: 30 },
-  { time: '20m', p1: 55, p2: 45 },
-  { time: '25m', p1: 85, p2: 15 },
-  { time: '30m', p1: 78, p2: 22 },
-];
 
 const LiveBroadcast = () => {
   const [isFollowing, setIsFollowing] = useState(false);
@@ -105,7 +93,7 @@ const LiveBroadcast = () => {
 
           {/* Side Panel: Commentary & Intelligence */}
           <div className="xl:col-span-4 space-y-10">
-            {/* Commentary Feed (Moved Up) */}
+            {/* Commentary Feed (Top) */}
             <CommentaryFeed events={[
               { id: '1', text: "Powerful cross-court smash from Axelsen leaves Lee with no response.", type: 'highlight', time: '14:42' },
               { id: '2', text: "Fantastic defensive rally of 24 shots. Axelsen holds his ground.", type: 'analysis', time: '14:40' },
@@ -114,42 +102,36 @@ const LiveBroadcast = () => {
               { id: '5', text: "Axelsen takes total control of the front court.", type: 'analysis', time: '14:32' },
             ]} />
 
-            {/* Momentum & Win Prob (Moved Down) */}
+            {/* Strategic Metrics (Bottom) */}
             <div className="glass-panel rounded-[3rem] p-8 border-slate-200 space-y-8">
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-black uppercase tracking-[0.2em] flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-sky-500" /> Win Probability
+                    <Zap className="h-4 w-4 text-sky-500" /> Strategic Metrics
                   </h3>
                   <Badge className="bg-sky-500/10 text-sky-600 border-none text-[8px] font-black">AI ANALYTICS</Badge>
                 </div>
+                
+                {/* Shots Accuracy */}
                 <div className="space-y-3">
                   <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-                    <span className="text-sky-600">Axelsen (84%)</span>
-                    <span className="text-slate-400">Lee (16%)</span>
+                    <span className="flex items-center gap-2"><Target className="h-3 w-3 text-sky-500" /> Shots Accuracy</span>
+                    <span className="text-[#0B1F3A]">94.2%</span>
                   </div>
-                  <div className="h-3 bg-slate-100 rounded-full overflow-hidden flex">
-                    <motion.div initial={{ width: 0 }} animate={{ width: '84%' }} transition={{ duration: 1.5 }} className="h-full bg-sky-500" />
+                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <motion.div initial={{ width: 0 }} animate={{ width: '94.2%' }} transition={{ duration: 1.5 }} className="h-full bg-sky-500" />
                   </div>
                 </div>
-              </div>
 
-              <div className="space-y-4">
-                <h3 className="text-sm font-black uppercase tracking-[0.2em] flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-sky-500" /> Match Momentum
-                </h3>
-                <div className="h-[140px] w-full pt-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={momentumData}>
-                      <defs>
-                        <linearGradient id="colorMomentum" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.2}/>
-                          <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <Area type="monotone" dataKey="p1" stroke="#0ea5e9" strokeWidth={3} fillOpacity={1} fill="url(#colorMomentum)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                {/* Net Drops */}
+                <div className="space-y-3">
+                  <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                    <span className="flex items-center gap-2"><Droplets className="h-3 w-3 text-sky-500" /> Net Drops</span>
+                    <span className="text-[#0B1F3A]">88.5%</span>
+                  </div>
+                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <motion.div initial={{ width: 0 }} animate={{ width: '88.5%' }} transition={{ duration: 1.5 }} className="h-full bg-sky-600" />
+                  </div>
                 </div>
               </div>
             </div>
