@@ -34,7 +34,7 @@ const BroadcastCenter = () => {
               <Radio className="h-6 w-6 animate-pulse" />
             </div>
             <div>
-              <h1 className="text-2xl font-black tracking-tighter uppercase italic text-[#0B1F3A]">Broadcast Center</h1>
+              <h1 className="text-2xl font-black tracking-tighter uppercase italic text-[#0B1F3A]">Broadcast Studio</h1>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
                 <Calendar className="h-3 w-3" /> {currentTime.toLocaleDateString()} 
                 <span className="h-1 w-1 bg-slate-300 rounded-full" />
@@ -59,21 +59,6 @@ const BroadcastCenter = () => {
       </div>
 
       <main className="container px-6 py-12 space-y-12">
-        {/* Hero Section */}
-        <section className="relative glass-panel p-12 rounded-[4rem] border-slate-200 overflow-hidden bg-[#0B1F3A] text-white">
-          <div className="relative z-10 max-w-2xl space-y-6">
-            <Badge className="bg-sky-500 text-white border-none font-black px-4 py-1">COMMAND CONSOLE</Badge>
-            <h2 className="text-5xl md:text-6xl font-black tracking-tighter italic leading-[0.9]">
-              START AND MANAGE LIVE <br /> <span className="text-sky-400">BADMINTON BROADCASTS</span>
-            </h2>
-            <p className="text-lg text-white/60 font-medium">Real-time scoring synchronization and multi-court broadcasting intelligence.</p>
-          </div>
-          
-          <div className="absolute -right-20 -bottom-20 opacity-20 pointer-events-none">
-            <Radio className="h-96 w-96 text-sky-400" />
-          </div>
-        </section>
-
         {/* Action Cards */}
         <div className="grid lg:grid-cols-2 gap-8">
           <BroadcastActionCard 
