@@ -59,21 +59,19 @@ const LiveBroadcast = () => {
         </div>
       </div>
 
-      <main className="container px-6 py-12 space-y-12">
-        
-        {/* Live Match Hero Section */}
-        <section className="relative">
-          <PremiumScoreboard 
-            p1={{ name: "Viktor Axelsen", country: "Denmark", flag: "🇩🇰", sets: [21, 14] }}
-            p2={{ name: "Lee Zii Jia", country: "Malaysia", flag: "🇲🇾", sets: [19, 11] }}
-            currentScore={[18, 14]}
-            serving={1}
-          />
-        </section>
+      <main className="container px-6 py-12">
+        <div className="grid lg:grid-cols-12 gap-10 items-start">
+          {/* Main Top Section: Scoreboard & Commentary */}
+          <div className="lg:col-span-8 space-y-10">
+            <section className="relative">
+              <PremiumScoreboard 
+                p1={{ name: "Viktor Axelsen", country: "Denmark", flag: "🇩🇰", sets: [21, 14] }}
+                p2={{ name: "Lee Zii Jia", country: "Malaysia", flag: "🇲🇾", sets: [19, 11] }}
+                currentScore={[18, 14]}
+                serving={1}
+              />
+            </section>
 
-        {/* Intelligence Modules Section */}
-        <section className="grid xl:grid-cols-12 gap-10">
-          <div className="xl:col-span-8 space-y-10">
             {/* Match Timeline Module */}
             <div className="glass-panel rounded-[3rem] p-10 border-slate-200 overflow-hidden">
               <MatchTimeline />
@@ -91,9 +89,9 @@ const LiveBroadcast = () => {
             </div>
           </div>
 
-          {/* Side Panel: Commentary & Intelligence */}
-          <div className="xl:col-span-4 space-y-10">
-            {/* Commentary Feed (Top) */}
+          {/* Sidebar Section: Commentary & Strategic Metrics */}
+          <div className="lg:col-span-4 space-y-10">
+            {/* Commentary Feed moved next to Scoreboard */}
             <CommentaryFeed events={[
               { id: '1', text: "Powerful cross-court smash from Axelsen leaves Lee with no response.", type: 'highlight', time: '14:42' },
               { id: '2', text: "Fantastic defensive rally of 24 shots. Axelsen holds his ground.", type: 'analysis', time: '14:40' },
@@ -136,7 +134,7 @@ const LiveBroadcast = () => {
               </div>
             </div>
           </div>
-        </section>
+        </div>
       </main>
     </div>
   );
