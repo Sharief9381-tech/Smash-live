@@ -10,7 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   Trophy, Clock, Activity, 
-  Zap, Bell, Check, Target, Droplets
+  Zap, Bell, Check, Target, Droplets,
+  TrendingUp, Timer, Flame, MapPin
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -61,7 +62,7 @@ const LiveBroadcast = () => {
 
       <main className="container px-6 py-12">
         <div className="grid lg:grid-cols-12 gap-10 items-start">
-          {/* Main Top Section: Scoreboard & Commentary */}
+          {/* Main Content Column */}
           <div className="lg:col-span-8 space-y-10">
             <section className="relative">
               <PremiumScoreboard 
@@ -89,9 +90,9 @@ const LiveBroadcast = () => {
             </div>
           </div>
 
-          {/* Sidebar Section: Commentary & Strategic Metrics */}
+          {/* Sidebar Column */}
           <div className="lg:col-span-4 space-y-10">
-            {/* Commentary Feed moved next to Scoreboard */}
+            {/* Commentary Feed */}
             <CommentaryFeed events={[
               { id: '1', text: "Powerful cross-court smash from Axelsen leaves Lee with no response.", type: 'highlight', time: '14:42' },
               { id: '2', text: "Fantastic defensive rally of 24 shots. Axelsen holds his ground.", type: 'analysis', time: '14:40' },
@@ -100,16 +101,16 @@ const LiveBroadcast = () => {
               { id: '5', text: "Axelsen takes total control of the front court.", type: 'analysis', time: '14:32' },
             ]} />
 
-            {/* Strategic Metrics (Bottom) */}
+            {/* Strategic Metrics (Expanded Grid) */}
             <div className="glass-panel rounded-[3rem] p-8 border-slate-200 space-y-8">
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-black uppercase tracking-[0.2em] flex items-center gap-2">
-                    <Zap className="h-4 w-4 text-sky-500" /> Strategic Metrics
-                  </h3>
-                  <Badge className="bg-sky-500/10 text-sky-600 border-none text-[8px] font-black">AI ANALYTICS</Badge>
-                </div>
-                
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-sky-500" /> Strategic Metrics
+                </h3>
+                <Badge className="bg-sky-500/10 text-sky-600 border-none text-[8px] font-black">AI ANALYTICS</Badge>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6">
                 {/* Shots Accuracy */}
                 <div className="space-y-3">
                   <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
@@ -129,6 +130,43 @@ const LiveBroadcast = () => {
                   </div>
                   <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                     <motion.div initial={{ width: 0 }} animate={{ width: '88.5%' }} transition={{ duration: 1.5 }} className="h-full bg-sky-600" />
+                  </div>
+                </div>
+
+                {/* Rally Dominance */}
+                <div className="space-y-3">
+                  <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                    <span className="flex items-center gap-2"><TrendingUp className="h-3 w-3 text-sky-500" /> Rally Dominance</span>
+                    <span className="text-[#0B1F3A]">76.4%</span>
+                  </div>
+                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <motion.div initial={{ width: 0 }} animate={{ width: '76.4%' }} transition={{ duration: 1.5 }} className="h-full bg-sky-400" />
+                  </div>
+                </div>
+
+                {/* Court Coverage */}
+                <div className="space-y-3">
+                  <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                    <span className="flex items-center gap-2"><MapPin className="h-3 w-3 text-sky-500" /> Court Coverage</span>
+                    <span className="text-[#0B1F3A]">91.2%</span>
+                  </div>
+                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <motion.div initial={{ width: 0 }} animate={{ width: '91.2%' }} transition={{ duration: 1.5 }} className="h-full bg-sky-700" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+                  <div className="space-y-1">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                      <Timer className="h-3 w-3" /> Reaction
+                    </p>
+                    <p className="text-xl font-black text-[#0B1F3A]">184ms</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                      <Flame className="h-3 w-3" /> Stamina
+                    </p>
+                    <p className="text-xl font-black text-[#0B1F3A]">82%</p>
                   </div>
                 </div>
               </div>
