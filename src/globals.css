@@ -4,35 +4,35 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --background: 40 20% 97%; /* #F9F7F2 - Bone */
+    --foreground: 0 0% 10%; /* #1A1A1A - Charcoal */
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 0 0% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 0 0% 10%;
 
-    --primary: 217 68% 14%; /* #0B1F3A */
-    --primary-foreground: 210 40% 98%;
+    --primary: 180 12% 20%; /* #2D3A3A - Deep Forest */
+    --primary-foreground: 40 20% 97%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 40 10% 90%;
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 40 10% 90%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 199 89% 48%; /* Neon Blue Accent */
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 180 12% 25%;
+    --accent-foreground: 40 20% 97%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 180 12% 20%;
 
-    --radius: 1rem;
+    --radius: 0.5rem;
   }
 }
 
@@ -41,38 +41,24 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased selection:bg-accent/30;
+    @apply bg-background text-foreground antialiased selection:bg-primary/20;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-.glass-panel {
-  @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-xl shadow-slate-900/5;
+.editorial-card {
+  @apply bg-white border border-black/5 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] transition-all duration-500;
 }
 
-.neon-glow {
-  box-shadow: 0 0 20px rgba(14, 165, 233, 0.2);
+.text-editorial {
+  font-family: serif;
 }
 
-.text-navy {
-  color: #0B1F3A;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.bg-navy {
-  background-color: #0B1F3A;
-}
-
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-.animate-marquee {
-  display: inline-flex;
-  animation: marquee 30s linear infinite;
-  will-change: transform;
-}
-
-.animate-marquee:hover {
-  animation-play-state: paused;
+.animate-editorial {
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
