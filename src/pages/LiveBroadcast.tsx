@@ -12,10 +12,9 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Trophy, Clock, Timer, Users, 
   Share2, Bell, TrendingUp, Activity, 
-  Zap, ChevronRight, MessageCircle, Play
+  Zap, ChevronRight
 } from 'lucide-react';
-import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
-import { cn } from '@/lib/utils';
+import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
 
 const momentumData = [
@@ -30,32 +29,32 @@ const momentumData = [
 
 const LiveBroadcast = () => {
   return (
-    <div className="min-h-screen bg-[#050505] text-white">
+    <div className="min-h-screen bg-slate-50 text-[#0B1F3A]">
       <Navbar />
       
       {/* Top Header Section */}
-      <div className="bg-[#0a0a0a] border-b border-white/5 py-6">
+      <div className="bg-white border-b border-slate-200 py-6">
         <div className="container px-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-8">
             <div className="space-y-1">
-              <h1 className="text-2xl font-black tracking-tighter uppercase italic text-white flex items-center gap-3">
-                <Trophy className="h-6 w-6 text-[#b6ff2a]" /> BWF WORLD TOUR FINALS 2024
+              <h1 className="text-2xl font-black tracking-tighter uppercase italic text-[#0B1F3A] flex items-center gap-3">
+                <Trophy className="h-6 w-6 text-sky-500" /> BWF WORLD TOUR FINALS 2024
               </h1>
-              <div className="flex items-center gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+              <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                 <span>Grand Final</span>
-                <span className="h-1 w-1 bg-white/20 rounded-full" />
+                <span className="h-1 w-1 bg-slate-200 rounded-full" />
                 <span>Court 01</span>
-                <span className="h-1 w-1 bg-white/20 rounded-full" />
+                <span className="h-1 w-1 bg-slate-200 rounded-full" />
                 <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" /> 00:42:15</span>
               </div>
             </div>
           </div>
           
           <div className="flex items-center gap-4">
-             <Button variant="outline" className="h-11 rounded-xl border-white/10 bg-white/5 text-xs font-black uppercase tracking-widest gap-2 hover:bg-white/10">
+             <Button variant="outline" className="h-11 rounded-xl border-slate-200 bg-white text-xs font-black uppercase tracking-widest gap-2 hover:bg-slate-50">
                <Bell className="h-4 w-4" /> Follow Match
              </Button>
-             <Button className="h-11 rounded-xl bg-[#b6ff2a] text-black font-black uppercase tracking-widest px-8 shadow-[0_0_20px_rgba(182,255,42,0.3)]">
+             <Button className="h-11 rounded-xl bg-[#0B1F3A] text-white font-black uppercase tracking-widest px-8 shadow-xl">
                Live Insights
              </Button>
           </div>
@@ -80,7 +79,7 @@ const LiveBroadcast = () => {
             <LiveVideoPlayer />
             
             {/* Match Timeline Module */}
-            <div className="bg-white/5 rounded-[3rem] p-10 border border-white/5">
+            <div className="glass-panel rounded-[3rem] p-10 border-slate-200">
               <MatchTimeline />
             </div>
 
@@ -88,9 +87,9 @@ const LiveBroadcast = () => {
             <div className="space-y-8">
               <div className="flex items-center justify-between px-2">
                 <h2 className="text-2xl font-black tracking-tight uppercase italic flex items-center gap-3">
-                  <Activity className="h-6 w-6 text-[#b6ff2a]" /> Technical Intelligence
+                  <Activity className="h-6 w-6 text-sky-500" /> Technical Intelligence
                 </h2>
-                <Button variant="link" className="text-[#b6ff2a] font-black uppercase tracking-widest text-[10px]">Compare History</Button>
+                <Button variant="link" className="text-sky-600 font-black uppercase tracking-widest text-[10px]">Compare History</Button>
               </div>
               <MatchStatGrid />
             </div>
@@ -99,39 +98,39 @@ const LiveBroadcast = () => {
           {/* Side Panel: Commentary & Intelligence */}
           <div className="xl:col-span-4 space-y-10">
             {/* Momentum & Win Prob */}
-            <div className="bg-white/5 rounded-[3rem] p-8 border border-white/5 space-y-8">
+            <div className="glass-panel rounded-[3rem] p-8 border-slate-200 space-y-8">
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-black uppercase tracking-[0.2em] flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-[#b6ff2a]" /> Win Probability
+                    <TrendingUp className="h-4 w-4 text-sky-500" /> Win Probability
                   </h3>
-                  <Badge className="bg-[#b6ff2a]/20 text-[#b6ff2a] border-none text-[8px] font-black">AI ANALYTICS</Badge>
+                  <Badge className="bg-sky-500/10 text-sky-600 border-none text-[8px] font-black">AI ANALYTICS</Badge>
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-                    <span className="text-[#b6ff2a]">Axelsen (84%)</span>
-                    <span className="text-white/40">Lee (16%)</span>
+                    <span className="text-sky-600">Axelsen (84%)</span>
+                    <span className="text-slate-400">Lee (16%)</span>
                   </div>
-                  <div className="h-3 bg-white/5 rounded-full overflow-hidden flex">
-                    <motion.div initial={{ width: 0 }} animate={{ width: '84%' }} transition={{ duration: 1.5 }} className="h-full bg-[#b6ff2a] shadow-[0_0_15px_rgba(182,255,42,0.5)]" />
+                  <div className="h-3 bg-slate-100 rounded-full overflow-hidden flex">
+                    <motion.div initial={{ width: 0 }} animate={{ width: '84%' }} transition={{ duration: 1.5 }} className="h-full bg-sky-500" />
                   </div>
                 </div>
               </div>
 
               <div className="space-y-4">
                 <h3 className="text-sm font-black uppercase tracking-[0.2em] flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-[#b6ff2a]" /> Match Momentum
+                  <Zap className="h-4 w-4 text-sky-500" /> Match Momentum
                 </h3>
                 <div className="h-[140px] w-full pt-4">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={momentumData}>
                       <defs>
                         <linearGradient id="colorMomentum" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#b6ff2a" stopOpacity={0.4}/>
-                          <stop offset="95%" stopColor="#b6ff2a" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.2}/>
+                          <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <Area type="monotone" dataKey="p1" stroke="#b6ff2a" strokeWidth={3} fillOpacity={1} fill="url(#colorMomentum)" />
+                      <Area type="monotone" dataKey="p1" stroke="#0ea5e9" strokeWidth={3} fillOpacity={1} fill="url(#colorMomentum)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -148,31 +147,31 @@ const LiveBroadcast = () => {
             ]} />
 
             {/* Player Mini Profile */}
-            <div className="bg-white/5 rounded-[3rem] p-8 border border-white/5 space-y-6">
+            <div className="glass-panel rounded-[3rem] p-8 border-slate-200 space-y-6">
                <h3 className="text-sm font-black uppercase tracking-[0.2em] italic">Head-to-Head Stats</h3>
                <div className="flex items-center justify-between text-center">
                   <div>
-                    <p className="text-2xl font-black text-[#b6ff2a]">18</p>
-                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Wins</p>
+                    <p className="text-2xl font-black text-sky-600">18</p>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Wins</p>
                   </div>
-                  <div className="h-10 w-px bg-white/10" />
+                  <div className="h-10 w-px bg-slate-100" />
                   <div>
-                    <p className="text-2xl font-black text-white">24</p>
+                    <p className="text-2xl font-black text-[#0B1F3A]">24</p>
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Faced</p>
                   </div>
-                  <div className="h-10 w-px bg-white/10" />
+                  <div className="h-10 w-px bg-slate-100" />
                   <div>
-                    <p className="text-2xl font-black text-white">6</p>
-                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Losses</p>
+                    <p className="text-2xl font-black text-red-500">6</p>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Losses</p>
                   </div>
                </div>
                <div className="space-y-2">
                   <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase">
                     <span>Dominance</span>
-                    <span className="text-[#b6ff2a]">75%</span>
+                    <span className="text-sky-600">75%</span>
                   </div>
-                  <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full w-[75%] bg-[#b6ff2a]" />
+                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full w-[75%] bg-sky-500" />
                   </div>
                </div>
             </div>
@@ -180,10 +179,10 @@ const LiveBroadcast = () => {
         </section>
 
         {/* Related Content & Upcoming */}
-        <section className="space-y-8 pt-12 border-t border-white/5">
+        <section className="space-y-8 pt-12 border-t border-slate-200">
           <div className="flex items-center justify-between">
             <h2 className="text-3xl font-black tracking-tighter uppercase italic">Upcoming Intelligence</h2>
-            <Button variant="outline" className="rounded-full border-white/10 hover:bg-white/5">Browse All Matches</Button>
+            <Button variant="outline" className="rounded-full border-slate-200 hover:bg-white">Browse All Matches</Button>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -192,16 +191,16 @@ const LiveBroadcast = () => {
               { p: "Antonsen vs Ginting", tourney: "All England", time: "Tomorrow, 14:30", cat: "Men's Singles" },
               { p: "Chen/Jia vs Baek/Lee", tourney: "China Masters", time: "Tomorrow, 18:00", cat: "Women's Doubles" },
             ].map((match, i) => (
-              <div key={i} className="bg-white/5 rounded-[2.5rem] p-8 border border-white/5 group hover:border-[#b6ff2a]/30 transition-all cursor-pointer">
+              <div key={i} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 group hover:border-sky-500/30 transition-all cursor-pointer shadow-sm">
                 <div className="space-y-4">
-                  <Badge variant="outline" className="border-white/10 text-slate-500 text-[8px] font-black">{match.cat}</Badge>
-                  <h4 className="text-xl font-black group-hover:text-[#b6ff2a] transition-colors leading-tight">{match.p}</h4>
-                  <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                  <Badge variant="outline" className="border-slate-100 text-slate-400 text-[8px] font-black">{match.cat}</Badge>
+                  <h4 className="text-xl font-black group-hover:text-sky-600 transition-colors leading-tight text-[#0B1F3A]">{match.p}</h4>
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-50">
                     <div className="space-y-0.5">
-                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{match.tourney}</p>
-                      <p className="text-xs font-bold text-white/60">{match.time}</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{match.tourney}</p>
+                      <p className="text-xs font-bold text-slate-500">{match.time}</p>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-slate-500 group-hover:text-[#b6ff2a] group-hover:translate-x-1 transition-all" />
+                    <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-sky-600 group-hover:translate-x-1 transition-all" />
                   </div>
                 </div>
               </div>

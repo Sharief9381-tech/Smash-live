@@ -18,25 +18,25 @@ const MatchTimeline = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between px-2">
-        <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] italic">Match Timeline</h3>
-        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Set 2 Progression</span>
+        <h3 className="text-sm font-black text-[#0B1F3A] uppercase tracking-[0.2em] italic">Match Timeline</h3>
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Set 2 Progression</span>
       </div>
       
-      <div className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide px-2">
+      <div className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide px-2">
         {points.map((p, i) => (
-          <div key={i} className="flex flex-col items-center gap-3 shrink-0">
+          <div key={i} className="flex flex-col items-center gap-4 shrink-0">
             <div className={cn(
-              "h-14 w-14 rounded-2xl flex flex-col items-center justify-center border transition-all",
+              "h-16 w-16 rounded-[1.5rem] flex flex-col items-center justify-center border transition-all",
               p.winner === 1 
-                ? "bg-[#b6ff2a]/10 border-[#b6ff2a]/30 shadow-[0_0_20px_rgba(182,255,42,0.1)]" 
-                : "bg-white/5 border-white/10"
+                ? "bg-sky-500 text-white border-sky-600 shadow-xl shadow-sky-500/20" 
+                : "bg-white text-[#0B1F3A] border-slate-100 shadow-sm"
             )}>
-              <span className={cn("text-sm font-black", p.winner === 1 ? "text-[#b6ff2a]" : "text-white")}>{p.score}</span>
-              <span className="text-[8px] font-bold uppercase opacity-40">{p.type}</span>
+              <span className="text-sm font-black">{p.score}</span>
+              <span className={cn("text-[8px] font-bold uppercase", p.winner === 1 ? "opacity-70" : "opacity-40")}>{p.type}</span>
             </div>
-            <div className={cn("h-1 w-1 rounded-full", p.winner === 1 ? "bg-[#b6ff2a]" : "bg-white/20")} />
+            <div className={cn("h-1.5 w-1.5 rounded-full", p.winner === 1 ? "bg-sky-500" : "bg-slate-200")} />
           </div>
         ))}
       </div>
