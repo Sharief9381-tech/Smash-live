@@ -3,7 +3,6 @@
 import React from 'react';
 import Navbar from '@/components/layout/Navbar';
 import PremiumScoreboard from '@/components/broadcast/PremiumScoreboard';
-import LiveVideoPlayer from '@/components/broadcast/LiveVideoPlayer';
 import CommentaryFeed from '@/components/broadcast/CommentaryFeed';
 import MatchStatGrid from '@/components/broadcast/MatchStatGrid';
 import MatchTimeline from '@/components/broadcast/MatchTimeline';
@@ -61,7 +60,7 @@ const LiveBroadcast = () => {
         </div>
       </div>
 
-      <main className="container px-6 py-12 space-y-16">
+      <main className="container px-6 py-12 space-y-12">
         
         {/* Live Match Hero Section */}
         <section className="relative">
@@ -73,11 +72,9 @@ const LiveBroadcast = () => {
           />
         </section>
 
-        {/* Live Stream Section */}
+        {/* Intelligence Modules Section */}
         <section className="grid xl:grid-cols-12 gap-10">
           <div className="xl:col-span-8 space-y-10">
-            <LiveVideoPlayer />
-            
             {/* Match Timeline Module */}
             <div className="glass-panel rounded-[3rem] p-10 border-slate-200">
               <MatchTimeline />
@@ -145,66 +142,6 @@ const LiveBroadcast = () => {
               { id: '4', text: "Unforced error from Lee Zii Jia at the net.", type: 'score', time: '14:35' },
               { id: '5', text: "Axelsen takes total control of the front court.", type: 'analysis', time: '14:32' },
             ]} />
-
-            {/* Player Mini Profile */}
-            <div className="glass-panel rounded-[3rem] p-8 border-slate-200 space-y-6">
-               <h3 className="text-sm font-black uppercase tracking-[0.2em] italic">Head-to-Head Stats</h3>
-               <div className="flex items-center justify-between text-center">
-                  <div>
-                    <p className="text-2xl font-black text-sky-600">18</p>
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Wins</p>
-                  </div>
-                  <div className="h-10 w-px bg-slate-100" />
-                  <div>
-                    <p className="text-2xl font-black text-[#0B1F3A]">24</p>
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Faced</p>
-                  </div>
-                  <div className="h-10 w-px bg-slate-100" />
-                  <div>
-                    <p className="text-2xl font-black text-red-500">6</p>
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Losses</p>
-                  </div>
-               </div>
-               <div className="space-y-2">
-                  <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase">
-                    <span>Dominance</span>
-                    <span className="text-sky-600">75%</span>
-                  </div>
-                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full w-[75%] bg-sky-500" />
-                  </div>
-               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Related Content & Upcoming */}
-        <section className="space-y-8 pt-12 border-t border-slate-200">
-          <div className="flex items-center justify-between">
-            <h2 className="text-3xl font-black tracking-tighter uppercase italic">Upcoming Intelligence</h2>
-            <Button variant="outline" className="rounded-full border-slate-200 hover:bg-white">Browse All Matches</Button>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              { p: "An Se-young vs Yamaguchi", tourney: "Jakarta Open", time: "Tomorrow, 09:00", cat: "Women's Singles" },
-              { p: "Antonsen vs Ginting", tourney: "All England", time: "Tomorrow, 14:30", cat: "Men's Singles" },
-              { p: "Chen/Jia vs Baek/Lee", tourney: "China Masters", time: "Tomorrow, 18:00", cat: "Women's Doubles" },
-            ].map((match, i) => (
-              <div key={i} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 group hover:border-sky-500/30 transition-all cursor-pointer shadow-sm">
-                <div className="space-y-4">
-                  <Badge variant="outline" className="border-slate-100 text-slate-400 text-[8px] font-black">{match.cat}</Badge>
-                  <h4 className="text-xl font-black group-hover:text-sky-600 transition-colors leading-tight text-[#0B1F3A]">{match.p}</h4>
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                    <div className="space-y-0.5">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{match.tourney}</p>
-                      <p className="text-xs font-bold text-slate-500">{match.time}</p>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-sky-600 group-hover:translate-x-1 transition-all" />
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         </section>
       </main>
