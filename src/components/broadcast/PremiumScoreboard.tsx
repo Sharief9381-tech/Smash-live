@@ -11,6 +11,13 @@ interface ScoreboardProps {
   serving: 1 | 2;
 }
 
+const ShuttleIcon = () => (
+  <svg viewBox="0 0 24 24" className="h-4 w-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 18a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" fill="currentColor" />
+    <path d="M10 14L7 6h10l-3 8" />
+  </svg>
+);
+
 const PremiumScoreboard = ({ p1, p2, currentScore, serving }: ScoreboardProps) => {
   return (
     <div className="w-full flex flex-col items-center justify-center py-10 space-y-8">
@@ -26,14 +33,16 @@ const PremiumScoreboard = ({ p1, p2, currentScore, serving }: ScoreboardProps) =
           </div>
           <div className="relative">
             <div className="h-24 w-24 rounded-full bg-slate-100 border-4 border-white overflow-hidden shadow-2xl">
-              <img src={`https://i.pravatar.cc/150?u=${p1.name}`} className="w-full h-full object-cover" />
+              <img src={`https://i.pravatar.cc/150?u=${p1.name}`} className="w-full h-full object-cover" alt={p1.name} />
             </div>
             {serving === 1 && (
               <motion.div 
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ repeat: Infinity, duration: 1.5 }}
-                className="absolute -top-1 -right-1 h-6 w-6 bg-sky-500 rounded-full border-4 border-white shadow-xl"
-              />
+                animate={{ scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="absolute -top-1 -right-1 h-8 w-8 bg-sky-500 rounded-full border-4 border-white shadow-xl flex items-center justify-center"
+              >
+                <ShuttleIcon />
+              </motion.div>
             )}
           </div>
         </div>
@@ -73,14 +82,16 @@ const PremiumScoreboard = ({ p1, p2, currentScore, serving }: ScoreboardProps) =
         <div className="flex-1 flex items-center justify-start gap-6 text-left">
           <div className="relative">
             <div className="h-24 w-24 rounded-full bg-slate-100 border-4 border-white overflow-hidden shadow-2xl">
-              <img src={`https://i.pravatar.cc/150?u=${p2.name}`} className="w-full h-full object-cover" />
+              <img src={`https://i.pravatar.cc/150?u=${p2.name}`} className="w-full h-full object-cover" alt={p2.name} />
             </div>
             {serving === 2 && (
               <motion.div 
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ repeat: Infinity, duration: 1.5 }}
-                className="absolute -top-1 -right-1 h-6 w-6 bg-sky-500 rounded-full border-4 border-white shadow-xl"
-              />
+                animate={{ scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="absolute -top-1 -right-1 h-8 w-8 bg-sky-500 rounded-full border-4 border-white shadow-xl flex items-center justify-center"
+              >
+                <ShuttleIcon />
+              </motion.div>
             )}
           </div>
           <div className="space-y-1">

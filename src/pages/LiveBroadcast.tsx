@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import PremiumScoreboard from '@/components/broadcast/PremiumScoreboard';
 import CommentaryFeed from '@/components/broadcast/CommentaryFeed';
@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Trophy, Clock, Timer, Users, 
   Share2, Bell, TrendingUp, Activity, 
-  Zap, ChevronRight
+  Zap, ChevronRight, Check
 } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
@@ -27,6 +27,8 @@ const momentumData = [
 ];
 
 const LiveBroadcast = () => {
+  const [isFollowing, setIsFollowing] = useState(false);
+
   return (
     <div className="min-h-screen bg-slate-50 text-[#0B1F3A]">
       <Navbar />
@@ -50,8 +52,16 @@ const LiveBroadcast = () => {
           </div>
           
           <div className="flex items-center gap-4">
-             <Button variant="outline" className="h-11 rounded-xl border-slate-200 bg-white text-xs font-black uppercase tracking-widest gap-2 hover:bg-slate-50">
-               <Bell className="h-4 w-4" /> Follow Match
+             <Button 
+                onClick={() => setIsFollowing(!isFollowing)}
+                variant={isFollowing ? "default" : "outline"} 
+                className={cn(
+                  "h-11 rounded-xl text-xs font-black uppercase tracking-widest gap-2 transition-all",
+                  isFollowing ? "bg-sky-500 text-white hover:bg-sky-600 border-none shadow-lg" : "border-slate-200 bg-white hover:bg-slate-50"
+                )}
+             >
+               {isFollowing ? <Check className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
+               {isFollowing ? "Following" : "Follow Match"}
              </Button>
              <Button className="h-11 rounded-xl bg-[#0B1F3A] text-white font-black uppercase tracking-widest px-8 shadow-xl">
                Live Insights
@@ -76,7 +86,7 @@ const LiveBroadcast = () => {
         <section className="grid xl:grid-cols-12 gap-10">
           <div className="xl:col-span-8 space-y-10">
             {/* Match Timeline Module */}
-            <div className="glass-panel rounded-[3rem] p-10 border-slate-200">
+            <div className="glass-panel rounded-[3rem] p-10 border-slate-200 overflow-hidden">
               <MatchTimeline />
             </div>
 
@@ -94,7 +104,16 @@ const LiveBroadcast = () => {
 
           {/* Side Panel: Commentary & Intelligence */}
           <div className="xl:col-span-4 space-y-10">
-            {/* Momentum & Win Prob */}
+            {/* Commentary Feed (Moved Up) */}
+            <CommentaryFeed events={[
+              { id: '1', text: "Powerful cross-court smash from Axelsen leaves Lee with no response.", type: 'highlight', time: '14:42' },
+              { id: '2', text: "Fantastic defensive rally of 24 shots. Axelsen holds his ground.", type: 'analysis', time: '14:40' },
+              { id: '3', text: "Point to Axelsen. He leads 18-14 in the second set.", type: 'score', time: '14:38' },
+              { id: '4', text: "Unforced error from Lee Zii Jia at the net.", type: 'score', time: '14:35' },
+              { id: '5', text: "Axelsen takes total control of the front court.", type: 'analysis', time: '14:32' },
+            ]} />
+
+            {/* Momentum & Win Prob (Moved Down) */}
             <div className="glass-panel rounded-[3rem] p-8 border-slate-200 space-y-8">
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
@@ -133,15 +152,6 @@ const LiveBroadcast = () => {
                 </div>
               </div>
             </div>
-
-            {/* Commentary Feed */}
-            <CommentaryFeed events={[
-              { id: '1', text: "Powerful cross-court smash from Axelsen leaves Lee with no response.", type: 'highlight', time: '14:42' },
-              { id: '2', text: "Fantastic defensive rally of 24 shots. Axelsen holds his ground.", type: 'analysis', time: '14:40' },
-              { id: '3', text: "Point to Axelsen. He leads 18-14 in the second set.", type: 'score', time: '14:38' },
-              { id: '4', text: "Unforced error from Lee Zii Jia at the net.", type: 'score', time: '14:35' },
-              { id: '5', text: "Axelsen takes total control of the front court.", type: 'analysis', time: '14:32' },
-            ]} />
           </div>
         </section>
       </main>
