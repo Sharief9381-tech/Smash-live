@@ -6,11 +6,8 @@ import BroadcastActionCard from '@/components/broadcast/BroadcastActionCard';
 import PlayerBroadcastStats from '@/components/broadcast/PlayerBroadcastStats';
 import { 
   Radio, Trophy, Target, 
-  Calendar, Clock,
-  Settings
+  Calendar, Clock
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 
 const BroadcastCenter = () => {
@@ -40,19 +37,6 @@ const BroadcastCenter = () => {
                 <span className="h-1 w-1 bg-slate-300 rounded-full" />
                 <Clock className="h-3 w-3" /> {currentTime.toLocaleTimeString()}
               </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl border-slate-200">
-              <Settings className="h-5 w-5 text-slate-500" />
-            </Button>
-            <div className="h-11 w-px bg-slate-200" />
-            <div className="flex items-center gap-3">
-              <div className="text-right hidden sm:block">
-                <p className="text-xs font-black text-[#0B1F3A]">Admin Operator</p>
-                <p className="text-[10px] font-bold text-sky-500 uppercase">Superuser</p>
-              </div>
-              <div className="h-11 w-11 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center font-black">AD</div>
             </div>
           </div>
         </div>
