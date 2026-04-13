@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
 const BroadcastCenter = () => {
   const navigate = useNavigate();
@@ -90,8 +91,7 @@ const BroadcastCenter = () => {
             title="Start Live Match"
             description="Initialize a quick individual singles or doubles match for immediate broadcasting."
             icon={Target}
-            buttonText="Start Individual Match"
-            onClick={() => navigate('/live-match/create')}
+            buttonText="Start Individual Match"            onClick={() => navigate('/live-match/create')}
             variant="primary"
           />
           <BroadcastActionCard 
@@ -107,7 +107,7 @@ const BroadcastCenter = () => {
         {/* Quick Setup Section */}
         <section className="grid lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 space-y-8">
-            <div className="glass-panel p-10 rounded-[3rem] border-slate-200 space-y-10">
+            <div className="glass-panel p-10 rounded-[3rem] space-y-10">
               <div className="flex items-center justify-between border-b border-slate-100 pb-6">
                 <h3 className="text-xl font-black text-[#0B1F3A] flex items-center gap-3 italic">
                   <Plus className="h-6 w-6 text-sky-500" /> Quick Match Configuration
