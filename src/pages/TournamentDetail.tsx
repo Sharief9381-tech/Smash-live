@@ -7,12 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   Trophy, Calendar, Users, MapPin, 
-  Share2, ListFilter, Play, CheckCircle2,
+  Share2, ListFilter, Play, 
   Clock, Timer, Activity
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { cn } from '@/lib/utils';
 
 const TournamentDetail = () => {
   const navigate = useNavigate();
