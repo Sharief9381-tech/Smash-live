@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +8,8 @@ import {
   Zap, RotateCcw, Activity, 
   Target, History, StopCircle, Clock,
   ChevronLeft, Flame, TrendingUp, AlertTriangle,
-  Radio, ShieldCheck, Trophy, MapPin, Timer
+  Radio, ShieldCheck, Trophy, MapPin, Share2,
+  Tornado, Users, BarChart3, Timer, RefreshCw
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -24,23 +25,23 @@ const ScoringPage = () => {
   const [history, setHistory] = useState<[number, number][]>([]);
   const [serving, setServing] = useState<1 | 2>(1);
   const [duration, setDuration] = useState(0);
+  const [isFinished, setIsFinished] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem(matchId || "");
     if (saved) {
-      const data = JSON.parse(saved);
-      setMatchData(data);
-      setServing(data.server === 'sideA' ? 1 : 2);
+      setMatchData(JSON.parse(saved));
     } else {
-      showError("Match session not found");
+      showError("Session Terminated");
       navigate('/broadcast/center');
     }
-  }, [matchId, navigate]);
+  }, [matchId]);
 
   useEffect(() => {
+    if (isFinished) return;
     const timer = setInterval(() => setDuration(p => p + 1), 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [isFinished]);
 
   const formatTime = (s: number) => {
     const m = Math.floor(s / 60);
@@ -49,15 +50,12 @@ const ScoringPage = () => {
   };
 
   const updateScore = (side: 1 | 2) => {
+    if (isFinished) return;
     setHistory(prev => [...prev, [...score]]);
     const next = [...score] as [number, number];
     next[side - 1] += 1;
     setScore(next);
     setServing(side);
-    
-    if ((next[side-1] >= 21 && Math.abs(next[0] - next[1]) >= 2) || next[side-1] === 30) {
-      showSuccess(`Set won by Side ${side === 1 ? 'A' : 'B'}`);
-    }
   };
 
   const undo = () => {
@@ -66,306 +64,392 @@ const ScoringPage = () => {
     setHistory(prev => prev.slice(0, -1));
   };
 
-  if (!matchData) return (
-    <div className="h-screen bg-slate-50 flex items-center justify-center">
-      <Loader2 className="h-10 w-10 animate-spin text-sky-500" />
-    </div>
-  );
+  const finalizeSet = () => {
+    setSets(prev => [...prev, [...score]]);
+    setScore([0, 0]);
+    setHistory([]);
+    showSuccess("Set Finalized • Intelligence Synced");
+  };
 
-  const getTeamLabel = (side: 'A' | 'B') => {
+  if (!matchData) return null;
+
+  const getTeamInfo = (side: 'A' | 'B') => {
     if (matchData.matchType === 'singles') {
       const p = side === 'A' ? matchData.players.p1 : matchData.players.p2;
-      return { name: p.name, sub: p.country, img: p.img };
+      return { name: p.name, rank: p.rank, country: p.country, img: p.img };
     }
     const p1 = side === 'A' ? matchData.players.tA1 : matchData.players.tB1;
     const p2 = side === 'A' ? matchData.players.tA2 : matchData.players.tB2;
     return { 
       name: `${p1.name.split(' ')[0]} / ${p2.name.split(' ')[0]}`,
-      sub: p1.country,
+      rank: Math.min(p1.rank, p2.rank),
+      country: p1.country,
       img: p1.img
     };
   };
 
-  const teamA = getTeamLabel('A');
-  const teamB = getTeamLabel('B');
+  const sideA = getTeamInfo('A');
+  const sideB = getTeamInfo('B');
 
   return (
-    <div className="min-h-screen bg-slate-50 text-[#0B1F3A]">
+    <div className="min-h-screen bg-[#050A10] text-white selection:bg-primary/30 font-sans overflow-x-hidden">
       <Navbar />
-      
-      <div className="bg-white border-b border-slate-200 py-6">
+
+      {/* TOP COMMAND HEADER */}
+      <header className="bg-white/5 backdrop-blur-2xl border-b border-white/5 py-6">
         <div className="container px-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-6">
-            <Button variant="ghost" onClick={() => navigate(-1)} className="rounded-2xl h-14 w-14 hover:bg-slate-50 border border-slate-100 shadow-sm">
+            <Button variant="ghost" onClick={() => navigate(-1)} className="rounded-2xl h-14 w-14 hover:bg-white/10 text-white/60">
               <ChevronLeft className="h-6 w-6" />
             </Button>
             <div className="space-y-1">
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-black text-[#0B1F3A] uppercase italic tracking-tighter">{matchData.name}</h1>
-                <Badge className="bg-red-500 text-white animate-pulse border-none px-4 h-6 text-[9px] font-black">LIVE BROADCAST</Badge>
+                <h1 className="text-3xl font-black uppercase italic tracking-tighter text-white">{matchData.name}</h1>
+                <Badge className="bg-[#b6ff2a] text-black border-none px-4 h-6 text-[9px] font-black animate-pulse">LIVE SCORING</Badge>
               </div>
-              <div className="flex items-center gap-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                <span className="flex items-center gap-1.5"><Trophy className="h-3 w-3 text-sky-500" /> {matchData.round}</span>
-                <span className="h-1 w-1 bg-slate-200 rounded-full" />
-                <span className="flex items-center gap-1.5"><MapPin className="h-3 w-3 text-sky-500" /> Court {matchData.court}</span>
-                <span className="h-1 w-1 bg-slate-200 rounded-full" />
-                <span className="flex items-center gap-1.5 text-[#0B1F3A]"><ShieldCheck className="h-3 w-3 text-sky-500" /> Session: {matchId?.slice(-8)}</span>
+              <div className="flex items-center gap-4 text-[10px] font-black text-white/40 uppercase tracking-widest">
+                <span className="flex items-center gap-1.5"><Trophy className="h-3 w-3 text-primary" /> {matchData.round}</span>
+                <span className="h-1 w-1 bg-white/10 rounded-full" />
+                <span className="flex items-center gap-1.5"><MapPin className="h-3 w-3 text-primary" /> Court {matchData.court}</span>
+                <span className="h-1 w-1 bg-white/10 rounded-full" />
+                <span className="text-sky-500">{matchData.matchType.toUpperCase()} MODE</span>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-             <div className="bg-[#0B1F3A] text-white px-8 py-3 rounded-[1.5rem] flex items-center gap-4 shadow-xl shadow-navy/20">
+             <div className="bg-white/5 border border-white/10 px-8 py-3 rounded-[1.5rem] flex items-center gap-6 shadow-2xl">
                 <div className="flex flex-col">
-                  <span className="text-[8px] font-black text-sky-400 uppercase tracking-widest">Match Duration</span>
-                  <span className="font-mono font-black text-lg tracking-tighter">{formatTime(duration)}</span>
+                  <span className="text-[8px] font-black text-primary uppercase tracking-widest">Match Timer</span>
+                  <span className="font-mono font-black text-2xl tracking-tighter text-white">{formatTime(duration)}</span>
                 </div>
-                <div className="h-8 w-px bg-white/10" />
-                <Radio className="h-5 w-5 text-red-500 animate-pulse" />
+                <div className="h-10 w-px bg-white/10" />
+                <Share2 className="h-5 w-5 text-sky-400 cursor-pointer hover:text-white transition-colors" />
              </div>
              <Button 
-                onClick={() => { showSuccess("Match Terminated"); navigate('/broadcast/center'); }}
-                variant="destructive" 
-                className="h-14 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest gap-2 px-8 shadow-xl shadow-red-500/10"
+                onClick={() => { setIsFinished(true); showSuccess("Match Synchronized"); }}
+                className="h-14 rounded-[1.5rem] bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/20 font-black uppercase text-[10px] tracking-[0.2em] px-8 transition-all"
               >
-               <StopCircle className="h-4 w-4" /> End Match
+               <StopCircle className="h-4 w-4 mr-2" /> End Match
              </Button>
           </div>
         </div>
-      </div>
+      </header>
 
-      <main className="container px-6 py-8 space-y-8">
-        <div className="grid lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-3 space-y-6">
-            <div className="glass-panel p-8 rounded-[3.5rem] border-slate-200 space-y-8 shadow-xl bg-white/50">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-6">
-                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  <Activity className="h-4 w-4 text-sky-500" /> Side A Performance
-                </h3>
-                <TrendingUp className="h-3 w-3 text-sky-500" />
+      <main className="container px-6 py-10 space-y-10">
+        
+        {/* COMPETING SIDES & MAIN SCOREBOARD */}
+        <div className="grid lg:grid-cols-12 gap-8 items-center">
+          
+          {/* TEAM A CARD */}
+          <div className="lg:col-span-3">
+            <motion.div 
+              initial={{ x: -50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              className={cn(
+                "glass-panel p-10 rounded-[4rem] text-center space-y-6 border-white/5 transition-all duration-500",
+                serving === 1 ? "bg-primary/10 border-primary/20 shadow-[0_0_50px_rgba(182,255,42,0.1)]" : "bg-white/5 opacity-60"
+              )}
+            >
+              <div className="relative mx-auto h-32 w-32">
+                <div className={cn(
+                  "h-full w-full rounded-full border-4 flex items-center justify-center font-black text-3xl shadow-2xl overflow-hidden",
+                  serving === 1 ? "border-primary" : "border-white/10"
+                )}>
+                   <div className="h-full w-full bg-slate-900 flex items-center justify-center">{sideA.img}</div>
+                </div>
+                {serving === 1 && (
+                  <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 2 }} className="absolute -top-2 -right-2 h-10 w-10 bg-primary rounded-full border-4 border-[#050A10] flex items-center justify-center shadow-xl">
+                    <Zap className="h-5 w-5 fill-black text-black" />
+                  </motion.div>
+                )}
               </div>
-              <div className="space-y-4">
-                {[
-                  { label: "Smash Success", val: 14, icon: Zap, color: "text-sky-500", bg: "bg-sky-50" },
-                  { label: "Net Points", val: 9, icon: Target, color: "text-indigo-500", bg: "bg-indigo-50" },
-                  { label: "Rally Duration", val: "18s", icon: Timer, color: "text-amber-500", bg: "bg-amber-50" }
-                ].map((s, i) => (
-                  <div key={i} className="flex justify-between items-center p-5 bg-white border border-slate-100 rounded-[1.5rem] shadow-sm group hover:border-sky-500/30 transition-all">
-                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center", s.bg, s.color)}>
-                      <s.icon className="h-5 w-5" />
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-black text-[#0B1F3A] tracking-tighter">{s.val}</p>
-                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{s.label}</p>
+              <div>
+                <h3 className="text-2xl font-black uppercase italic tracking-tighter leading-none">{sideA.name}</h3>
+                <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mt-2">{sideA.country} • RANK #{sideA.rank}</p>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* CENTRAL CORE SCOREBOARD */}
+          <div className="lg:col-span-6">
+            <div className="flex flex-col items-center gap-8">
+              <div className="flex items-center gap-16 relative">
+                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-5 pointer-events-none select-none">
+                    <Tornado className="h-60 w-60 text-white animate-spin-slow" />
+                 </div>
+                 
+                 <motion.div key={`a-${score[0]}`} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex flex-col items-center">
+                    <span className="text-[14rem] font-black font-mono leading-none tracking-tighter text-primary drop-shadow-[0_0_40px_rgba(182,255,42,0.3)]">{score[0]}</span>
+                    {score[0] >= 20 && score[0] > score[1] && <Badge className="bg-primary text-black font-black text-[9px]">MATCH POINT</Badge>}
+                 </motion.div>
+
+                 <div className="h-40 w-1.5 bg-white/5 rotate-[20deg] rounded-full" />
+
+                 <motion.div key={`b-${score[1]}`} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex flex-col items-center">
+                    <span className="text-[14rem] font-black font-mono leading-none tracking-tighter text-white drop-shadow-[0_0_40px_rgba(255,255,255,0.1)]">{score[1]}</span>
+                    {score[1] >= 20 && score[1] > score[0] && <Badge className="bg-white text-black font-black text-[9px]">MATCH POINT</Badge>}
+                 </motion.div>
+              </div>
+
+              <div className="flex gap-4">
+                {sets.map((s, i) => (
+                  <div key={i} className="flex flex-col items-center gap-1">
+                    <span className="text-[8px] font-black text-white/20 uppercase">Set {i+1}</span>
+                    <div className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl font-black text-sm min-w-[80px] text-center">
+                      <span className={cn(s[0] > s[1] ? "text-primary" : "text-white/60")}>{s[0]}</span>
+                      <span className="mx-2 opacity-20">—</span>
+                      <span className={cn(s[1] > s[0] ? "text-sky-500" : "text-white/60")}>{s[1]}</span>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+          </div>
 
-            <div className="glass-panel p-8 rounded-[3.5rem] border-slate-200 bg-[#0B1F3A] text-white space-y-6 relative overflow-hidden">
-               <div className="absolute -right-6 -bottom-6 opacity-10">
-                 <Zap className="h-24 w-24 text-sky-400" />
+          {/* TEAM B CARD */}
+          <div className="lg:col-span-3">
+            <motion.div 
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              className={cn(
+                "glass-panel p-10 rounded-[4rem] text-center space-y-6 border-white/5 transition-all duration-500",
+                serving === 2 ? "bg-sky-500/10 border-sky-500/20 shadow-[0_0_50px_rgba(14,165,233,0.1)]" : "bg-white/5 opacity-60"
+              )}
+            >
+              <div className="relative mx-auto h-32 w-32">
+                <div className={cn(
+                  "h-full w-full rounded-full border-4 flex items-center justify-center font-black text-3xl shadow-2xl overflow-hidden",
+                  serving === 2 ? "border-sky-500" : "border-white/10"
+                )}>
+                   <div className="h-full w-full bg-slate-900 flex items-center justify-center">{sideB.img}</div>
+                </div>
+                {serving === 2 && (
+                  <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 2 }} className="absolute -top-2 -right-2 h-10 w-10 bg-sky-500 rounded-full border-4 border-[#050A10] flex items-center justify-center shadow-xl">
+                    <Zap className="h-5 w-5 fill-white text-white" />
+                  </motion.div>
+                )}
+              </div>
+              <div>
+                <h3 className="text-2xl font-black uppercase italic tracking-tighter leading-none">{sideB.name}</h3>
+                <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mt-2">{sideB.country} • RANK #{sideB.rank}</p>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* SCORING CONTROLS & SERVE INTEL */}
+        <div className="grid lg:grid-cols-12 gap-8 items-stretch">
+          
+          {/* SERVE & COURT INDICATOR */}
+          <div className="lg:col-span-3 glass-panel p-10 rounded-[3.5rem] border-white/5 space-y-8 flex flex-col justify-center">
+            <div className="flex items-center gap-4 border-b border-white/5 pb-6">
+               <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center"><Activity className="h-5 w-5" /></div>
+               <h4 className="text-xs font-black uppercase tracking-[0.2em]">Service Matrix</h4>
+            </div>
+            <div className="space-y-6">
+               <div className="flex justify-between items-center">
+                 <span className="text-[10px] font-bold text-white/40 uppercase">Serving Position</span>
+                 <Badge variant="outline" className="border-primary/30 text-primary font-black">{serving === 1 ? 'LEFT COURT' : 'RIGHT COURT'}</Badge>
                </div>
-               <div className="space-y-1 relative z-10">
-                 <p className="text-[9px] font-black text-sky-400 uppercase tracking-widest">Prediction Engine</p>
-                 <h4 className="text-lg font-black italic">Win Probability</h4>
+               <div className="flex justify-between items-center">
+                 <span className="text-[10px] font-bold text-white/40 uppercase">Rally Count</span>
+                 <span className="text-lg font-black">{history.length + 1}</span>
                </div>
-               <div className="space-y-2 relative z-10">
-                  <div className="flex justify-between text-xs font-black">
-                    <span>Team A</span>
-                    <span className="text-sky-400">72%</span>
-                  </div>
-                  <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-sky-500" style={{ width: '72%' }} />
-                  </div>
+               <div className="flex justify-between items-center">
+                 <span className="text-[10px] font-bold text-white/40 uppercase">Win Probability</span>
+                 <div className="flex items-center gap-2">
+                    <span className="text-lg font-black text-primary">74%</span>
+                    <TrendingUp className="h-4 w-4 text-primary" />
+                 </div>
                </div>
             </div>
           </div>
 
-          <div className="lg:col-span-6 space-y-8">
-            <div className="glass-panel p-12 rounded-[4.5rem] border-slate-200 shadow-[0_40px_100px_rgba(11,31,58,0.12)] flex flex-col items-center gap-12 bg-white relative">
-              <div className="flex justify-between w-full items-center px-6">
-                <div className="flex-1 flex flex-col items-center gap-6">
-                  <div className="relative group">
-                    <div className={cn(
-                      "h-32 w-32 rounded-full border-4 p-1.5 shadow-2xl transition-all duration-500",
-                      serving === 1 ? "border-sky-500 rotate-0" : "border-slate-50 rotate-[-15deg] opacity-50 grayscale"
-                    )}>
-                      <div className="h-full w-full rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-black text-3xl text-[#0B1F3A] shadow-inner">
-                        {teamA.img}
-                      </div>
-                    </div>
-                    {serving === 1 && (
-                      <motion.div 
-                        animate={{ scale: [1, 1.2, 1], y: [0, -5, 0] }} 
-                        transition={{ repeat: Infinity, duration: 2 }} 
-                        className="absolute -top-2 -right-2 h-10 w-10 bg-sky-500 rounded-full border-4 border-white flex items-center justify-center shadow-xl z-20"
-                      >
-                        <Zap className="h-5 w-5 fill-white text-white" />
-                      </motion.div>
-                    )}
-                  </div>
-                  <div className="text-center space-y-1">
-                    <h4 className="font-black text-2xl text-[#0B1F3A] tracking-tighter uppercase italic leading-none">{teamA.name}</h4>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{teamA.sub}</p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col items-center px-12 relative">
-                  <Badge className="bg-[#0B1F3A] text-white border-none font-black text-[10px] tracking-[0.3em] px-6 py-1.5 mb-8 rounded-full shadow-lg">SET {sets.length + 1}</Badge>
-                  <div className="flex items-center gap-14">
-                    <motion.span 
-                      key={`score1-${score[0]}`} 
-                      initial={{ scale: 1.4, opacity: 0, y: 10 }} 
-                      animate={{ scale: 1, opacity: 1, y: 0 }} 
-                      className="text-[11rem] font-black font-mono tabular-nums leading-[0.8] text-sky-600 tracking-tighter drop-shadow-sm"
-                    >
-                      {score[0]}
-                    </motion.span>
-                    <div className="h-32 w-2 bg-slate-100 rotate-[15deg] rounded-full mx-2" />
-                    <motion.span 
-                      key={`score2-${score[1]}`} 
-                      initial={{ scale: 1.4, opacity: 0, y: 10 }} 
-                      animate={{ scale: 1, opacity: 1, y: 0 }} 
-                      className="text-[11rem] font-black font-mono tabular-nums leading-[0.8] text-[#0B1F3A] tracking-tighter drop-shadow-sm"
-                    >
-                      {score[1]}
-                    </motion.span>
-                  </div>
-                  <div className="flex gap-3 mt-10">
-                    {sets.map((s, i) => (
-                      <div key={i} className="flex flex-col items-center">
-                        <span className="text-[8px] font-black text-slate-300 uppercase mb-1">SET {i+1}</span>
-                        <div className="px-5 py-2.5 bg-[#0B1F3A] text-white rounded-2xl font-black text-sm shadow-xl border border-white/10">{s[0]} - {s[1]}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex-1 flex flex-col items-center gap-6">
-                  <div className="relative group">
-                    <div className={cn(
-                      "h-32 w-32 rounded-full border-4 p-1.5 shadow-2xl transition-all duration-500",
-                      serving === 2 ? "border-red-500 rotate-0" : "border-slate-50 rotate-[15deg] opacity-50 grayscale"
-                    )}>
-                      <div className="h-full w-full rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-black text-3xl text-[#0B1F3A] shadow-inner">
-                        {teamB.img}
-                      </div>
-                    </div>
-                    {serving === 2 && (
-                      <motion.div 
-                        animate={{ scale: [1, 1.2, 1], y: [0, -5, 0] }} 
-                        transition={{ repeat: Infinity, duration: 2 }} 
-                        className="absolute -top-2 -right-2 h-10 w-10 bg-red-500 rounded-full border-4 border-white flex items-center justify-center shadow-xl z-20"
-                      >
-                        <Zap className="h-5 w-5 fill-white text-white" />
-                      </motion.div>
-                    )}
-                  </div>
-                  <div className="text-center space-y-1">
-                    <h4 className="font-black text-2xl text-[#0B1F3A] tracking-tighter uppercase italic leading-none">{teamB.name}</h4>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{teamB.sub}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-8 w-full pt-12 border-t border-slate-100">
-                <Button 
-                  onClick={() => updateScore(1)} 
-                  className="h-32 bg-sky-600 text-white font-black text-4xl rounded-[3rem] shadow-[0_25px_50px_rgba(14,165,233,0.3)] hover:scale-[1.03] transition-all hover:bg-sky-500 group"
-                >
-                  <div className="flex flex-col items-center gap-2">
-                    <Zap className="h-6 w-6 fill-white opacity-50 group-hover:scale-125 transition-transform" />
-                    <span>POINT A</span>
-                  </div>
+          {/* MAIN CONTROLS */}
+          <div className="lg:col-span-6 grid grid-cols-2 gap-6">
+             <Button 
+                onClick={() => updateScore(1)}
+                className="h-40 bg-primary/10 border-2 border-primary/20 hover:bg-primary hover:text-black rounded-[3rem] font-black text-4xl shadow-2xl transition-all group"
+             >
+               <div className="flex flex-col items-center gap-2">
+                 <Zap className="h-6 w-6 opacity-40 group-hover:opacity-100 group-hover:scale-125 transition-all" />
+                 POINT SIDE A
+               </div>
+             </Button>
+             <Button 
+                onClick={() => updateScore(2)}
+                className="h-40 bg-white/5 border-2 border-white/10 hover:bg-white hover:text-black rounded-[3rem] font-black text-4xl shadow-2xl transition-all group"
+             >
+               <div className="flex flex-col items-center gap-2">
+                 <Zap className="h-6 w-6 opacity-40 group-hover:opacity-100 group-hover:scale-125 transition-all" />
+                 POINT SIDE B
+               </div>
+             </Button>
+             
+             <div className="col-span-2 grid grid-cols-4 gap-4">
+                <Button onClick={undo} variant="outline" className="h-16 rounded-2xl border-white/10 bg-white/5 font-black text-[10px] tracking-widest gap-2 hover:bg-red-500/20 hover:text-red-400">
+                  <RotateCcw className="h-4 w-4" /> UNDO
                 </Button>
-                <Button 
-                  onClick={() => updateScore(2)} 
-                  className="h-32 bg-[#0B1F3A] text-white font-black text-4xl rounded-[3rem] shadow-[0_25px_50px_rgba(11,31,58,0.2)] hover:scale-[1.03] transition-all hover:bg-[#0B1F3A]/90 group"
-                >
-                  <div className="flex flex-col items-center gap-2">
-                    <Zap className="h-6 w-6 fill-white opacity-50 group-hover:scale-125 transition-transform" />
-                    <span>POINT B</span>
-                  </div>
+                <Button variant="outline" className="h-16 rounded-2xl border-white/10 bg-white/5 font-black text-[10px] tracking-widest gap-2 opacity-50">
+                  <RefreshCw className="h-4 w-4" /> REDO
                 </Button>
-              </div>
-
-              <div className="flex gap-6 w-full max-w-2xl">
-                <Button 
-                  onClick={undo} 
-                  disabled={history.length === 0} 
-                  variant="outline" 
-                  className="flex-1 h-16 rounded-[1.5rem] border-slate-200 font-black text-[11px] tracking-[0.2em] gap-3 hover:bg-red-50 hover:text-red-500 transition-all shadow-sm"
-                >
-                  <RotateCcw className="h-4 w-4" /> UNDO POINT
+                <Button onClick={finalizeSet} className="h-16 rounded-2xl bg-white/10 border border-white/10 font-black text-[10px] tracking-widest gap-2 hover:bg-white hover:text-black">
+                  <History className="h-4 w-4" /> END SET
                 </Button>
-                <Button 
-                  onClick={() => { 
-                    if (score[0] === 0 && score[1] === 0) return;
-                    setSets(p => [...p, [...score]]); 
-                    setScore([0, 0]); 
-                    setHistory([]);
-                    showSuccess(`Set ${sets.length + 1} finalized`); 
-                  }} 
-                  variant="outline" 
-                  className="flex-1 h-16 rounded-[1.5rem] border-slate-200 font-black text-[11px] tracking-[0.2em] gap-3 hover:bg-[#0B1F3A] hover:text-white transition-all shadow-sm"
-                >
-                  <History className="h-4 w-4" /> FINALIZE SET
+                <Button onClick={() => setScore([0, 0])} className="h-16 rounded-2xl bg-white/10 border border-white/10 font-black text-[10px] tracking-widest gap-2 hover:bg-red-500/20 text-red-400">
+                  <RotateCcw className="h-4 w-4" /> RESET
                 </Button>
-              </div>
-            </div>
+             </div>
           </div>
 
-          <div className="lg:col-span-3 space-y-6">
-            <div className="glass-panel p-8 rounded-[3.5rem] border-slate-200 h-[640px] flex flex-col shadow-xl bg-white/50 relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
-                <Radio className="h-40 w-40 text-[#0B1F3A]" />
-              </div>
-              <div className="flex items-center justify-between border-b border-slate-100 pb-6 mb-8 relative z-10">
-                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-sky-500 fill-current" /> AI STUDIO LOG
-                </h3>
-                <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              </div>
-              
-              <div className="flex-1 overflow-y-auto space-y-8 pr-2 custom-scrollbar relative z-10">
-                {[
-                  { type: "Smash Winner", t: "14:42", text: "Team A secures point with a technical baseline kill.", side: 'A' },
-                  { type: "Error", t: "14:40", text: "Unforced net error by Team B. Symmetrical shift detected.", side: 'A' },
-                  { type: "Rally Intel", t: "14:38", text: "24-shot intensive rally. Both sides maintaining 92% stamina.", side: 'B' },
-                  { type: "Tactical", t: "14:35", text: "Team B shifting to aggressive backhand defense pattern.", side: 'B' }
-                ].map((log, i) => (
-                  <div key={i} className="space-y-3 relative group">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <div className={cn("h-1.5 w-1.5 rounded-full", log.side === 'A' ? "bg-sky-500" : "bg-red-500")} />
-                        <span className="text-[11px] font-black text-[#0B1F3A] group-hover:text-sky-600 transition-colors uppercase">{log.type}</span>
-                      </div>
-                      <span className="text-[8px] font-bold text-slate-300 font-mono">{log.t}</span>
-                    </div>
-                    <p className="text-xs font-bold text-slate-500 leading-relaxed border-l-2 border-slate-100 pl-4 group-hover:border-sky-500 transition-all">{log.text}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="pt-8 relative z-10">
-                <Button className="w-full h-14 bg-slate-50 border border-slate-200 text-[#0B1F3A] font-black text-[10px] uppercase tracking-widest rounded-2xl hover:bg-[#0B1F3A] hover:text-white transition-all shadow-sm">
-                  EXPORT TELEMETRY DATA
-                </Button>
-              </div>
+          {/* AI COMMENTARY FEED */}
+          <div className="lg:col-span-3 glass-panel p-10 rounded-[3.5rem] border-white/5 h-full flex flex-col gap-8">
+            <div className="flex items-center justify-between border-b border-white/5 pb-6">
+               <h4 className="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                 <Zap className="h-4 w-4 text-primary fill-current" /> AI ANALYTICS LOG
+               </h4>
+               <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+            </div>
+            <div className="flex-1 overflow-y-auto space-y-6 pr-2 custom-scrollbar">
+               {[
+                 { t: "14:42", msg: "Strategic serve placement forcing high returns.", type: "intel" },
+                 { t: "14:40", msg: "Team A maintaining high smash accuracy (92%).", type: "stat" },
+                 { t: "14:38", msg: "Match point potential detected for Axelsen.", type: "alert" },
+               ].map((log, i) => (
+                 <div key={i} className="space-y-2 border-l-2 border-white/5 pl-4 hover:border-primary transition-all group">
+                    <span className="text-[8px] font-black text-white/20 font-mono">{log.t}</span>
+                    <p className="text-xs font-bold text-white/60 leading-relaxed group-hover:text-white transition-colors">{log.msg}</p>
+                 </div>
+               ))}
             </div>
           </div>
         </div>
+
+        {/* LIVE STATS ANALYTICS GRID */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-6">
+           {[
+             { l: "Total Rallies", v: "84", i: Tornado },
+             { l: "Longest Rally", v: "42s", i: Timer },
+             { l: "Smash Winners", v: "18", i: Zap },
+             { l: "Unforced Errors", v: "12", i: AlertTriangle },
+             { l: "Drop Shots", v: "24", i: Target },
+             { l: "Service Faults", v: "2", i: AlertTriangle },
+             { l: "Streak", v: "6W", i: Flame },
+           ].map((stat, i) => (
+             <div key={i} className="glass-panel p-6 rounded-[2.5rem] border-white/5 flex flex-col items-center text-center gap-4 hover:border-primary/30 transition-all group">
+                <div className="h-12 w-12 rounded-2xl bg-white/5 flex items-center justify-center text-white/40 group-hover:bg-primary group-hover:text-black transition-all">
+                  <stat.i className="h-5 w-5" />
+                </div>
+                <div>
+                   <p className="text-2xl font-black tracking-tighter">{stat.v}</p>
+                   <p className="text-[8px] font-black text-white/40 uppercase tracking-widest">{stat.l}</p>
+                </div>
+             </div>
+           ))}
+        </div>
+
+        {/* MOMENTUM & INSIGHTS */}
+        <div className="glass-panel p-12 rounded-[4.5rem] border-white/5 bg-gradient-to-br from-white/5 to-transparent relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+            <BarChart3 className="h-40 w-40" />
+          </div>
+          <div className="grid md:grid-cols-2 gap-20 relative z-10">
+             <div className="space-y-6">
+               <h4 className="text-sm font-black uppercase tracking-[0.3em] flex items-center gap-3">
+                 <Tornado className="h-5 w-5 text-primary" /> Tactical Momentum
+               </h4>
+               <div className="h-24 bg-white/5 rounded-[2rem] border border-white/10 p-6 flex items-center gap-8">
+                  <div className="flex-1 space-y-3">
+                    <div className="flex justify-between text-[10px] font-black uppercase opacity-60">
+                      <span>Side A Dominance</span>
+                      <span>82%</span>
+                    </div>
+                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                      <motion.div initial={{ width: 0 }} animate={{ width: '82%' }} className="h-full bg-primary" />
+                    </div>
+                  </div>
+                  <div className="h-10 w-px bg-white/10" />
+                  <div className="flex-1 space-y-3">
+                    <div className="flex justify-between text-[10px] font-black uppercase opacity-60">
+                      <span>Side B Pressure</span>
+                      <span>High</span>
+                    </div>
+                    <div className="flex gap-1.5">
+                      {[1, 2, 3, 4, 5].map(j => <div key={j} className={cn("h-2 flex-1 rounded-full", j <= 4 ? "bg-red-500" : "bg-white/10")} />)}
+                    </div>
+                  </div>
+               </div>
+             </div>
+
+             <div className="space-y-6">
+                <h4 className="text-sm font-black uppercase tracking-[0.3em] flex items-center gap-3">
+                  <Zap className="h-5 w-5 text-primary" /> Neural Insights
+                </h4>
+                <p className="text-sm font-medium text-white/60 leading-relaxed italic">
+                  "Current data indicates a high probability of a baseline attack shift from Side A. Side B's recovery time has dropped by 12% in the last 10 points."
+                </p>
+                <div className="flex gap-4">
+                  <Badge className="bg-primary/20 text-primary border-none text-[8px] font-black uppercase">Pressure Alert</Badge>
+                  <Badge className="bg-sky-500/20 text-sky-400 border-none text-[8px] font-black uppercase">Stamina Warning</Badge>
+                </div>
+             </div>
+          </div>
+        </div>
       </main>
+
+      {/* FINAL MATCH SUMMARY OVERLAY */}
+      <AnimatePresence>
+        {isFinished && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            className="fixed inset-0 z-[100] bg-[#050A10]/95 backdrop-blur-3xl flex items-center justify-center p-6"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 40 }} 
+              animate={{ scale: 1, y: 0 }} 
+              className="max-w-4xl w-full glass-panel p-20 rounded-[5rem] border-white/10 text-center space-y-12 relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 p-20 opacity-5 pointer-events-none"><Trophy className="h-80 w-80 text-primary" /></div>
+              
+              <div className="space-y-4 relative z-10">
+                <div className="mx-auto h-20 w-20 rounded-3xl bg-primary text-black flex items-center justify-center shadow-[0_0_50px_rgba(182,255,42,0.3)]">
+                  <Trophy className="h-10 w-10" />
+                </div>
+                <h2 className="text-6xl font-black italic tracking-tighter uppercase leading-none">Match Complete</h2>
+                <p className="text-primary font-black uppercase tracking-[0.5em] text-xs">Intelligence Symmetrically Finalized</p>
+              </div>
+
+              <div className="flex items-center justify-center gap-20 py-12 border-y border-white/5 relative z-10">
+                 <div className="text-right">
+                    <p className="text-4xl font-black">{sideA.name}</p>
+                    <p className="text-sm font-bold text-white/40 uppercase tracking-widest">{sideA.country}</p>
+                 </div>
+                 <div className="flex flex-col items-center">
+                    <span className="text-7xl font-black font-mono tracking-tighter text-primary">2 - 1</span>
+                    <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mt-2">Sets Won</span>
+                 </div>
+                 <div className="text-left">
+                    <p className="text-4xl font-black">{sideB.name}</p>
+                    <p className="text-sm font-bold text-white/40 uppercase tracking-widest">{sideB.country}</p>
+                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6 relative z-10">
+                <Button onClick={() => navigate('/court')} className="h-20 bg-primary text-black font-black text-xl rounded-3xl shadow-2xl hover:bg-[#b6ff2a]/90">
+                  RETURN TO COURT
+                </Button>
+                <Button className="h-20 bg-white/5 text-white border border-white/10 font-black text-xl rounded-3xl hover:bg-white/10">
+                  GENERATE HIGHLIGHTS
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
-
-const Loader2 = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-  </svg>
-);
 
 export default ScoringPage;

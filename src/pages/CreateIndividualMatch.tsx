@@ -19,11 +19,94 @@ import { showSuccess, showError } from '@/utils/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
+// Stable component to prevent focus loss during typing
+const PlayerSlot = ({ 
+  id, 
+  label, 
+  selectedPlayer, 
+  searchQuery, 
+  onSearchChange, 
+  onSelect, 
+  onRemove,
+  error 
+}: { 
+  id: string; 
+  label: string;
+  selectedPlayer: Player | null;
+  searchQuery: string;
+  onSearchChange: (val: string) => void;
+  onSelect: (player: Player) => void;
+  onRemove: () => void;
+  error?: string;
+}) => (
+  <div className="space-y-3">
+    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">{label}</Label>
+    <div className="relative">
+      {!selectedPlayer ? (
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
+          <Input 
+            placeholder="Search Smash ID (e.g. Smash#01)" 
+            className={cn(
+              "h-14 bg-white border-slate-100 rounded-2xl pl-11 font-bold focus:border-sky-500 shadow-sm",
+              error && "border-red-500 bg-red-50/10"
+            )}
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+          />
+          <AnimatePresence>
+            {searchQuery && (
+              <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-[2rem] shadow-2xl overflow-hidden p-2">
+                {playersDatabase.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())).length > 0 ? (
+                  playersDatabase.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 4).map(p => (
+                    <button key={p.id} onClick={() => onSelect(p)} className="w-full p-3 flex items-center gap-4 hover:bg-slate-50 rounded-2xl transition-all text-left group">
+                      <div className="h-12 w-12 rounded-full bg-[#0B1F3A] flex items-center justify-center text-[10px] font-black text-sky-500 border border-slate-100">{p.img}</div>
+                      <div className="flex-1">
+                        <p className="font-black text-sm text-[#0B1F3A] group-hover:text-sky-600 transition-colors">{p.name}</p>
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Rank #{p.rank} • {p.country}</p>
+                        <p className="text-[8px] font-bold text-slate-300 uppercase">{p.state} Badminton Club</p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-slate-200 group-hover:text-sky-500" />
+                    </button>
+                  ))
+                ) : (
+                  <div className="p-6 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">No player found for this Smash ID</div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+          {error && <p className="text-[10px] font-bold text-red-500 mt-1.5 ml-1">{error}</p>}
+        </div>
+      ) : (
+        <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="h-24 bg-[#0B1F3A] rounded-[2rem] p-5 flex items-center justify-between border border-sky-500/20 shadow-2xl">
+          <div className="flex items-center gap-4">
+            <div className="h-14 w-14 rounded-full bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sm font-black text-sky-400 shadow-inner">
+              {selectedPlayer?.img}
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <p className="font-black text-white text-lg leading-tight uppercase italic">{selectedPlayer?.name}</p>
+                <ShieldCheck className="h-4 w-4 text-sky-500" />
+              </div>
+              <p className="text-[9px] font-black text-sky-400 uppercase tracking-widest">BWF Certified • {selectedPlayer?.country}</p>
+            </div>
+          </div>
+          <button onClick={onRemove} className="h-10 w-10 rounded-xl bg-white/5 hover:bg-red-500/20 text-white/40 hover:text-red-400 transition-all flex items-center justify-center">
+            <X className="h-5 w-5" />
+          </button>
+        </motion.div>
+      )}
+    </div>
+  </div>
+);
+
 const CreateIndividualMatch = () => {
   const navigate = useNavigate();
   const [isInitializing, setIsInitializing] = useState(false);
   const [matchType, setMatchType] = useState<'singles' | 'doubles' | 'mixed'>('singles');
-  const [searchQueries, setSearchQueries] = useState<Record<string, string>>({});
+  const [searchQueries, setSearchQueries] = useState<Record<string, string>>({
+    p1: "", p2: "", tA1: "", tA2: "", tB1: "", tB2: ""
+  });
   const [selectedPlayers, setSelectedPlayers] = useState<Record<string, Player | null>>({
     p1: null, p2: null, tA1: null, tA2: null, tB1: null, tB2: null
   });
@@ -50,7 +133,6 @@ const CreateIndividualMatch = () => {
     if (!formData.court) newErrors.court = "Court number is required";
     if (!formData.time) newErrors.time = "Start time is required";
 
-    // Player validations
     if (matchType === 'singles') {
       if (!selectedPlayers.p1) newErrors.p1 = "Player 1 required";
       if (!selectedPlayers.p2) newErrors.p2 = "Player 2 required";
@@ -61,19 +143,11 @@ const CreateIndividualMatch = () => {
       if (!selectedPlayers.tB2) newErrors.tB2 = "Team B Player 2 required";
     }
 
-    // Court occupancy check (Simulated)
-    const existingMatches = Object.keys(localStorage).filter(k => k.startsWith('live_'));
-    const isOccupied = existingMatches.some(k => {
-      const data = JSON.parse(localStorage.getItem(k) || "{}");
-      return data.court === formData.court && data.status === 'live';
-    });
-    if (isOccupied) newErrors.court = "Court already occupied with a live match";
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const selectPlayer = (id: string, player: Player) => {
+  const handleSelect = (id: string, player: Player) => {
     const isAlreadyOnCourt = Object.entries(selectedPlayers).some(([slot, p]) => p?.id === player.id);
     if (isAlreadyOnCourt) {
       showError("Player cannot be selected on both sides");
@@ -96,7 +170,6 @@ const CreateIndividualMatch = () => {
 
     setIsInitializing(true);
     
-    // Simulate Network Check
     const networkSuccess = Math.random() > 0.05;
     if (!networkSuccess) {
       setTimeout(() => {
@@ -122,68 +195,6 @@ const CreateIndividualMatch = () => {
       navigate(`/scoring/${matchId}`);
     }, 1500);
   };
-
-  const PlayerSlot = ({ id, label }: { id: string; label: string }) => (
-    <div className="space-y-3">
-      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">{label}</Label>
-      <div className="relative">
-        {!selectedPlayers[id] ? (
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
-            <Input 
-              placeholder="Search Smash ID (e.g. Smash#01)" 
-              className={cn(
-                "h-14 bg-white border-slate-100 rounded-2xl pl-11 font-bold focus:border-sky-500 shadow-sm",
-                errors[id] && "border-red-500 bg-red-50/10"
-              )}
-              value={searchQueries[id] || ""}
-              onChange={(e) => setSearchQueries(prev => ({ ...prev, [id]: e.target.value }))}
-            />
-            <AnimatePresence>
-              {searchQueries[id] && (
-                <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-[2rem] shadow-2xl overflow-hidden p-2">
-                  {playersDatabase.filter(p => p.name.toLowerCase().includes(searchQueries[id].toLowerCase())).length > 0 ? (
-                    playersDatabase.filter(p => p.name.toLowerCase().includes(searchQueries[id].toLowerCase())).slice(0, 4).map(p => (
-                      <button key={p.id} onClick={() => selectPlayer(id, p)} className="w-full p-3 flex items-center gap-4 hover:bg-slate-50 rounded-2xl transition-all text-left group">
-                        <div className="h-12 w-12 rounded-full bg-[#0B1F3A] flex items-center justify-center text-[10px] font-black text-sky-500 border border-slate-100">{p.img}</div>
-                        <div className="flex-1">
-                          <p className="font-black text-sm text-[#0B1F3A] group-hover:text-sky-600 transition-colors">{p.name}</p>
-                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Rank #{p.rank} • {p.country}</p>
-                          <p className="text-[8px] font-bold text-slate-300 uppercase">{p.state} Badminton Club</p>
-                        </div>
-                        <ChevronRight className="h-4 w-4 text-slate-200 group-hover:text-sky-500" />
-                      </button>
-                    ))
-                  ) : (
-                    <div className="p-6 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">No player found for this Smash ID</div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-            {errors[id] && <p className="text-[10px] font-bold text-red-500 mt-1.5 ml-1">{errors[id]}</p>}
-          </div>
-        ) : (
-          <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="h-24 bg-[#0B1F3A] rounded-[2rem] p-5 flex items-center justify-between border border-sky-500/20 shadow-2xl">
-            <div className="flex items-center gap-4">
-              <div className="h-14 w-14 rounded-full bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sm font-black text-sky-400 shadow-inner">
-                {selectedPlayers[id]?.img}
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <p className="font-black text-white text-lg leading-tight uppercase italic">{selectedPlayers[id]?.name}</p>
-                  <ShieldCheck className="h-4 w-4 text-sky-500" />
-                </div>
-                <p className="text-[9px] font-black text-sky-400 uppercase tracking-widest">BWF Certified • {selectedPlayers[id]?.country}</p>
-              </div>
-            </div>
-            <button onClick={() => setSelectedPlayers(p => ({ ...p, [id]: null }))} className="h-10 w-10 rounded-xl bg-white/5 hover:bg-red-500/20 text-white/40 hover:text-red-400 transition-all flex items-center justify-center">
-              <X className="h-5 w-5" />
-            </button>
-          </motion.div>
-        )}
-      </div>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-slate-50 selection:bg-sky-500/30">
@@ -214,9 +225,8 @@ const CreateIndividualMatch = () => {
         </div>
 
         <div className="grid lg:grid-cols-12 gap-8 items-start">
-          {/* Section 1: Match Setup */}
           <div className="lg:col-span-4 space-y-8">
-            <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 border-slate-200 shadow-xl shadow-slate-900/5 relative overflow-hidden">
+            <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 border-slate-200 shadow-xl relative overflow-hidden">
               <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
                 <Target className="h-40 w-40 text-[#0B1F3A]" />
               </div>
@@ -280,7 +290,6 @@ const CreateIndividualMatch = () => {
                     <Select value={formData.sets} onValueChange={(v: any) => setFormData({...formData, sets: v})}>
                       <SelectTrigger className="h-14 bg-slate-50 border-slate-100 rounded-2xl font-bold"><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="1">1 Set</SelectItem>
                         <SelectItem value="3">3 Sets</SelectItem>
                         <SelectItem value="5">5 Sets</SelectItem>
                       </SelectContent>
@@ -302,7 +311,6 @@ const CreateIndividualMatch = () => {
             </div>
           </div>
 
-          {/* Section 2: Player Selection */}
           <div className="lg:col-span-8 space-y-8">
             <div className="glass-panel p-10 rounded-[3.5rem] space-y-10 border-slate-200 shadow-xl min-h-[500px]">
               <div className="flex items-center justify-between border-b border-slate-100 pb-6">
@@ -318,7 +326,6 @@ const CreateIndividualMatch = () => {
               <div className="grid lg:grid-cols-2 gap-12 relative">
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-100 font-black text-[12rem] italic pointer-events-none select-none opacity-50">VS</div>
                 
-                {/* Side A */}
                 <div className="space-y-8 relative z-10">
                   <div className="flex items-center gap-3">
                     <div className="h-1 w-8 bg-sky-500 rounded-full" />
@@ -326,16 +333,42 @@ const CreateIndividualMatch = () => {
                   </div>
                   
                   {matchType === 'singles' ? (
-                    <PlayerSlot id="p1" label="Player 01 Smash ID" />
+                    <PlayerSlot 
+                      id="p1" 
+                      label="Player 01 Smash ID" 
+                      selectedPlayer={selectedPlayers.p1} 
+                      searchQuery={searchQueries.p1}
+                      onSearchChange={(v) => setSearchQueries(prev => ({ ...prev, p1: v }))}
+                      onSelect={(p) => handleSelect('p1', p)}
+                      onRemove={() => setSelectedPlayers(prev => ({ ...prev, p1: null }))}
+                      error={errors.p1}
+                    />
                   ) : (
                     <div className="space-y-6">
-                      <PlayerSlot id="tA1" label="Member 01 Smash ID" />
-                      <PlayerSlot id="tA2" label="Member 02 Smash ID" />
+                      <PlayerSlot 
+                        id="tA1" 
+                        label="Member 01 Smash ID" 
+                        selectedPlayer={selectedPlayers.tA1} 
+                        searchQuery={searchQueries.tA1}
+                        onSearchChange={(v) => setSearchQueries(prev => ({ ...prev, tA1: v }))}
+                        onSelect={(p) => handleSelect('tA1', p)}
+                        onRemove={() => setSelectedPlayers(prev => ({ ...prev, tA1: null }))}
+                        error={errors.tA1}
+                      />
+                      <PlayerSlot 
+                        id="tA2" 
+                        label="Member 02 Smash ID" 
+                        selectedPlayer={selectedPlayers.tA2} 
+                        searchQuery={searchQueries.tA2}
+                        onSearchChange={(v) => setSearchQueries(prev => ({ ...prev, tA2: v }))}
+                        onSelect={(p) => handleSelect('tA2', p)}
+                        onRemove={() => setSelectedPlayers(prev => ({ ...prev, tA2: null }))}
+                        error={errors.tA2}
+                      />
                     </div>
                   )}
                 </div>
 
-                {/* Side B */}
                 <div className="space-y-8 relative z-10 text-right">
                   <div className="flex items-center justify-end gap-3">
                     <span className="text-xs font-black text-[#0B1F3A] uppercase tracking-widest italic">SIDE B INTELLIGENCE</span>
@@ -343,18 +376,44 @@ const CreateIndividualMatch = () => {
                   </div>
 
                   {matchType === 'singles' ? (
-                    <PlayerSlot id="p2" label="Player 02 Smash ID" />
+                    <PlayerSlot 
+                      id="p2" 
+                      label="Player 02 Smash ID" 
+                      selectedPlayer={selectedPlayers.p2} 
+                      searchQuery={searchQueries.p2}
+                      onSearchChange={(v) => setSearchQueries(prev => ({ ...prev, p2: v }))}
+                      onSelect={(p) => handleSelect('p2', p)}
+                      onRemove={() => setSelectedPlayers(prev => ({ ...prev, p2: null }))}
+                      error={errors.p2}
+                    />
                   ) : (
                     <div className="space-y-6">
-                      <PlayerSlot id="tB1" label="Member 01 Smash ID" />
-                      <PlayerSlot id="tB2" label="Member 02 Smash ID" />
+                      <PlayerSlot 
+                        id="tB1" 
+                        label="Member 01 Smash ID" 
+                        selectedPlayer={selectedPlayers.tB1} 
+                        searchQuery={searchQueries.tB1}
+                        onSearchChange={(v) => setSearchQueries(prev => ({ ...prev, tB1: v }))}
+                        onSelect={(p) => handleSelect('tB1', p)}
+                        onRemove={() => setSelectedPlayers(prev => ({ ...prev, tB1: null }))}
+                        error={errors.tB1}
+                      />
+                      <PlayerSlot 
+                        id="tB2" 
+                        label="Member 02 Smash ID" 
+                        selectedPlayer={selectedPlayers.tB2} 
+                        searchQuery={searchQueries.tB2}
+                        onSearchChange={(v) => setSearchQueries(prev => ({ ...prev, tB2: v }))}
+                        onSelect={(p) => handleSelect('tB2', p)}
+                        onRemove={() => setSelectedPlayers(prev => ({ ...prev, tB2: null }))}
+                        error={errors.tB2}
+                      />
                     </div>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Section 3: Match Settings */}
             <div className="grid md:grid-cols-2 gap-8">
               <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 border-slate-200 shadow-xl">
                  <div className="flex items-center gap-4 border-b border-slate-100 pb-6">
@@ -404,7 +463,7 @@ const CreateIndividualMatch = () => {
 
                 <div className="space-y-6">
                   <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-sky-400 ml-1">Initial Service Node</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-sky-400 ml-1">Initial Server</Label>
                     <div className="grid grid-cols-2 gap-2">
                       <button 
                         onClick={() => setFormData({...formData, server: 'sideA'})}
@@ -422,19 +481,19 @@ const CreateIndividualMatch = () => {
                   </div>
 
                   <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-sky-400 ml-1">Side Allocation (Team A)</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-sky-400 ml-1">Court Allocation</Label>
                     <div className="grid grid-cols-2 gap-2">
                       <button 
                         onClick={() => setFormData({...formData, side: 'left'})}
                         className={cn("h-12 rounded-xl border-2 font-black text-[10px] transition-all", formData.side === 'left' ? "border-sky-500 bg-sky-500/20 text-white" : "border-white/10 text-white/40")}
                       >
-                        LEFT COURT
+                        LEFT SIDE
                       </button>
                       <button 
                         onClick={() => setFormData({...formData, side: 'right'})}
                         className={cn("h-12 rounded-xl border-2 font-black text-[10px] transition-all", formData.side === 'right' ? "border-sky-500 bg-sky-500/20 text-white" : "border-white/10 text-white/40")}
                       >
-                        RIGHT COURT
+                        RIGHT SIDE
                       </button>
                     </div>
                   </div>
@@ -442,20 +501,13 @@ const CreateIndividualMatch = () => {
               </div>
             </div>
 
-            {/* Final Action */}
             <div className="pt-4">
               <Button 
                 onClick={handleStart}
                 disabled={isInitializing}
                 className="w-full h-24 bg-[#0B1F3A] text-white font-black text-3xl rounded-[2.5rem] shadow-[0_25px_50px_rgba(11,31,58,0.2)] hover:bg-sky-500 transition-all group flex items-center justify-center gap-6"
               >
-                {isInitializing ? (
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                ) : (
-                  <>
-                    INITIALIZE MATCH <Zap className="h-8 w-8 fill-sky-400 text-sky-400 group-hover:scale-125 transition-transform" />
-                  </>
-                )}
+                {isInitializing ? <Loader2 className="h-8 w-8 animate-spin" /> : "START MATCH"}
               </Button>
               <div className="flex items-center justify-center gap-2 mt-6 text-slate-400">
                 <ShieldCheck className="h-4 w-4" />
