@@ -5,7 +5,7 @@ export const MatchService = {
   async createMatch(matchData: Partial<Match>) {
     return apiRequest('/matches', {
       method: 'POST',
-      body: JSON.stringify(match)
+      body: JSON.stringify(matchData)
     });
   },
 
