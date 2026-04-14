@@ -22,14 +22,14 @@ const TournamentDetail = () => {
       <Navbar />
       
       {/* Hero Header */}
-      <div className="relative h-[450px] w-full overflow-hidden bg-[#0B1F3A]">
+      <div className="relative h-[480px] w-full overflow-hidden bg-[#0B1F3A]">
         {/* Animated Background Pattern */}
-        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+        <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0B1F3A] via-[#0B1F3A]/60 to-transparent z-10" />
         
         <img 
           src="https://images.unsplash.com/photo-1626224580175-340ad0e3a242?q=80&w=2070&auto=format&fit=crop" 
-          className="w-full h-full object-cover opacity-40 scale-105"
+          className="w-full h-full object-cover opacity-50 scale-105"
           alt="Badminton court"
         />
         
@@ -57,10 +57,13 @@ const TournamentDetail = () => {
                 </div>
               </div>
               
-              <h1 className="text-6xl md:text-8xl font-black tracking-tighter uppercase italic text-white leading-[0.85]">
-                BWF WORLD TOUR <br />
-                <span className="text-sky-500 drop-shadow-[0_0_30px_rgba(14,165,233,0.3)]">FINALS 2024</span>
-              </h1>
+              <div className="space-y-2">
+                <h1 className="text-6xl md:text-8xl font-black tracking-tighter uppercase italic text-white leading-[0.85]">
+                  BWF WORLD TOUR <br />
+                  <span className="text-sky-500 drop-shadow-[0_0_30px_rgba(14,165,233,0.3)]">FINALS 2024</span>
+                </h1>
+                <div className="h-2 w-32 bg-sky-500 rounded-full mt-4" />
+              </div>
               
               <div className="flex flex-wrap items-center gap-8 text-xs text-white/70 font-black uppercase tracking-[0.2em]">
                 <span className="flex items-center gap-2.5 bg-white/5 px-4 py-2 rounded-xl border border-white/10"><Calendar className="h-4 w-4 text-sky-500" /> Dec 12 - 18, 2024</span>
@@ -70,7 +73,7 @@ const TournamentDetail = () => {
             </div>
             
             <div className="lg:col-span-4 flex w-full lg:justify-end gap-4">
-              <Link to="/broadcast/live-active" className="flex-1 lg:flex-none">
+              <Link to="/live-match/active" className="flex-1 lg:flex-none">
                 <Button size="lg" className="w-full lg:w-auto bg-white text-[#0B1F3A] font-black px-10 h-20 rounded-[2rem] shadow-2xl hover:bg-sky-500 hover:text-white transition-all group">
                   WATCH INTEL <Play className="ml-3 h-6 w-6 fill-current group-hover:scale-110 transition-transform" />
                 </Button>
@@ -117,7 +120,7 @@ const TournamentDetail = () => {
                 <div className="space-y-8">
                   <BracketNode match={{ id: '1', team1: 'Viktor Axelsen', team2: 'Lee Zii Jia', score1: 2, score2: 0, winner: 1, status: 'completed' }} />
                   <BracketNode match={{ id: '2', team1: 'Shi Yuqi', team2: 'Anders Antonsen', score1: 1, score2: 2, winner: 2, status: 'completed' }} />
-                  <div className="cursor-pointer" onClick={() => navigate('/broadcast/live-active')}>
+                  <div className="cursor-pointer" onClick={() => navigate('/live-match/active')}>
                     <BracketNode match={{ id: '3', team1: 'Jonatan Christie', team2: 'Kunlavut Vitidsarn', status: 'live' }} />
                   </div>
                   <BracketNode match={{ id: '4', team1: 'Loh Kean Yew', team2: 'Anthony Ginting', time: '18:30', status: 'scheduled' }} />
@@ -164,8 +167,6 @@ const TournamentDetail = () => {
               </div>
             </div>
           </TabsContent>
-
-          {/* Other tabs content (Players, Standings) would go here with similar high-quality styling */}
         </Tabs>
       </main>
     </div>
