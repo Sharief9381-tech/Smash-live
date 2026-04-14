@@ -8,7 +8,8 @@ import {
   Zap, RotateCcw, Activity, 
   Target, Trophy, ChevronLeft, 
   BarChart3, RefreshCw, StopCircle,
-  TrendingUp, Star, MoreHorizontal
+  TrendingUp, Star, MoreHorizontal,
+  History
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
