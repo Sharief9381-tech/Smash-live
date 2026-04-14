@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Zap, RotateCcw, Activity, 
   Target, History, StopCircle, Clock,
-  ChevronLeft, Flame, TrendingUp, AlertTriangle,
+  ChevronLeft, ChevronRight, Flame, TrendingUp, AlertTriangle,
   Radio, ShieldCheck, Trophy, MapPin, Share2,
   Tornado, Users, BarChart3, Timer, RefreshCw,
   Settings, Camera, ArrowLeft, Delete, Info
