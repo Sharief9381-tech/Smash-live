@@ -8,7 +8,7 @@ import {
   Zap, RotateCcw, Activity, 
   Target, History, StopCircle, Clock,
   ChevronLeft, Flame, TrendingUp, AlertTriangle,
-  Radio, ShieldCheck, Trophy, MapPin
+  Radio, ShieldCheck, Trophy, MapPin, Timer
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
