@@ -5,7 +5,9 @@ import cors from 'cors';
 import helmet from 'helmet';
 import connectDB from './database/connection';
 import matchRoutes from './routes/match.routes';
+import authRoutes from './routes/auth.routes';
 import { config } from './config';
+import { initMatchSockets } from './sockets/match.socket';
 
 const app = express();
 const httpServer = createServer(app);
@@ -22,20 +24,14 @@ app.use(express.json());
 connectDB();
 
 // API Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/matches', matchRoutes);
 
-// Sockets
-io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
-  
-  socket.on('join:match', (matchId) => {
-    socket.join(matchId);
-    console.log(`Socket ${socket.id} joined room ${matchId}`);
-  });
-});
+// Socket Logic
+initMatchSockets(io);
 
 app.set('io', io);
 
 httpServer.listen(config.port, () => {
-  console.log(`Server running on port ${config.port}`);
+  console.log(`🚀 SmashLive Backend running on port ${config.port}`);
 });
