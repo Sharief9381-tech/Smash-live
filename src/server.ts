@@ -4,6 +4,8 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 import helmet from 'helmet';
 import connectDB from './database/connection';
+import matchRoutes from './routes/match.routes';
+import { config } from './config';
 
 const app = express();
 const httpServer = createServer(app);
@@ -19,21 +21,21 @@ app.use(express.json());
 // Database
 connectDB();
 
+// API Routes
+app.use('/api/matches', matchRoutes);
+
 // Sockets
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
   
   socket.on('join:match', (matchId) => {
     socket.join(matchId);
+    console.log(`Socket ${socket.id} joined room ${matchId}`);
   });
 });
 
 app.set('io', io);
 
-// Routes would be imported here
-// app.use('/api/matches', matchRoutes);
-
-const PORT = process.env.PORT || 5000;
-httpServer.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+httpServer.listen(config.port, () => {
+  console.log(`Server running on port ${config.port}`);
 });
