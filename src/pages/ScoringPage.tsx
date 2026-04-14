@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +8,7 @@ import {
   Zap, RotateCcw, Activity, 
   Target, History, StopCircle, Clock,
   ChevronLeft, Flame, TrendingUp, AlertTriangle,
-  Radio, ShieldCheck
+  Radio, ShieldCheck, Trophy, MapPin
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -35,7 +35,7 @@ const ScoringPage = () => {
       showError("Match session not found");
       navigate('/broadcast/center');
     }
-  }, [matchId]);
+  }, [matchId, navigate]);
 
   useEffect(() => {
     const timer = setInterval(() => setDuration(p => p + 1), 1000);
@@ -55,7 +55,6 @@ const ScoringPage = () => {
     setScore(next);
     setServing(side);
     
-    // Auto-win set detection (BWF Rules: 21 points, 2 lead, cap at 30)
     if ((next[side-1] >= 21 && Math.abs(next[0] - next[1]) >= 2) || next[side-1] === 30) {
       showSuccess(`Set won by Side ${side === 1 ? 'A' : 'B'}`);
     }
@@ -94,7 +93,6 @@ const ScoringPage = () => {
     <div className="min-h-screen bg-slate-50 text-[#0B1F3A]">
       <Navbar />
       
-      {/* Dynamic technical header */}
       <div className="bg-white border-b border-slate-200 py-6">
         <div className="container px-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-6">
@@ -111,7 +109,7 @@ const ScoringPage = () => {
                 <span className="h-1 w-1 bg-slate-200 rounded-full" />
                 <span className="flex items-center gap-1.5"><MapPin className="h-3 w-3 text-sky-500" /> Court {matchData.court}</span>
                 <span className="h-1 w-1 bg-slate-200 rounded-full" />
-                <span className="flex items-center gap-1.5 text-[#0B1F3A]"><ShieldCheck className="h-3 w-3 text-sky-500" /> Session: {matchId.slice(-8)}</span>
+                <span className="flex items-center gap-1.5 text-[#0B1F3A]"><ShieldCheck className="h-3 w-3 text-sky-500" /> Session: {matchId?.slice(-8)}</span>
               </div>
             </div>
           </div>
@@ -138,8 +136,6 @@ const ScoringPage = () => {
 
       <main className="container px-6 py-8 space-y-8">
         <div className="grid lg:grid-cols-12 gap-8 items-start">
-          
-          {/* Intelligence Modules (Left) */}
           <div className="lg:col-span-3 space-y-6">
             <div className="glass-panel p-8 rounded-[3.5rem] border-slate-200 space-y-8 shadow-xl bg-white/50">
               <div className="flex items-center justify-between border-b border-slate-100 pb-6">
@@ -187,12 +183,9 @@ const ScoringPage = () => {
             </div>
           </div>
 
-          {/* Central Scoring Engine */}
           <div className="lg:col-span-6 space-y-8">
             <div className="glass-panel p-12 rounded-[4.5rem] border-slate-200 shadow-[0_40px_100px_rgba(11,31,58,0.12)] flex flex-col items-center gap-12 bg-white relative">
               <div className="flex justify-between w-full items-center px-6">
-                
-                {/* Side A Profiler */}
                 <div className="flex-1 flex flex-col items-center gap-6">
                   <div className="relative group">
                     <div className={cn(
@@ -219,7 +212,6 @@ const ScoringPage = () => {
                   </div>
                 </div>
 
-                {/* Technical Score Core */}
                 <div className="flex flex-col items-center px-12 relative">
                   <Badge className="bg-[#0B1F3A] text-white border-none font-black text-[10px] tracking-[0.3em] px-6 py-1.5 mb-8 rounded-full shadow-lg">SET {sets.length + 1}</Badge>
                   <div className="flex items-center gap-14">
@@ -251,7 +243,6 @@ const ScoringPage = () => {
                   </div>
                 </div>
 
-                {/* Side B Profiler */}
                 <div className="flex-1 flex flex-col items-center gap-6">
                   <div className="relative group">
                     <div className={cn(
@@ -279,7 +270,6 @@ const ScoringPage = () => {
                 </div>
               </div>
 
-              {/* Advanced Controls */}
               <div className="grid grid-cols-2 gap-8 w-full pt-12 border-t border-slate-100">
                 <Button 
                   onClick={() => updateScore(1)} 
@@ -292,7 +282,7 @@ const ScoringPage = () => {
                 </Button>
                 <Button 
                   onClick={() => updateScore(2)} 
-                  className="h-32 bg-[#0B1F3A] text-white font-black text-4xl rounded-[3rem] shadow-[0_25px_50px_rgba(11,31,58,0.2)] hover:scale-[1.03] transition-all hover:bg-navy/90 group"
+                  className="h-32 bg-[#0B1F3A] text-white font-black text-4xl rounded-[3rem] shadow-[0_25px_50px_rgba(11,31,58,0.2)] hover:scale-[1.03] transition-all hover:bg-[#0B1F3A]/90 group"
                 >
                   <div className="flex flex-col items-center gap-2">
                     <Zap className="h-6 w-6 fill-white opacity-50 group-hover:scale-125 transition-transform" />
@@ -327,7 +317,6 @@ const ScoringPage = () => {
             </div>
           </div>
 
-          {/* AI Logs & Technical Timeline (Right) */}
           <div className="lg:col-span-3 space-y-6">
             <div className="glass-panel p-8 rounded-[3.5rem] border-slate-200 h-[640px] flex flex-col shadow-xl bg-white/50 relative overflow-hidden">
               <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
