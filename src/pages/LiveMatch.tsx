@@ -10,24 +10,27 @@ import {
   Search, 
   Zap,
   TrendingUp,
-  ArrowRight
+  ArrowRight,
+  Globe,
+  Radio
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const LiveMatch = () => {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   
-  const categories = ["All", "Men's Singles", "Women's Singles", "Men's Doubles", "Women's Doubles", "Mixed Doubles"];
+  const categories = ["All", "Men's Singles", "Women's Singles", "Men's Doubles", "Mixed Doubles"];
 
   const matches = [
-    { p1: "Viktor Axelsen", p2: "Lee Zii Jia", score: "21-19, 14-11", tournament: "BWF Finals", viewers: "12.4k", status: "Live", category: "Men's Singles", smashId: "LIVE_001" },
-    { p1: "An Se-young", p2: "Tai Tzu-ying", score: "21-12, 18-15", tournament: "Jakarta Open", viewers: "8.2k", status: "Live", category: "Women's Singles", smashId: "LIVE_002" },
-    { p1: "Jonatan Christie", p2: "Anthony Ginting", score: "0-0", tournament: "Indonesia Master", viewers: "3.1k", status: "Warm-up", category: "Men's Singles", smashId: "LIVE_003" },
-    { p1: "Chen/Jia", p2: "Baek/Lee", score: "21-18", tournament: "China Masters", viewers: "5.5k", status: "Live", category: "Women's Doubles", smashId: "LIVE_004" },
+    { id: "bwf_01", p1: "Viktor Axelsen", p2: "Lee Zii Jia", score: "21-19, 14-11", tournament: "BWF Finals", viewers: "12.4k", status: "Live", category: "Men's Singles", smashId: "LIVE_001" },
+    { id: "bwf_02", p1: "An Se-young", p2: "Tai Tzu-ying", score: "21-12, 18-15", tournament: "Jakarta Open", viewers: "8.2k", status: "Live", category: "Women's Singles", smashId: "LIVE_002" },
+    { id: "bwf_03", p1: "Jonatan Christie", p2: "Anthony Ginting", score: "0-0", tournament: "Indonesia Master", viewers: "3.1k", status: "Warm-up", category: "Men's Singles", smashId: "LIVE_003" },
+    { id: "bwf_04", p1: "Chen/Jia", p2: "Baek/Lee", score: "21-18", tournament: "China Masters", viewers: "5.5k", status: "Live", category: "Women's Doubles", smashId: "LIVE_004" },
   ];
 
   const filtered = useMemo(() => {
@@ -50,9 +53,9 @@ const LiveMatch = () => {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Zap className="h-4 w-4 text-sky-500 fill-current" />
-              <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.3em]">SMASHED</span>
+              <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.4em]">Operational Broadcast Network</span>
             </div>
-            <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic">LIVE SCORING</h1>
+            <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-none">Global Live Scopes</h1>
           </div>
           
           <div className="relative w-full md:w-96">
@@ -73,9 +76,9 @@ const LiveMatch = () => {
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={cn(
-                "whitespace-nowrap px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all",
+                "whitespace-nowrap px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all",
                 activeCategory === cat 
-                  ? "bg-[#0B1F3A] text-white shadow-lg shadow-navy/20" 
+                  ? "bg-[#0B1F3A] text-white shadow-xl shadow-navy/20" 
                   : "bg-white text-slate-400 border border-slate-100 hover:border-sky-500/50 hover:text-sky-500"
               )}
             >
@@ -85,93 +88,106 @@ const LiveMatch = () => {
         </div>
 
         <div className="grid lg:grid-cols-12 gap-8">
-          {/* Main Content */}
+          {/* Main Feed */}
           <div className="lg:col-span-8 space-y-8">
-            <div className="glass-panel p-10 rounded-[3rem] space-y-8 border-sky-500/10 shadow-sky-500/5">
-              <div className="flex items-center justify-between">
+            <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 border-sky-500/10 shadow-sky-500/5">
+              <div className="flex items-center justify-between border-b border-slate-50 pb-6">
                 <h3 className="text-xl font-black text-[#0B1F3A] flex items-center gap-3 italic">
-                  <Activity className="h-5 w-5 text-red-500 animate-pulse" /> Live Intelligence Feed
+                  <Activity className="h-5 w-5 text-red-500 animate-pulse" /> Live Feed
                 </h3>
+                <div className="flex items-center gap-2 px-4 py-1.5 bg-slate-50 rounded-full border border-slate-100">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Channels: {filtered.length}</span>
+                </div>
               </div>
 
-              <div className="space-y-4">
-                {filtered.length > 0 ? filtered.map((match, i) => (
-                  <div key={i} className="flex flex-col md:flex-row items-center justify-between p-8 rounded-[2.5rem] bg-slate-50 border border-slate-100 hover:border-sky-500/30 transition-all group cursor-pointer">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{match.tournament}</p>
-                        <Badge variant="outline" className="text-[8px] font-bold border-slate-200">{match.smashId}</Badge>
-                        <Badge className="bg-sky-500/10 text-sky-600 border-none text-[8px] font-black">{match.category}</Badge>
+              <div className="space-y-6">
+                <AnimatePresence mode="popLayout">
+                  {filtered.length > 0 ? filtered.map((match, i) => (
+                    <motion.div 
+                      layout
+                      key={match.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      whileHover={{ x: 10 }}
+                      onClick={() => navigate(`/broadcast/${match.id}`)}
+                      className="flex flex-col md:flex-row items-center justify-between p-10 rounded-[3rem] bg-white border border-slate-100 hover:border-sky-500/40 transition-all group cursor-pointer shadow-sm hover:shadow-2xl"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <Badge className="bg-sky-500/10 text-sky-600 border-none text-[9px] font-black uppercase px-3">{match.category}</Badge>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">{match.tournament} • {match.smashId}</p>
+                        </div>
+                        <div className="font-black text-3xl text-[#0B1F3A] tracking-tighter uppercase italic">
+                          {match.p1} <span className="text-sky-500 opacity-40">VS</span> {match.p2}
+                        </div>
+                        <div className="flex items-center gap-4 text-[10px] font-bold text-slate-300 uppercase tracking-widest">
+                           <span className="flex items-center gap-1.5"><Globe className="h-3.5 w-3.5" /> High Definition Link</span>
+                           <span className="flex items-center gap-1.5 text-sky-500"><TrendingUp className="h-3.5 w-3.5" /> {match.viewers} Viewers</span>
+                        </div>
                       </div>
-                      <div className="font-black text-2xl text-[#0B1F3A] tracking-tight">{match.p1} <span className="text-sky-500">vs</span> {match.p2}</div>
+                      <div className="flex items-center gap-10 mt-8 md:mt-0">
+                         <span className="text-5xl font-black font-mono text-[#0B1F3A] tracking-tighter tabular-nums group-hover:text-sky-600 transition-colors">{match.score}</span>
+                         <Button className="h-20 w-20 rounded-[2.5rem] bg-[#0B1F3A] text-white hover:bg-sky-500 transition-all shadow-2xl border-none group-hover:scale-110">
+                            <Play className="h-8 w-8 fill-current ml-1" />
+                         </Button>
+                      </div>
+                    </motion.div>
+                  )) : (
+                    <div className="py-32 text-center bg-slate-50 rounded-[4rem] border-2 border-dashed border-slate-200">
+                      <Radio className="h-12 w-12 text-slate-200 mx-auto animate-pulse" />
+                      <p className="text-sm font-black text-slate-400 uppercase tracking-widest mt-6 italic">No Active Broadcasts Found</p>
                     </div>
-                    <div className="flex items-center gap-8 mt-6 md:mt-0">
-                       <span className="text-4xl font-mono font-black text-sky-600 tabular-nums tracking-tighter">{match.score}</span>
-                       <Link to={`/broadcast/${match.smashId.toLowerCase()}`}>
-                        <Button className="h-16 w-16 rounded-[1.5rem] bg-[#0B1F3A] text-white hover:bg-sky-500 transition-all shadow-xl group-hover:scale-105 border-none">
-                           <Play className="h-7 w-7 fill-current" />
-                        </Button>
-                       </Link>
-                    </div>
-                  </div>
-                )) : (
-                  <div className="py-20 text-center bg-slate-100/50 rounded-[3rem] border-2 border-dashed border-slate-200">
-                    <Zap className="h-10 w-10 text-slate-200 mx-auto" />
-                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest mt-4">Nothing In This Court</p>
-                  </div>
-                )}
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           </div>
 
-          {/* Right Sidebar - Pro Insights */}
+          {/* Right Sidebar */}
           <div className="lg:col-span-4 space-y-8">
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="glass-panel p-10 rounded-[3rem] space-y-8 bg-gradient-to-br from-[#0B1F3A] to-[#1a3a5f] text-white border-none shadow-2xl"
-            >
-              <div className="space-y-2">
-                <Badge className="bg-sky-500 border-none font-black text-[10px]">AI PREDICTION</Badge>
-                <h3 className="text-3xl font-black italic tracking-tight">Pro Intelligence</h3>
+            <div className="bg-[#0B1F3A] p-12 rounded-[4rem] text-white space-y-8 relative overflow-hidden group shadow-2xl">
+              <div className="absolute -right-20 -bottom-20 opacity-10 group-hover:rotate-12 transition-transform duration-1000">
+                <Radio className="h-80 w-80 text-sky-400" />
               </div>
-
-              <div className="space-y-6">
-                <div className="bg-white/5 p-8 rounded-[2rem] border border-white/10 space-y-4">
-                  <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest opacity-60">
-                    <span>Momentum Shift</span>
-                    <TrendingUp className="h-3 w-3 text-sky-400" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm font-bold">
-                      <span>V. Axelsen</span>
-                      <span className="text-sky-400">84%</span>
-                    </div>
-                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                      <div className="h-full bg-sky-500" style={{ width: '84%' }} />
-                    </div>
-                  </div>
+              
+              <div className="space-y-6 relative z-10">
+                <Badge className="bg-sky-500 border-none font-black text-[10px] px-4 py-1.5">INTELLIGENCE PRO</Badge>
+                <div className="space-y-2">
+                  <h3 className="text-4xl font-black italic tracking-tighter leading-none">Broadcast Control</h3>
+                  <p className="text-sm font-medium text-white/50">Access court heatmaps and prediction AI for live matches.</p>
                 </div>
+                <Link to="/broadcast/center" className="block">
+                  <Button className="w-full h-16 bg-white text-[#0B1F3A] font-black rounded-2xl hover:bg-sky-500 hover:text-white transition-all shadow-2xl border-none text-lg">
+                    LAUNCH STUDIO <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
 
-                <div className="space-y-4">
-                  <h4 className="text-[10px] font-black uppercase tracking-widest opacity-60">Hot Stats Today</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-6 bg-white/5 rounded-3xl border border-white/10 text-center">
-                      <p className="text-3xl font-black">410</p>
-                      <p className="text-[8px] font-bold uppercase tracking-widest opacity-40">Peak Smash (km/h)</p>
-                    </div>
-                    <div className="p-6 bg-white/5 rounded-3xl border border-white/10 text-center">
-                      <p className="text-3xl font-black">1.2B</p>
-                      <p className="text-[8px] font-bold uppercase tracking-widest opacity-40">Data Points</p>
-                    </div>
-                  </div>
+            <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 shadow-xl">
+              <div className="space-y-1">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-[#0B1F3A]">Network Stability</h4>
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-sm font-bold text-[#0B1F3A]">99.9% Global Uptime</span>
                 </div>
               </div>
-
-              <Button className="w-full h-16 bg-sky-500 text-white font-black rounded-2xl hover:bg-sky-400 border-none group text-lg shadow-xl shadow-sky-500/20">
-                UPGRADE TO PRO <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </motion.div>
+              <div className="space-y-6 pt-4 border-t border-slate-100">
+                 {[
+                   { label: "Data Latency", val: "42ms", icon: Zap, color: "text-amber-500" },
+                   { label: "Active Nodes", val: "24 Servers", icon: Globe, color: "text-sky-500" },
+                 ].map((stat, i) => (
+                   <div key={i} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <stat.icon className={cn("h-4 w-4", stat.color)} />
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</span>
+                      </div>
+                      <span className="text-sm font-black text-[#0B1F3A]">{stat.val}</span>
+                   </div>
+                 ))}
+              </div>
+            </div>
           </div>
         </div>
       </main>
