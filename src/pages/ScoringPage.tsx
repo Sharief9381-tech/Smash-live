@@ -9,8 +9,7 @@ import {
   Target, History, StopCircle, Clock,
   ChevronLeft, Flame, TrendingUp, AlertTriangle,
   Radio, ShieldCheck, Trophy, MapPin, Share2,
-  Tornado, Users, BarChart3, Timer, RefreshCw,
-  MousePointer2, ChevronDown, Check
+  Tornado, Users, BarChart3, Timer, RefreshCw
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -37,7 +36,7 @@ const ScoringPage = () => {
       showError("Session Terminated");
       navigate('/broadcast/center');
     }
-  }, [matchId]);
+  }, [matchId, navigate]);
 
   useEffect(() => {
     if (isFinished) return;
@@ -67,6 +66,17 @@ const ScoringPage = () => {
     const last = history[history.length - 1];
     setScore(last.score);
     setHistory(prev => prev.slice(0, -1));
+  };
+
+  const finalizeSet = () => {
+    if (score[0] === 0 && score[1] === 0) {
+      showError("Score must be registered before ending set");
+      return;
+    }
+    setSets(prev => [...prev, [...score]]);
+    setScore([0, 0]);
+    setHistory([]);
+    showSuccess("Set Finalized • Score Synchronized");
   };
 
   if (!matchData) return null;
