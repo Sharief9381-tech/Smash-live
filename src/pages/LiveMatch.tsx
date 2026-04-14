@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,18 +23,53 @@ const LiveMatch = () => {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+  const [studioMatches, setStudioMatches] = useState<any[]>([]);
   
   const categories = ["All", "Men's Singles", "Women's Singles", "Men's Doubles", "Mixed Doubles"];
 
-  const matches = [
+  // Hardcoded matches + dynamic Studio matches
+  const baseMatches = [
     { id: "bwf_01", p1: "Viktor Axelsen", p2: "Lee Zii Jia", score: "21-19, 14-11", tournament: "BWF Finals", viewers: "12.4k", status: "Live", category: "Men's Singles", smashId: "LIVE_001" },
     { id: "bwf_02", p1: "An Se-young", p2: "Tai Tzu-ying", score: "21-12, 18-15", tournament: "Jakarta Open", viewers: "8.2k", status: "Live", category: "Women's Singles", smashId: "LIVE_002" },
     { id: "bwf_03", p1: "Jonatan Christie", p2: "Anthony Ginting", score: "0-0", tournament: "Indonesia Master", viewers: "3.1k", status: "Warm-up", category: "Men's Singles", smashId: "LIVE_003" },
     { id: "bwf_04", p1: "Chen/Jia", p2: "Baek/Lee", score: "21-18", tournament: "China Masters", viewers: "5.5k", status: "Live", category: "Women's Doubles", smashId: "LIVE_004" },
   ];
 
+  useEffect(() => {
+    const loadStudioMatches = () => {
+      const active = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
+      const formatted = active.map((m: any) => ({
+        id: m.id,
+        p1: m.players.p1?.name || (m.players.tA1?.name ? `${m.players.tA1.name}/${m.players.tA2.name}` : "Team A"),
+        p2: m.players.p2?.name || (m.players.tB1?.name ? `${m.players.tB1.name}/${m.players.tB2.name}` : "Team B"),
+        score: m.currentScore ? `${m.currentScore[0]}-${m.currentScore[1]}` : "0-0",
+        tournament: m.name,
+        viewers: "User Hosted",
+        status: "Live",
+        category: m.matchType === 'singles' ? "Men's Singles" : "Doubles",
+        smashId: `STUDIO_${m.id.slice(-4)}`,
+        isStudioMatch: true
+      }));
+      setStudioMatches(formatted);
+    };
+
+    loadStudioMatches();
+    
+    // Listen for storage changes in real-time
+    const handleStorage = () => loadStudioMatches();
+    window.addEventListener('storage', handleStorage);
+    const interval = setInterval(loadStudioMatches, 1000); // Polling as backup for same-tab updates
+    
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      clearInterval(interval);
+    };
+  }, []);
+
+  const allMatches = useMemo(() => [...studioMatches, ...baseMatches], [studioMatches]);
+
   const filtered = useMemo(() => {
-    return matches.filter(m => {
+    return allMatches.filter(m => {
       const matchesSearch = m.p1.toLowerCase().includes(query.toLowerCase()) || 
                            m.p2.toLowerCase().includes(query.toLowerCase()) ||
                            m.tournament.toLowerCase().includes(query.toLowerCase()) ||
@@ -42,7 +77,7 @@ const LiveMatch = () => {
       const matchesCategory = activeCategory === "All" || m.category === activeCategory;
       return matchesSearch && matchesCategory;
     });
-  }, [query, activeCategory]);
+  }, [query, activeCategory, allMatches]);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -102,7 +137,7 @@ const LiveMatch = () => {
 
               <div className="space-y-6">
                 <AnimatePresence mode="popLayout">
-                  {filtered.length > 0 ? filtered.map((match, i) => (
+                  {filtered.length > 0 ? filtered.map((match) => (
                     <motion.div 
                       layout
                       key={match.id}
@@ -110,12 +145,17 @@ const LiveMatch = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
                       whileHover={{ x: 10 }}
-                      onClick={() => navigate(`/broadcast/${match.id}`)}
-                      className="flex flex-col md:flex-row items-center justify-between p-10 rounded-[3rem] bg-white border border-slate-100 hover:border-sky-500/40 transition-all group cursor-pointer shadow-sm hover:shadow-2xl"
+                      onClick={() => navigate(match.isStudioMatch ? `/broadcast/${match.id}` : `/broadcast/${match.id}`)}
+                      className={cn(
+                        "flex flex-col md:flex-row items-center justify-between p-10 rounded-[3rem] border transition-all group cursor-pointer shadow-sm hover:shadow-2xl",
+                        match.isStudioMatch ? "bg-sky-50/50 border-sky-200" : "bg-white border-slate-100 hover:border-sky-500/40"
+                      )}
                     >
                       <div className="space-y-3">
                         <div className="flex items-center gap-3">
-                          <Badge className="bg-sky-500/10 text-sky-600 border-none text-[9px] font-black uppercase px-3">{match.category}</Badge>
+                          <Badge className={cn("border-none text-[9px] font-black uppercase px-3", match.isStudioMatch ? "bg-[#0B1F3A] text-white" : "bg-sky-500/10 text-sky-600")}>
+                            {match.isStudioMatch ? "YOUR MATCH" : match.category}
+                          </Badge>
                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">{match.tournament} • {match.smashId}</p>
                         </div>
                         <div className="font-black text-3xl text-[#0B1F3A] tracking-tighter uppercase italic">
@@ -127,7 +167,9 @@ const LiveMatch = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-10 mt-8 md:mt-0">
-                         <span className="text-5xl font-black font-mono text-[#0B1F3A] tracking-tighter tabular-nums group-hover:text-sky-600 transition-colors">{match.score}</span>
+                         <span className={cn("text-5xl font-black font-mono tracking-tighter tabular-nums transition-colors", match.isStudioMatch ? "text-sky-600" : "text-[#0B1F3A] group-hover:text-sky-600")}>
+                            {match.score}
+                         </span>
                          <Button className="h-20 w-20 rounded-[2.5rem] bg-[#0B1F3A] text-white hover:bg-sky-500 transition-all shadow-2xl border-none group-hover:scale-110">
                             <Play className="h-8 w-8 fill-current ml-1" />
                          </Button>

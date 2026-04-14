@@ -16,10 +16,31 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { showSuccess } from '@/utils/toast';
+import { useParams } from 'react-router-dom';
 
 const LiveBroadcast = () => {
+  const { id } = useParams();
   const [isFollowing, setIsFollowing] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const [matchData, setMatchData] = useState<any>(null);
+
+  useEffect(() => {
+    const loadMatch = () => {
+      const saved = localStorage.getItem(id || "");
+      if (saved) {
+        setMatchData(JSON.parse(saved));
+      }
+    };
+
+    loadMatch();
+    const interval = setInterval(loadMatch, 1000);
+    window.addEventListener('storage', loadMatch);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', loadMatch);
+    };
+  }, [id]);
 
   const handleFollow = () => {
     const newState = !isFollowing;
@@ -32,6 +53,13 @@ const LiveBroadcast = () => {
     }
   };
 
+  // Fallback data if no dynamic match found
+  const p1 = matchData?.players?.p1 || { name: "Viktor Axelsen", country: "Denmark", flag: "🇩🇰" };
+  const p2 = matchData?.players?.p2 || { name: "Lee Zii Jia", country: "Malaysia", flag: "🇲🇾" };
+  const score = matchData?.currentScore || [18, 14];
+  const sets = matchData?.setsWon || [0, 0];
+  const serving = matchData?.serving || 1;
+
   return (
     <div className="min-h-screen bg-slate-50 text-[#0B1F3A]">
       <Navbar />
@@ -42,14 +70,14 @@ const LiveBroadcast = () => {
           <div className="flex items-center gap-8">
             <div className="space-y-1">
               <h1 className="text-2xl font-black tracking-tighter uppercase italic text-[#0B1F3A] flex items-center gap-3">
-                <Trophy className="h-6 w-6 text-sky-500" /> BWF WORLD TOUR FINALS 2024
+                <Trophy className="h-6 w-6 text-sky-500" /> {matchData?.name || "BWF WORLD TOUR FINALS 2024"}
               </h1>
               <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                <span>Grand Final</span>
+                <span>{matchData?.round || "Grand Final"}</span>
                 <span className="h-1 w-1 bg-slate-200 rounded-full" />
-                <span>Court 01</span>
+                <span>Court {matchData?.court || "01"}</span>
                 <span className="h-1 w-1 bg-slate-200 rounded-full" />
-                <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" /> 00:42:15</span>
+                <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" /> LIVE BROADCAST</span>
               </div>
             </div>
           </div>
@@ -105,99 +133,18 @@ const LiveBroadcast = () => {
         <div className="grid lg:grid-cols-12 gap-8 items-stretch">
           <div className="lg:col-span-8">
             <PremiumScoreboard 
-              p1={{ name: "Viktor Axelsen", country: "Denmark", flag: "🇩🇰", sets: [21, 14] }}
-              p2={{ name: "Lee Zii Jia", country: "Malaysia", flag: "🇲🇾", sets: [19, 11] }}
-              currentScore={[18, 14]}
-              serving={1}
+              p1={{ name: p1.name, country: p1.country, flag: p1.flag || "🏳️", sets: [sets[0]] }}
+              p2={{ name: p2.name, country: p2.country, flag: p2.flag || "🏳️", sets: [sets[1]] }}
+              currentScore={score as [number, number]}
+              serving={serving as 1 | 2}
             />
           </div>
           <div className="lg:col-span-4">
             <CommentaryFeed events={[
-              { id: '1', text: "Powerful cross-court smash from Axelsen leaves Lee with no response.", type: 'highlight', time: '14:42' },
-              { id: '2', text: "Fantastic defensive rally of 24 shots. Axelsen holds his ground.", type: 'analysis', time: '14:40' },
-              { id: '3', text: "Point to Axelsen. He leads 18-14 in the second set.", type: 'score', time: '14:38' },
+              { id: '1', text: `${p1.name} displays incredible power in this set.`, type: 'highlight', time: '14:42' },
+              { id: '2', text: "Strategic rally in progress. Both players testing net depth.", type: 'analysis', time: '14:40' },
+              { id: '3', text: `Score updated: ${score[0]}-${score[1]}. Dynamic pulse active.`, type: 'score', time: '14:38' },
             ]} />
-          </div>
-        </div>
-
-        {/* Mid Row: Timeline and Strategic Comparison (Upgraded Position) */}
-        <div className="grid lg:grid-cols-2 gap-8">
-          <div className="glass-panel rounded-[3rem] p-8 border-slate-200 overflow-hidden flex flex-col justify-center">
-            <MatchTimeline />
-          </div>
-          
-          <div className="glass-panel rounded-[3rem] p-8 border-slate-200 grid grid-cols-2 gap-8 bg-white relative overflow-hidden group">
-            {/* Axelsen Stats */}
-            <div className="space-y-6 relative z-10">
-              <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-                <div className="h-8 w-8 rounded-full bg-sky-500 flex items-center justify-center text-[10px] font-black text-white">VA</div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-[#0B1F3A]">Axelsen</span>
-              </div>
-              <div className="space-y-4">
-                {[
-                  { label: "Shots Acc.", val: 94, color: "bg-sky-500" },
-                  { label: "Net Drops", val: 88, color: "bg-sky-600" },
-                  { label: "Rally Dom.", val: 76, color: "bg-sky-400" },
-                  { label: "Coverage", val: 91, color: "bg-sky-700" },
-                ].map((s, i) => (
-                  <div key={i} className="space-y-1.5">
-                    <div className="flex justify-between text-[8px] font-black text-slate-400 uppercase tracking-widest">
-                      <span>{s.label}</span>
-                      <span className="text-[#0B1F3A]">{s.val}%</span>
-                    </div>
-                    <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
-                      <motion.div initial={{ width: 0 }} animate={{ width: `${s.val}%` }} className={cn("h-full", s.color)} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-between pt-2 border-t border-slate-50">
-                <div className="text-center">
-                  <p className="text-[8px] font-black text-slate-400 uppercase">Reaction</p>
-                  <p className="text-sm font-black text-[#0B1F3A]">184ms</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-[8px] font-black text-slate-400 uppercase">Stamina</p>
-                  <p className="text-sm font-black text-sky-600">82%</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Lee Zii Jia Stats */}
-            <div className="space-y-6 relative z-10">
-              <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-                <div className="h-8 w-8 rounded-full bg-[#0B1F3A] flex items-center justify-center text-[10px] font-black text-white">LZ</div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-[#0B1F3A]">Zii Jia</span>
-              </div>
-              <div className="space-y-4">
-                {[
-                  { label: "Shots Acc.", val: 82, color: "bg-[#0B1F3A]" },
-                  { label: "Net Drops", val: 76, color: "bg-[#1a3a5f]" },
-                  { label: "Rally Dom.", val: 64, color: "bg-[#254b7a]" },
-                  { label: "Coverage", val: 85, color: "bg-[#2f5c94]" },
-                ].map((s, i) => (
-                  <div key={i} className="space-y-1.5">
-                    <div className="flex justify-between text-[8px] font-black text-slate-400 uppercase tracking-widest">
-                      <span>{s.label}</span>
-                      <span className="text-[#0B1F3A]">{s.val}%</span>
-                    </div>
-                    <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
-                      <motion.div initial={{ width: 0 }} animate={{ width: `${s.val}%` }} className={cn("h-full", s.color)} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-between pt-2 border-t border-slate-50">
-                <div className="text-center">
-                  <p className="text-[8px] font-black text-slate-400 uppercase">Reaction</p>
-                  <p className="text-sm font-black text-[#0B1F3A]">212ms</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-[8px] font-black text-slate-400 uppercase">Stamina</p>
-                  <p className="text-sm font-black text-red-500">74%</p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
