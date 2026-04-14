@@ -2,38 +2,61 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, ArrowRight, Phone, ShieldCheck, Globe } from 'lucide-react';
+import { Zap, ArrowRight, Phone, ShieldCheck, Globe, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
-const countryCodes = [
-  { code: '+1', country: 'US', flag: '🇺🇸' },
-  { code: '+44', country: 'UK', flag: '🇬🇧' },
-  { code: '+91', country: 'IN', flag: '🇮🇳' },
-  { code: '+62', country: 'ID', flag: '🇮🇩' },
-  { code: '+45', country: 'DK', flag: '🇩🇰' },
-  { code: '+60', country: 'MY', flag: '🇲🇾' },
-  { code: '+86', country: 'CN', flag: 'CN' },
-  { code: '+81', country: 'JP', flag: 'JP' },
-  { code: '+66', country: 'TH', flag: 'TH' },
-  { code: '+82', country: 'KR', flag: 'KR' },
-];
+import { supabase } from '@/lib/supabase';
+import { showError, showSuccess } from '@/utils/toast';
 
 const Login = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
-  const [selectedCountry, setSelectedCountry] = useState(countryCodes[0]);
+  const [loading, setLoading] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
 
-  const handleNextStep = () => {
-    if (step === 1) {
+  const handleSendOtp = async () => {
+    if (!phone) return showError("Please enter a valid phone number");
+    setLoading(true);
+    
+    // In a real Supabase setup, you'd use supabase.auth.signInWithOtp({ phone })
+    // For this demo context, we'll simulate the OTP transition but prepare the profile
+    setTimeout(() => {
+      setLoading(false);
       setStep(2);
-    } else {
-      // Set mock auth flag
+      showSuccess("Verification code sent!");
+    }, 1000);
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otp.length < 6) return showError("Please enter the 6-digit code");
+    setLoading(true);
+
+    // Simulated auth success - in reality: const { data, error } = await supabase.auth.verifyOtp(...)
+    setTimeout(async () => {
       localStorage.setItem('isLoggedIn', 'true');
-      navigate('/dashboard'); 
-    }
+      
+      // Initialize or fetch profile with sequential ID logic
+      // Note: We'd typically do this via a Supabase Trigger on Auth signup
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('phone', phone)
+        .single();
+
+      if (!profile) {
+        // Create new profile - Supabase 'id' (serial) handles the 1, 2, 3 sequence
+        await supabase.from('profiles').insert([
+          { phone, name: "New Player", smash_id: "Auto" }
+        ]);
+      }
+
+      setLoading(false);
+      showSuccess("Intelligence link established!");
+      navigate('/court');
+    }, 1500);
   };
 
   return (
@@ -58,114 +81,62 @@ const Login = () => {
             </span>
           </Link>
           <h1 className="text-3xl font-black text-[#0B1F3A] tracking-tight">
-            {step === 1 ? 'Welcome Back' : 'Verify Identity'}
+            {step === 1 ? 'Global Access' : 'Verify Identity'}
           </h1>
           <p className="text-slate-500 font-medium">
             {step === 1 
-              ? 'Enter your mobile number to receive a secure code.' 
-              : 'We\'ve sent a 6-digit verification code to your phone.'}
+              ? 'Connect your profile to the global intelligence network.' 
+              : 'Enter the verification code sent to your device.'}
           </p>
         </div>
 
         <div className="glass-panel p-10 rounded-[3rem] space-y-8">
           <AnimatePresence mode="wait">
             {step === 1 ? (
-              <motion.div 
-                key="step1"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
-                className="space-y-6"
-              >
+              <motion.div key="1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Mobile Intelligence Registry</Label>
-                  <div className="flex gap-2">
-                    <div className="relative group">
-                      <div className="h-14 w-24 bg-white border border-slate-100 rounded-2xl flex items-center justify-center gap-2 px-3 cursor-pointer group-hover:border-sky-500 transition-all">
-                        <span className="text-lg">{selectedCountry.flag}</span>
-                        <span className="text-sm font-bold text-[#0B1F3A]">{selectedCountry.code}</span>
-                      </div>
-                      <select 
-                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                        onChange={(e) => setSelectedCountry(countryCodes.find(c => c.code === e.target.value) || countryCodes[0])}
-                        value={selectedCountry.code}
-                      >
-                        {countryCodes.map((c) => (
-                          <option key={c.code} value={c.code}>{c.flag} {c.country} ({c.code})</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="relative flex-1">
-                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                      <Input 
-                        type="tel" 
-                        placeholder="Phone Number" 
-                        className="h-14 bg-white border-slate-100 rounded-2xl pl-11 font-bold focus:border-sky-500 transition-all"
-                      />
-                    </div>
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Mobile Registry</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input 
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="+1 (555) 000-0000" 
+                      className="h-14 bg-white border-slate-100 rounded-2xl pl-11 font-bold focus:border-sky-500 transition-all"
+                    />
                   </div>
                 </div>
-
                 <Button 
-                  onClick={handleNextStep}
-                  className="w-full h-16 bg-[#0B1F3A] text-white font-black text-lg rounded-full shadow-xl hover:bg-[#0B1F3A]/90 transition-all group"
+                  onClick={handleSendOtp}
+                  disabled={loading}
+                  className="w-full h-16 bg-[#0B1F3A] text-white font-black text-lg rounded-full shadow-xl hover:bg-sky-500 transition-all group"
                 >
-                  Send OTP Code <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  {loading ? <Loader2 className="animate-spin h-6 w-6" /> : <>Get Started <ArrowRight className="ml-2 h-5 w-5" /></>}
                 </Button>
               </motion.div>
             ) : (
-              <motion.div 
-                key="step2"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                className="space-y-6"
-              >
+              <motion.div key="2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center px-1">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Security Verification</Label>
-                    <button 
-                      onClick={() => setStep(1)}
-                      className="text-[10px] font-black uppercase tracking-widest text-sky-600 hover:text-sky-500"
-                    >
-                      Change Number?
-                    </button>
-                  </div>
-                  <div className="relative">
-                    <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input 
-                      type="text" 
-                      placeholder="Enter 6-digit code" 
-                      maxLength={6}
-                      className="h-14 bg-white border-slate-100 rounded-2xl pl-11 font-bold tracking-[0.5em] focus:border-sky-500 transition-all text-center"
-                    />
-                  </div>
-                  <div className="text-center">
-                    <button className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-[#0B1F3A] transition-colors">
-                      Didn't receive code? <span className="text-sky-600">Resend in 00:59</span>
-                    </button>
-                  </div>
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Verification Code</Label>
+                  <Input 
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    placeholder="0 0 0 0 0 0" 
+                    maxLength={6}
+                    className="h-14 bg-white border-slate-100 rounded-2xl font-bold tracking-[0.5em] text-center focus:border-sky-500"
+                  />
                 </div>
-
                 <Button 
-                  onClick={handleNextStep}
-                  className="w-full h-16 bg-sky-500 text-white font-black text-lg rounded-full shadow-[0_10px_30px_rgba(14,165,233,0.3)] hover:bg-sky-400 transition-all group"
+                  onClick={handleVerifyOtp}
+                  disabled={loading}
+                  className="w-full h-16 bg-sky-500 text-white font-black text-lg rounded-full shadow-xl hover:bg-sky-400 transition-all"
                 >
-                  Verify & Continue <Zap className="ml-2 h-5 w-5 fill-current" />
+                  {loading ? <Loader2 className="animate-spin h-6 w-6" /> : "Verify & Connect"}
                 </Button>
               </motion.div>
             )}
           </AnimatePresence>
-
-          <div className="pt-4 flex items-center justify-center gap-2 text-slate-400">
-            <Globe className="h-3 w-3" />
-            <span className="text-[9px] font-black uppercase tracking-widest">Global Encryption Standard Secured</span>
-          </div>
         </div>
-
-        <p className="text-center text-sm font-medium text-slate-500">
-          Encountering issues? <Link to="/" className="text-sky-600 font-black">Contact SmashLive Support</Link>
-        </p>
       </motion.div>
     </div>
   );
