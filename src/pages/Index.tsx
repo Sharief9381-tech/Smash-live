@@ -31,7 +31,6 @@ const Index = () => {
       
       {/* High-Impact Hero Section */}
       <section className="relative min-h-[95vh] flex items-center overflow-hidden py-20 bg-slate-50/50">
-        {/* Abstract Background Elements */}
         <div className="absolute top-0 right-0 w-[60%] h-[60%] bg-sky-500/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/4" />
         <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-[#0B1F3A]/5 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/4" />
 
@@ -78,7 +77,6 @@ const Index = () => {
             </div>
           </motion.div>
 
-          {/* High-Impact Visual: Performance Matrix */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -132,7 +130,7 @@ const Index = () => {
                     <div className="flex -space-x-3">
                       {[1, 2, 3, 4].map(i => (
                         <div key={i} className="h-10 w-10 rounded-full border-4 border-[#0B1F3A] bg-slate-200 overflow-hidden">
-                          <img src={`https://i.pravatar.cc/100?u=${i}`} className="w-full h-full object-cover" />
+                          <img src={`https://i.pravatar.cc/100?u=${i}`} className="w-full h-full object-cover" alt="" />
                         </div>
                       ))}
                     </div>
@@ -145,7 +143,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Platform Modules Grid */}
       <section className="py-32 bg-white relative">
         <div className="container px-6 space-y-20">
           <div className="text-center space-y-4 max-w-2xl mx-auto">
@@ -178,62 +175,9 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Global Broadcast Integration */}
-      <section className="py-32 bg-[#0B1F3A] overflow-hidden relative rounded-[6rem] mx-6 mb-12 shadow-2xl">
-        <div className="absolute top-0 right-0 p-20 opacity-10 pointer-events-none">
-          <Globe className="h-[500px] w-[500px] text-sky-400" />
-        </div>
-        
-        <div className="container px-12 space-y-20 relative z-10">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-10 border-b border-white/10 pb-16">
-            <div className="space-y-6">
-              <Badge className="bg-sky-500 text-white font-black px-6 py-2 border-none rounded-full text-xs">BROADCAST NETWORK</Badge>
-              <h2 className="text-6xl font-black text-white tracking-tighter uppercase italic leading-none">Global Live Reach</h2>
-            </div>
-            <Link to="/tournaments" className="text-sky-400 font-black text-sm uppercase tracking-[0.3em] flex items-center gap-3 hover:text-sky-300 transition-colors group">
-              VIEW ALL CHANNELS <ArrowRight className="h-5 w-5 group-hover:translate-x-2 transition-transform" />
-            </Link>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {[
-              { players: "V. Axelsen vs L. Zii Jia", score: "21-19, 14-11", status: "Live", img: "https://images.unsplash.com/photo-1626224580175-340ad0e3a242?q=80&w=2070&auto=format&fit=crop" },
-              { players: "An Se-young vs T. Tzu-ying", score: "21-12, 18-15", status: "Live", img: "https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?q=80&w=2070&auto=format&fit=crop" },
-              { players: "J. Christie vs A. Ginting", score: "Scheduled", status: "Upcoming", img: "https://images.unsplash.com/photo-1613918108466-292b78a8ef95?q=80&w=2070&auto=format&fit=crop" },
-            ].map((match, i) => (
-              <div key={i} className="group relative rounded-[4rem] overflow-hidden bg-white/5 border border-white/10 hover:border-sky-500/50 transition-all duration-500">
-                <div className="aspect-video overflow-hidden relative">
-                  <img src={match.img} alt="" className="w-full h-full object-cover opacity-60 grayscale-[30%] group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" />
-                  <div className="absolute top-6 left-6">
-                    <Badge className={match.status === 'Live' ? 'bg-red-500 border-none px-4 py-1 animate-pulse' : 'bg-sky-500 border-none px-4 py-1'}>{match.status}</Badge>
-                  </div>
-                </div>
-                <div className="p-10 space-y-4">
-                  <h4 className="text-2xl font-black text-white tracking-tight">{match.players}</h4>
-                  <div className="flex items-center justify-between">
-                    <span className="text-3xl font-mono font-black text-sky-400">{match.score}</span>
-                    <Link to="/broadcast/live">
-                      <Button size="icon" className="h-16 w-16 rounded-3xl bg-white text-[#0B1F3A] hover:bg-sky-500 hover:text-white transition-all border-none shadow-2xl group-hover:translate-x-1">
-                        <PlayIcon className="h-7 w-7 fill-current ml-1" />
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <Footer />
     </div>
   );
 };
-
-const PlayIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-    <polygon points="5 3 19 12 5 21 5 3" />
-  </svg>
-);
 
 export default Index;
