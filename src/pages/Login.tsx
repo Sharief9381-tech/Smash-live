@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, ArrowRight, Phone, ShieldCheck, Globe, ChevronDown } from 'lucide-react';
+import { Zap, ArrowRight, Phone, ShieldCheck, Globe, ChevronDown, RefreshCcw } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +32,17 @@ const Login = () => {
   const [otp, setOtp] = useState("");
   const [selectedCountry, setSelectedCountry] = useState(countryCodes[0]);
   const [isLoading, setIsLoading] = useState(false);
+  const [timer, setTimer] = useState(30);
+
+  useEffect(() => {
+    let interval: any;
+    if (step === 2 && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [step, timer]);
 
   const handleSendOtp = async () => {
     if (phone.length < 8) {
@@ -43,7 +54,8 @@ const Login = () => {
     setTimeout(() => {
       setIsLoading(false);
       setStep(2);
-      showSuccess(`Verification code sent to ${selectedCountry.code} ${phone}`);
+      setTimer(30);
+      showSuccess(`Verification code [1234] sent to ${selectedCountry.code} ${phone}`);
     }, 1000);
   };
 
@@ -54,7 +66,10 @@ const Login = () => {
     }
     setIsLoading(true);
     try {
-      // In a real scenario, this would verify the phone/OTP
+      // Simulation: Code '1234' is the master key for demo
+      if (otp !== "1234") {
+        throw new Error("Invalid verification code. Please use 1234.");
+      }
       await AuthService.login({ email: `${phone}@smashlive.com` });
       showSuccess("Authentication successful. Welcome to the Court.");
       navigate('/court'); 
@@ -169,6 +184,9 @@ const Login = () => {
                       className="h-16 bg-white border-slate-100 rounded-2xl pl-12 font-black text-2xl text-center tracking-[0.5em] focus:border-sky-500 shadow-sm"
                     />
                   </div>
+                  <p className="text-center text-[9px] font-black text-slate-400 uppercase tracking-widest mt-2">
+                    Tip: Use <span className="text-sky-500">1234</span> for demo access
+                  </p>
                 </div>
                 <div className="flex flex-col gap-4">
                   <Button 
@@ -178,12 +196,25 @@ const Login = () => {
                   >
                     {isLoading ? "VERIFYING..." : "VERIFY & ENTER COURT"}
                   </Button>
-                  <button 
-                    onClick={() => setStep(1)}
-                    className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-sky-500 transition-colors"
-                  >
-                    Change Mobile Number
-                  </button>
+                  
+                  <div className="flex items-center justify-between px-2">
+                    <button 
+                      onClick={() => setStep(1)}
+                      className="text-[9px] font-black text-slate-400 uppercase tracking-widest hover:text-sky-500 transition-colors"
+                    >
+                      Change Number
+                    </button>
+                    {timer > 0 ? (
+                      <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Resend in {timer}s</span>
+                    ) : (
+                      <button 
+                        onClick={handleSendOtp}
+                        className="text-[9px] font-black text-sky-500 uppercase tracking-widest flex items-center gap-1.5 hover:underline"
+                      >
+                        <RefreshCcw className="h-3 w-3" /> Resend Code
+                      </button>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             )}
