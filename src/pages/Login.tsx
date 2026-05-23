@@ -48,8 +48,8 @@ const Login = () => {
   };
 
   const handleVerify = async () => {
-    if (otp.length !== 6) {
-      showError("Please enter the 6-digit verification code");
+    if (otp.length !== 4) {
+      showError("Please enter the 4-digit verification code");
       return;
     }
     setIsLoading(true);
@@ -158,14 +158,14 @@ const Login = () => {
                 className="space-y-6"
               >
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">6-Digit Verification Code</Label>
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">4-Digit Verification Code</Label>
                   <div className="relative">
                     <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-sky-500" />
                     <Input 
-                      maxLength={6}
+                      maxLength={4}
                       value={otp}
                       onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                      placeholder="• • • • • •" 
+                      placeholder="• • • •" 
                       className="h-16 bg-white border-slate-100 rounded-2xl pl-12 font-black text-2xl text-center tracking-[0.5em] focus:border-sky-500 shadow-sm"
                     />
                   </div>
