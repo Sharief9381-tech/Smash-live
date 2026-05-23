@@ -1,25 +1,37 @@
-import { apiRequest } from '@/lib/api';
+"use client";
 
 export const AuthService = {
   async login(credentials: { email: string; password?: string }) {
-    const data = await apiRequest('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials)
-    });
+    // Simulate a network delay
+    await new Promise(resolve => setTimeout(resolve, 800));
     
-    if (data.token) {
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('isLoggedIn', 'true');
+    // Mock successful response
+    const mockUser = {
+      _id: "user_" + Math.random().toString(36).substr(2, 9),
+      email: credentials.email,
+      token: "mock_jwt_token_" + Date.now()
+    };
+    
+    localStorage.setItem('token', mockUser.token);
+    localStorage.setItem('isLoggedIn', 'true');
+    
+    // Create a default profile if none exists
+    if (!localStorage.getItem('userProfile')) {
+      localStorage.setItem('userProfile', JSON.stringify({
+        name: "Viktor Axelsen",
+        country: "Denmark",
+        state: "Hovedstaden",
+        image: "https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?q=80&w=2070&auto=format&fit=crop",
+        height: "194"
+      }));
     }
     
-    return data;
+    return mockUser;
   },
 
   async register(userData: any) {
-    return apiRequest('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(userData)
-    });
+    await new Promise(resolve => setTimeout(resolve, 800));
+    return { success: true, message: "User registered locally" };
   },
 
   logout() {
