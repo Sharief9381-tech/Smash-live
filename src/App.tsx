@@ -16,6 +16,7 @@ import CreateBroadcast from "./pages/CreateBroadcast";
 import Rankings from "./pages/Rankings";
 import News from "./pages/News";
 import MatchArchive from "./pages/MatchArchive";
+import Smashed from "./pages/Smashed";
 import Login from "./pages/Login";
 import Court from "./pages/Court";
 import BroadcastCenter from "./pages/BroadcastCenter";
@@ -48,7 +49,7 @@ const App = () => (
           <Route path="/login" element={<AuthCheck><Login /></AuthCheck>} />
           <Route path="/court" element={<ProtectedRoute><Court /></ProtectedRoute>} />
           <Route path="/dashboard" element={<Navigate to="/court" replace />} />
-          <Route path="/smashed" element={<Navigate to="/court" replace />} />
+          <Route path="/smashed" element={<Smashed />} />
           <Route path="/live-match/active" element={<LiveMatch />} />
           <Route path="/live-match/active-:id" element={<LiveMatch />} />
           <Route path="/live-match/create" element={<ProtectedRoute><CreateIndividualMatch /></ProtectedRoute>} />

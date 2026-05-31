@@ -53,6 +53,7 @@ const Navbar = () => {
     { name: 'Studio', path: '/broadcast/center' },
     { name: 'Rankings', path: '/rankings' },
     { name: 'News', path: '/news' },
+    { name: 'Smashed', path: '/smashed' },
   ];
 
   return (
