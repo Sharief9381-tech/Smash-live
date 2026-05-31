@@ -30,6 +30,7 @@ const EditProfile = () => {
   
   const [formData, setFormData] = useState({
     name: "Viktor Axelsen",
+    smashId: "SMASH#0000",
     country: "Denmark",
     state: "Hovedstaden",
     image: "https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?q=80&w=2070&auto=format&fit=crop",
@@ -103,7 +104,6 @@ const EditProfile = () => {
           </div>
 
           <div className="grid lg:grid-cols-12 gap-12">
-            {/* Left Column: Image Upload */}
             <div className="lg:col-span-4 space-y-6">
               <section className="glass-panel p-8 rounded-[3rem] border-slate-200 text-center space-y-6">
                 <div className="relative mx-auto h-48 w-48 group">
@@ -125,8 +125,8 @@ const EditProfile = () => {
                   />
                 </div>
                 <div>
-                  <h4 className="font-black text-lg">Profile Photo</h4>
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">PNG, JPG up to 2MB</p>
+                  <h4 className="font-black text-lg">{formData.smashId}</h4>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Unique Smash Identity</p>
                 </div>
                 <Button 
                   variant="outline" 
@@ -138,7 +138,6 @@ const EditProfile = () => {
               </section>
             </div>
 
-            {/* Right Column: Form Fields */}
             <div className="lg:col-span-8 space-y-10">
               <section className="glass-panel p-10 rounded-[3rem] space-y-8 border-slate-200">
                 <h3 className="text-xl font-black flex items-center gap-3 italic">

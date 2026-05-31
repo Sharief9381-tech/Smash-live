@@ -15,14 +15,16 @@ export const AuthService = {
     localStorage.setItem('token', mockUser.token);
     localStorage.setItem('isLoggedIn', 'true');
     
-    // Create a default profile if none exists
+    // Create a default profile with a UNIQUE Smash ID if none exists
     if (!localStorage.getItem('userProfile')) {
+      const uniqueId = Math.floor(1000 + Math.random() * 9000);
       localStorage.setItem('userProfile', JSON.stringify({
-        name: "Viktor Axelsen",
+        name: credentials.email.split('@')[0],
+        smashId: `SMASH#${uniqueId}`,
         country: "Denmark",
         state: "Hovedstaden",
         image: "https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?q=80&w=2070&auto=format&fit=crop",
-        height: "194"
+        height: "185"
       }));
     }
     
