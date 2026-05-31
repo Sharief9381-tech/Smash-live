@@ -86,41 +86,42 @@ const Tournaments = () => {
     <div className="min-h-screen bg-white">
       <Navbar />
       
-      {/* Editorial Header */}
-      <section className="bg-slate-50 py-20 border-b border-slate-200">
-        <div className="container px-6">
-          <div className="max-w-3xl space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-sky-500/10 text-sky-600">
-              <Trophy className="h-4 w-4" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em]">BWF World Tour Calendar</span>
+      {/* Editorial Header - Increased spacing and max-width for more breathing room */}
+      <section className="bg-slate-50 py-28 border-b border-slate-200">
+        <div className="container px-8">
+          <div className="max-w-4xl space-y-8">
+            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-sky-500/10 text-sky-600">
+              <Trophy className="h-5 w-5" />
+              <span className="text-[11px] font-black uppercase tracking-[0.25em]">BWF World Tour Calendar</span>
             </div>
-            <h1 className="text-6xl md:text-7xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-[0.9]">
+            <h1 className="text-7xl md:text-8xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-[0.85]">
               Global Circuit <br />
               <span className="text-sky-500">Intelligence</span>
             </h1>
-            <p className="text-xl text-slate-500 font-medium max-w-xl">
-              Track major tournaments, seeded entries, and prize distribution across the official 2024/25 badminton season.
+            <p className="text-2xl text-slate-500 font-medium max-w-2xl leading-relaxed">
+              Track major tournaments, seeded entries, and prize distribution across the official 2024/25 badminton season with real-time tactical data.
             </p>
           </div>
         </div>
       </section>
 
-      <main className="container px-6 py-16">
-        <div className="grid lg:grid-cols-12 gap-16">
+      <main className="container px-8 py-20">
+        {/* Increased gap between main column and sidebar to 20 */}
+        <div className="grid lg:grid-cols-12 gap-20">
           {/* Main Content */}
-          <div className="lg:col-span-8 space-y-12">
+          <div className="lg:col-span-8 space-y-16">
             
             {/* Search & Filter Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 border-b border-slate-100 pb-10">
+              <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
                 {tournamentCategories.map(cat => (
                   <button
                     key={cat}
                     onClick={() => setActiveCategory(cat)}
                     className={cn(
-                      "px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
+                      "px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
                       activeCategory === cat 
-                        ? "bg-[#0B1F3A] text-white shadow-xl shadow-navy/20" 
+                        ? "bg-[#0B1F3A] text-white shadow-2xl shadow-navy/20 scale-105" 
                         : "bg-white text-slate-400 border border-slate-100 hover:border-sky-500/50 hover:text-sky-500"
                     )}
                   >
@@ -129,19 +130,19 @@ const Tournaments = () => {
                 ))}
               </div>
 
-              <div className="relative w-full md:w-72">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <div className="relative w-full md:w-80">
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
                 <input 
                   placeholder="Find Event..." 
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  className="w-full h-12 pl-11 pr-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm focus:border-sky-500 outline-none transition-all"
+                  className="w-full h-14 pl-14 pr-6 bg-slate-50 border border-slate-200 rounded-[2rem] font-bold text-sm focus:border-sky-500 outline-none transition-all shadow-sm"
                 />
               </div>
             </div>
 
             {/* Tournaments Grid */}
-            <div className="grid md:grid-cols-2 gap-10">
+            <div className="grid md:grid-cols-2 gap-12">
               <AnimatePresence mode="popLayout">
                 {filtered.map((t) => (
                   <motion.div 
@@ -150,65 +151,65 @@ const Tournaments = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    whileHover={{ y: -10 }}
-                    className="group flex flex-col glass-panel rounded-[3.5rem] overflow-hidden border-slate-200 shadow-xl bg-white"
+                    whileHover={{ y: -15 }}
+                    className="group flex flex-col glass-panel rounded-[4rem] overflow-hidden border-slate-200 shadow-2xl bg-white"
                   >
                     <div className="aspect-[16/10] overflow-hidden relative">
                       <img 
                         src={t.img} 
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90" 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 opacity-90" 
                         alt={t.name} 
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                       
-                      <div className="absolute top-6 left-6 flex flex-col gap-2">
+                      <div className="absolute top-8 left-8 flex flex-col gap-3">
                         <Badge className={cn(
-                          "font-black px-4 h-7 border-none shadow-lg w-fit", 
+                          "font-black px-6 h-8 border-none shadow-2xl w-fit text-xs", 
                           t.status === 'Live' ? 'bg-red-500 text-white animate-pulse' : 
                           t.status === 'Upcoming' ? 'bg-sky-500 text-white' : 'bg-slate-500 text-white'
                         )}>
-                          {t.status === 'Live' && <Activity className="h-3 w-3 mr-1.5" />} {t.status}
+                          {t.status === 'Live' && <Activity className="h-4 w-4 mr-2" />} {t.status}
                         </Badge>
-                        <Badge className="bg-white/90 backdrop-blur-md text-[#0B1F3A] border-none font-black px-4 h-7 w-fit">
+                        <Badge className="bg-white/95 backdrop-blur-md text-[#0B1F3A] border-none font-black px-6 h-8 w-fit text-xs">
                           {t.category}
                         </Badge>
                       </div>
                     </div>
 
-                    <div className="p-10 flex flex-col flex-1 space-y-8">
-                       <div className="space-y-3">
-                          <h3 className="text-2xl font-black text-[#0B1F3A] group-hover:text-sky-600 transition-colors leading-[1.1] tracking-tighter italic uppercase">
+                    <div className="p-12 flex flex-col flex-1 space-y-10">
+                       <div className="space-y-4">
+                          <h3 className="text-3xl font-black text-[#0B1F3A] group-hover:text-sky-600 transition-colors leading-none tracking-tighter italic uppercase">
                             {t.name}
                           </h3>
-                          <div className="flex flex-col gap-2">
-                            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                              <MapPin className="h-3.5 w-3.5 text-sky-500 shrink-0" /> 
+                          <div className="flex flex-col gap-3">
+                            <div className="flex items-center gap-3 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                              <MapPin className="h-4 w-4 text-sky-500 shrink-0" /> 
                               {t.location}
                             </div>
-                            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                              <Calendar className="h-3.5 w-3.5 text-sky-500 shrink-0" /> 
+                            <div className="flex items-center gap-3 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                              <Calendar className="h-4 w-4 text-sky-500 shrink-0" /> 
                               {t.date}
                             </div>
                           </div>
                        </div>
 
-                       <div className="grid grid-cols-2 gap-6 py-6 border-y border-slate-100">
-                          <div className="space-y-1">
-                             <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-none">Prize Pool</p>
-                             <p className="text-xl font-black text-[#0B1F3A] tracking-tight leading-none">{t.prize}</p>
+                       <div className="grid grid-cols-2 gap-8 py-8 border-y border-slate-100">
+                          <div className="space-y-2">
+                             <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none">Prize Pool</p>
+                             <p className="text-2xl font-black text-[#0B1F3A] tracking-tighter leading-none">{t.prize}</p>
                           </div>
-                          <div className="space-y-1 text-right">
-                             <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-none">Circuit Pts</p>
-                             <p className="text-xl font-black text-sky-600 tracking-tight leading-none">+{t.points}</p>
+                          <div className="space-y-2 text-right">
+                             <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none">Circuit Pts</p>
+                             <p className="text-2xl font-black text-sky-600 tracking-tighter leading-none">+{t.points}</p>
                           </div>
                        </div>
 
                        <Button 
                         onClick={() => navigate(`/tournament/${t.id}`)}
-                        className="w-full h-16 bg-[#0B1F3A] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-sky-500 transition-all shadow-xl shadow-navy/10 group-hover:shadow-sky-500/20 border-none"
+                        className="w-full h-20 bg-[#0B1F3A] text-white rounded-[2rem] font-black text-xs uppercase tracking-widest hover:bg-sky-500 transition-all shadow-2xl shadow-navy/10 group-hover:shadow-sky-500/30 border-none"
                        >
                           {t.status === 'Live' ? "Enter Live Intelligence" : "Explore Event Profile"} 
-                          <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                          <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-2 transition-transform" />
                        </Button>
                     </div>
                   </motion.div>
@@ -218,73 +219,74 @@ const Tournaments = () => {
           </div>
 
           {/* Right Sidebar */}
-          <div className="lg:col-span-4 space-y-10">
-            <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 shadow-xl bg-slate-50 border-slate-200">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-6">
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[#0B1F3A]">Top Seeded</h3>
-                <Link to="/rankings" className="text-[10px] font-black text-sky-500 hover:underline">Full Ladder</Link>
+          <div className="lg:col-span-4 space-y-12">
+            <div className="glass-panel p-12 rounded-[4rem] space-y-10 shadow-2xl bg-slate-50 border-slate-200">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-8">
+                <h3 className="text-sm font-black uppercase tracking-[0.3em] text-[#0B1F3A]">Top Seeded</h3>
+                <Link to="/rankings" className="text-xs font-black text-sky-500 hover:underline">Full Ladder</Link>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-5">
                 {[
                   { name: "Viktor Axelsen", pts: "105.4k", rank: 1, country: "DK" },
                   { name: "Shi Yuqi", pts: "98.2k", rank: 2, country: "CN" },
                   { name: "Jonatan Christie", pts: "92.1k", rank: 3, country: "ID" },
                   { name: "Anders Antonsen", pts: "89.4k", rank: 4, country: "DK" },
+                  { name: "Loh Kean Yew", pts: "84.2k", rank: 5, country: "SG" },
                 ].map((player) => (
-                  <div key={player.rank} className="flex items-center justify-between p-4 rounded-2xl bg-white border border-slate-100 hover:border-sky-500/30 transition-all group">
-                    <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 rounded-xl bg-[#0B1F3A] flex items-center justify-center text-[10px] font-black text-sky-500 group-hover:bg-sky-500 group-hover:text-white transition-all">
+                  <div key={player.rank} className="flex items-center justify-between p-5 rounded-[2rem] bg-white border border-slate-100 hover:border-sky-500/40 transition-all group shadow-sm">
+                    <div className="flex items-center gap-5">
+                      <div className="h-12 w-12 rounded-2xl bg-[#0B1F3A] flex items-center justify-center text-xs font-black text-sky-500 group-hover:bg-sky-500 group-hover:text-white transition-all shadow-md">
                         #{player.rank}
                       </div>
                       <div>
-                        <p className="text-xs font-black text-[#0B1F3A]">{player.name}</p>
-                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{player.country} • Professional</p>
+                        <p className="text-sm font-black text-[#0B1F3A]">{player.name}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{player.country} • Elite Seed</p>
                       </div>
                     </div>
-                    <span className="text-xs font-black text-sky-600 tracking-tight">{player.pts}</span>
+                    <span className="text-sm font-black text-sky-600 tracking-tight">{player.pts}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="bg-[#0B1F3A] p-10 rounded-[3.5rem] text-white relative overflow-hidden group shadow-2xl">
-              <div className="absolute -right-10 -bottom-10 opacity-10 group-hover:rotate-12 group-hover:scale-125 transition-transform duration-700">
-                <Award className="h-48 w-48 text-white" />
+            <div className="bg-[#0B1F3A] p-12 rounded-[4rem] text-white relative overflow-hidden group shadow-2xl">
+              <div className="absolute -right-12 -bottom-12 opacity-10 group-hover:rotate-12 group-hover:scale-125 transition-transform duration-1000">
+                <Award className="h-56 w-56 text-white" />
               </div>
-              <div className="space-y-6 relative z-10">
-                <Badge className="bg-sky-500 border-none font-black text-[9px] px-3 h-6 rounded-full">CIRCUIT PRO</Badge>
-                <div className="space-y-2">
-                  <h4 className="text-3xl font-black italic tracking-tighter uppercase leading-none">Platform <br /> Dominance</h4>
-                  <p className="text-[10px] text-white/50 leading-relaxed font-bold uppercase tracking-widest">Access proprietary data analysis for all circuit players.</p>
+              <div className="space-y-8 relative z-10">
+                <Badge className="bg-sky-500 border-none font-black text-[10px] px-5 h-8 rounded-full shadow-2xl">CIRCUIT PRO</Badge>
+                <div className="space-y-4">
+                  <h4 className="text-4xl font-black italic tracking-tighter uppercase leading-[0.9]">Platform <br /> Dominance</h4>
+                  <p className="text-xs text-white/50 leading-relaxed font-bold uppercase tracking-widest">Access proprietary data analysis for all circuit players and tournament trends.</p>
                 </div>
-                <Button className="w-full h-14 bg-white text-[#0B1F3A] rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-sky-500 hover:text-white border-none shadow-xl transition-all">
+                <Button className="w-full h-16 bg-white text-[#0B1F3A] rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-sky-500 hover:text-white border-none shadow-2xl transition-all">
                   Go Pro Now
                 </Button>
               </div>
             </div>
 
-            <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 shadow-xl border-slate-200">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#0B1F3A] flex items-center gap-2">
-                <TrendingUp className="h-3 w-3 text-sky-500" /> Season Overview
+            <div className="glass-panel p-12 rounded-[4rem] space-y-10 shadow-2xl border-slate-200">
+              <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-[#0B1F3A] flex items-center gap-3">
+                <TrendingUp className="h-4 w-4 text-sky-500" /> Season Overview
               </h4>
-              <div className="space-y-8">
-                <div className="flex items-center gap-5">
-                  <div className="h-12 w-12 rounded-2xl bg-sky-50 flex items-center justify-center text-sky-500 shadow-sm">
-                    <Users className="h-6 w-6" />
+              <div className="space-y-10">
+                <div className="flex items-center gap-6">
+                  <div className="h-14 w-14 rounded-3xl bg-sky-50 flex items-center justify-center text-sky-500 shadow-inner">
+                    <Users className="h-7 w-7" />
                   </div>
                   <div>
-                    <p className="text-2xl font-black text-[#0B1F3A] tracking-tighter leading-none">1,240</p>
-                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Global Participants</p>
+                    <p className="text-3xl font-black text-[#0B1F3A] tracking-tighter leading-none">1,240</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Global Participants</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-5">
-                  <div className="h-12 w-12 rounded-2xl bg-sky-50 flex items-center justify-center text-sky-500 shadow-sm">
-                    <Activity className="h-6 w-6" />
+                <div className="flex items-center gap-6">
+                  <div className="h-14 w-14 rounded-3xl bg-sky-50 flex items-center justify-center text-sky-500 shadow-inner">
+                    <Activity className="h-7 w-7" />
                   </div>
                   <div>
-                    <p className="text-2xl font-black text-[#0B1F3A] tracking-tighter leading-none">48</p>
-                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Confirmed Tournaments</p>
+                    <p className="text-3xl font-black text-[#0B1F3A] tracking-tighter leading-none">48</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Confirmed Tournaments</p>
                   </div>
                 </div>
               </div>
