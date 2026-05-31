@@ -37,14 +37,14 @@ const Navbar = () => {
       const saved = localStorage.getItem('userProfile');
       if (saved) {
         const parsed = JSON.parse(saved);
-        setUserName(parsed.name);
-        setUserImage(parsed.image);
+        setUserName(parsed.name || "New Athlete");
+        setUserImage(parsed.image || "");
       }
     };
     
     checkAuth();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [location.pathname]);
 
   const navItems = [
     { name: isLoggedIn ? 'COURT' : 'Home', path: isLoggedIn ? '/court' : '/' },
@@ -55,6 +55,11 @@ const Navbar = () => {
     { name: 'News', path: '/news' },
     { name: 'Smashed', path: '/smashed' },
   ];
+
+  const getInitials = (name: string) => {
+    if (!name) return "??";
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
 
   return (
     <nav className={cn(
@@ -164,7 +169,7 @@ const Navbar = () => {
             <Link to="/player/me" className="flex items-center group">
               <Avatar className="h-10 w-10 border-2 border-slate-200 group-hover:border-sky-500 transition-all shadow-sm">
                 <AvatarImage src={userImage} />
-                <AvatarFallback className="font-black bg-slate-100">{userName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                <AvatarFallback className="font-black bg-slate-100">{getInitials(userName)}</AvatarFallback>
               </Avatar>
             </Link>
           ) : (
