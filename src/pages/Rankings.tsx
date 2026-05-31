@@ -51,7 +51,8 @@ const Rankings = () => {
           winRate: "88.4",
           smashAcc: "94.2",
           img: userProfile.name.split(' ').map((n: string) => n[0]).join(''),
-          isUser: true
+          isUser: true,
+          smashId: userProfile.smashId
         });
       }
     }
@@ -66,7 +67,8 @@ const Rankings = () => {
 
     return list.filter(p => 
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.country.toLowerCase().includes(searchQuery.toLowerCase())
+      p.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.smashId && p.smashId.toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [searchQuery, scope, userProfile]);
 
@@ -123,7 +125,7 @@ const Rankings = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                 <input 
                   type="text" 
-                  placeholder="Smash Here" 
+                  placeholder="Search by name or ID (e.g. Smash#1)" 
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 h-10 text-xs font-bold focus:border-sky-500 outline-none transition-all"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -165,7 +167,7 @@ const Rankings = () => {
                               <h4 className="font-black text-[#0B1F3A] text-base">
                                 {row.name} {row.isUser && <span className="ml-1 text-[8px] bg-sky-500 text-white px-1.5 py-0.5 rounded-full">YOU</span>}
                               </h4>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{row.country} • {row.state}</p>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{row.country} • {row.state} • {row.smashId}</p>
                             </div>
                           </div>
                         </TableCell>

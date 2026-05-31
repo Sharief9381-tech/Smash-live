@@ -20,13 +20,17 @@ export const AuthService = {
       let userProfile = profile;
 
       if (!profile) {
-        const uniqueId = Math.floor(1000 + Math.random() * 9000);
+        // Increment global count for sequential ID
+        const currentCount = parseInt(localStorage.getItem('smash_total_accounts') || '0');
+        const nextId = currentCount + 1;
+        localStorage.setItem('smash_total_accounts', nextId.toString());
+
         const { data: newProfile, error: createError } = await supabase
           .from('profiles')
           .insert([{
             email: credentials.email,
             name: credentials.email.split('@')[0],
-            smash_id: `SMASH#${uniqueId}`,
+            smash_id: `Smash#${nextId}`,
             country: "Denmark",
             state: "Hovedstaden",
             image: "https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?q=80&w=2070&auto=format&fit=crop"
@@ -44,10 +48,14 @@ export const AuthService = {
     } catch (err) {
       console.error("Database connection failed. Falling back to local session for testing.");
       
-      // Local fallback if Supabase is not configured or reachable
+      // Local fallback: Sequential ID generation
+      const currentCount = parseInt(localStorage.getItem('smash_total_accounts') || '0');
+      const nextId = currentCount + 1;
+      localStorage.setItem('smash_total_accounts', nextId.toString());
+
       const mockProfile = {
         name: credentials.email.split('@')[0] || "Player",
-        smashId: `SMASH#${Math.floor(1000 + Math.random() * 9000)}`,
+        smashId: `Smash#${nextId}`,
         country: "Denmark",
         state: "Hovedstaden",
         image: "https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?q=80&w=2070&auto=format&fit=crop"
@@ -65,7 +73,8 @@ export const AuthService = {
       smashId: userProfile.smashId || userProfile.smash_id,
       country: userProfile.country,
       state: userProfile.state,
-      image: userProfile.image
+      image: userProfile.image,
+      onboardingComplete: userProfile.onboardingComplete
     }));
   },
 
