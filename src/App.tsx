@@ -7,7 +7,6 @@ import Index from "./pages/Index";
 import LiveMatch from "./pages/LiveMatch";
 import Tournaments from "./pages/Tournaments";
 import CreateTournament from "./pages/CreateTournament";
-import CreateMatch from "./pages/CreateMatch";
 import TournamentDetail from "./pages/TournamentDetail";
 import PlayerProfile from "./pages/PlayerProfile";
 import EditProfile from "./pages/EditProfile";
@@ -22,6 +21,7 @@ import Court from "./pages/Court";
 import BroadcastCenter from "./pages/BroadcastCenter";
 import CreateIndividualMatch from "./pages/CreateIndividualMatch";
 import ScoringPage from "./pages/ScoringPage";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,11 +47,11 @@ const App = () => (
         <Routes>
           <Route path="/" element={<AuthCheck><Index /></AuthCheck>} />
           <Route path="/login" element={<AuthCheck><Login /></AuthCheck>} />
+          <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
           <Route path="/court" element={<ProtectedRoute><Court /></ProtectedRoute>} />
           <Route path="/dashboard" element={<Navigate to="/court" replace />} />
           <Route path="/smashed" element={<Smashed />} />
           <Route path="/live-match/active" element={<LiveMatch />} />
-          <Route path="/live-match/active-:id" element={<LiveMatch />} />
           <Route path="/live-match/create" element={<ProtectedRoute><CreateIndividualMatch /></ProtectedRoute>} />
           <Route path="/scoring/:matchId" element={<ProtectedRoute><ScoringPage /></ProtectedRoute>} />
           <Route path="/tournaments" element={<Tournaments />} />

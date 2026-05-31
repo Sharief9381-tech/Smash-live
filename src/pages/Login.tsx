@@ -66,13 +66,19 @@ const Login = () => {
     }
     setIsLoading(true);
     try {
-      // Simulation: Code '1234' is the master key for demo
       if (otp !== "1234") {
         throw new Error("Invalid verification code. Please use 1234.");
       }
-      await AuthService.login({ email: `${phone}@smashlive.com` });
-      showSuccess("Authentication successful. Welcome to the Court.");
-      navigate('/court'); 
+      const user = await AuthService.login({ email: `${phone}@smashlive.com` });
+      
+      showSuccess("Authentication successful.");
+      
+      // If it's a "new" account (simulated here by missing properties)
+      if (!user.onboardingComplete) {
+        navigate('/onboarding');
+      } else {
+        navigate('/court'); 
+      }
     } catch (err: any) {
       showError(err.message);
     } finally {
@@ -82,7 +88,6 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Decorative Background Elements */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#0B1F3A]/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/2" />
 
