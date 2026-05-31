@@ -1,43 +1,53 @@
 "use client";
 
-export const AuthService = {
-  async login(credentials: { email: string; password?: string }) {
-    // Simulate a network delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Mock successful response
-    const mockUser = {
-      _id: "user_" + Math.random().toString(36).substr(2, 9),
-      email: credentials.email,
-      token: "mock_jwt_token_" + Date.now()
-    };
-    
-    localStorage.setItem('token', mockUser.token);
-    localStorage.setItem('isLoggedIn', 'true');
-    
-    // Create a default profile with a UNIQUE Smash ID if none exists
-    if (!localStorage.getItem('userProfile')) {
-      const uniqueId = Math.floor(1000 + Math.random() * 9000);
-      localStorage.setItem('userProfile', JSON.stringify({
-        name: credentials.email.split('@')[0],
-        smashId: `SMASH#${uniqueId}`,
-        country: "Denmark",
-        state: "Hovedstaden",
-        image: "https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?q=80&w=2070&auto=format&fit=crop",
-        height: "185"
-      }));
-    }
-    
-    return mockUser;
-  },
+import { supabase } from '@/lib/supabase';
 
-  async register(userData: any) {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    return { success: true, message: "User registered locally" };
+export const AuthService = {
+  async login(credentials: { email: string }) {
+    // In a real app, we'd use supabase.auth.signInWithOtp
+    // For this demo, we'll ensure a profile exists in the 'profiles' table
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('email', credentials.email)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+
+    let userProfile = profile;
+
+    if (!profile) {
+      const uniqueId = Math.floor(1000 + Math.random() * 9000);
+      const { data: newProfile, error: createError } = await supabase
+        .from('profiles')
+        .insert([{
+          email: credentials.email,
+          name: credentials.email.split('@')[0],
+          smash_id: `SMASH#${uniqueId}`,
+          country: "Denmark",
+          state: "Hovedstaden",
+          image: "https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?q=80&w=2070&auto=format&fit=crop"
+        }])
+        .select()
+        .single();
+
+      if (createError) throw createError;
+      userProfile = newProfile;
+    }
+
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('userProfile', JSON.stringify({
+      name: userProfile.name,
+      smashId: userProfile.smash_id,
+      country: userProfile.country,
+      state: userProfile.state,
+      image: userProfile.image
+    }));
+
+    return userProfile;
   },
 
   logout() {
-    localStorage.removeItem('token');
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('userProfile');
   }

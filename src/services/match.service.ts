@@ -1,51 +1,64 @@
 "use client";
 
+import { supabase } from '@/lib/supabase';
 import { Match } from '@/types/database';
 
 export const MatchService = {
-  async createMatch(matchData: Partial<Match>) {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const id = `match_${Date.now()}`;
-    const newMatch = { ...matchData, id, createdAt: new Date().toISOString() };
-    
-    // Save to local storage for persistence
-    localStorage.setItem(id, JSON.stringify(newMatch));
-    
-    // Update active matches list
-    const activeMatches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
-    activeMatches.push(newMatch);
-    localStorage.setItem('active_studio_matches', JSON.stringify(activeMatches));
-    
-    return newMatch;
+  async createMatch(matchData: any) {
+    const { data, error } = await supabase
+      .from('matches')
+      .insert([{
+        name: matchData.name,
+        match_type: matchData.matchType,
+        players: matchData.players,
+        status: 'live',
+        current_score: [0, 0],
+        sets_won: [0, 0],
+        serving: 1
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   },
 
-  async updateScore(matchId: string, side: 1 | 2, action: string) {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    const saved = localStorage.getItem(matchId);
-    if (!saved) throw new Error('Match not found');
-    
-    const match = JSON.parse(saved);
-    const newScore = [...(match.currentScore || [0, 0])];
-    newScore[side - 1]++;
-    
-    const updatedMatch = {
-      ...match,
-      currentScore: newScore,
-      lastUpdate: Date.now()
-    };
-    
-    localStorage.setItem(matchId, JSON.stringify(updatedMatch));
-    return updatedMatch;
+  async updateScore(matchId: string, score: [number, number], sets: [number, number], serving: number) {
+    const { data, error } = await supabase
+      .from('matches')
+      .update({
+        current_score: score,
+        sets_won: sets,
+        serving: serving,
+        last_update: new Date().toISOString()
+      })
+      .eq('id', matchId);
+
+    if (error) throw error;
+    return data;
   },
 
   async getLiveMatches() {
-    // Return both static demos and local storage matches
-    const active = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
-    return active;
+    const { data, error } = await supabase
+      .from('matches')
+      .select('*')
+      .eq('status', 'live')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
   },
 
-  async getMatchById(id: string) {
-    const saved = localStorage.getItem(id);
-    return saved ? JSON.parse(saved) : null;
+  // Subscribe to real-time updates for a specific match
+  subscribeToMatch(matchId: string, callback: (payload: any) => void) {
+    return supabase
+      .channel(`match_${matchId}`)
+      .on('postgres_changes', { 
+        event: 'UPDATE', 
+        schema: 'public', 
+        table: 'matches', 
+        filter: `id=eq.${matchId}` 
+      }, callback)
+      .subscribe();
   }
 };
