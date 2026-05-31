@@ -86,27 +86,48 @@ const Tournaments = () => {
     <div className="min-h-screen bg-white">
       <Navbar />
       
-      {/* Editorial Header - Increased spacing and max-width for more breathing room */}
+      {/* Editorial Header */}
       <section className="bg-slate-50 py-28 border-b border-slate-200">
         <div className="container px-8">
-          <div className="max-w-4xl space-y-8">
-            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-sky-500/10 text-sky-600">
-              <Trophy className="h-5 w-5" />
-              <span className="text-[11px] font-black uppercase tracking-[0.25em]">BWF World Tour Calendar</span>
+          <div className="grid lg:grid-cols-12 gap-16 items-center">
+            {/* Quote / Heading Column */}
+            <div className="lg:col-span-7 space-y-8">
+              <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-sky-500/10 text-sky-600">
+                <Trophy className="h-5 w-5" />
+                <span className="text-[11px] font-black uppercase tracking-[0.25em]">BWF World Tour Calendar</span>
+              </div>
+              <h1 className="text-7xl md:text-8xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-[0.85]">
+                Global Circuit <br />
+                <span className="text-sky-500">Intelligence</span>
+              </h1>
+              <p className="text-2xl text-slate-500 font-medium max-w-2xl leading-relaxed">
+                Track major tournaments, seeded entries, and prize distribution across the official season with real-time tactical data.
+              </p>
             </div>
-            <h1 className="text-7xl md:text-8xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-[0.85]">
-              Global Circuit <br />
-              <span className="text-sky-500">Intelligence</span>
-            </h1>
-            <p className="text-2xl text-slate-500 font-medium max-w-2xl leading-relaxed">
-              Track major tournaments, seeded entries, and prize distribution across the official 2024/25 badminton season with real-time tactical data.
-            </p>
+
+            {/* Circuit Pro Card beside the quote */}
+            <div className="lg:col-span-5">
+              <div className="bg-[#0B1F3A] p-12 rounded-[4rem] text-white relative overflow-hidden group shadow-2xl">
+                <div className="absolute -right-12 -bottom-12 opacity-10 group-hover:rotate-12 group-hover:scale-125 transition-transform duration-1000">
+                  <Award className="h-56 w-56 text-white" />
+                </div>
+                <div className="space-y-8 relative z-10">
+                  <Badge className="bg-sky-500 border-none font-black text-[10px] px-5 h-8 rounded-full shadow-2xl">CIRCUIT PRO</Badge>
+                  <div className="space-y-4">
+                    <h4 className="text-4xl font-black italic tracking-tighter uppercase leading-[0.9]">Platform <br /> Dominance</h4>
+                    <p className="text-xs text-white/50 leading-relaxed font-bold uppercase tracking-widest">Access proprietary data analysis for all circuit players and tournament trends.</p>
+                  </div>
+                  <Button className="w-full h-16 bg-white text-[#0B1F3A] rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-sky-500 hover:text-white border-none shadow-2xl transition-all">
+                    Go Pro Now
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       <main className="container px-8 py-20">
-        {/* Increased gap between main column and sidebar to 20 */}
         <div className="grid lg:grid-cols-12 gap-20">
           {/* Main Content */}
           <div className="lg:col-span-8 space-y-16">
@@ -250,22 +271,7 @@ const Tournaments = () => {
               </div>
             </div>
 
-            <div className="bg-[#0B1F3A] p-12 rounded-[4rem] text-white relative overflow-hidden group shadow-2xl">
-              <div className="absolute -right-12 -bottom-12 opacity-10 group-hover:rotate-12 group-hover:scale-125 transition-transform duration-1000">
-                <Award className="h-56 w-56 text-white" />
-              </div>
-              <div className="space-y-8 relative z-10">
-                <Badge className="bg-sky-500 border-none font-black text-[10px] px-5 h-8 rounded-full shadow-2xl">CIRCUIT PRO</Badge>
-                <div className="space-y-4">
-                  <h4 className="text-4xl font-black italic tracking-tighter uppercase leading-[0.9]">Platform <br /> Dominance</h4>
-                  <p className="text-xs text-white/50 leading-relaxed font-bold uppercase tracking-widest">Access proprietary data analysis for all circuit players and tournament trends.</p>
-                </div>
-                <Button className="w-full h-16 bg-white text-[#0B1F3A] rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-sky-500 hover:text-white border-none shadow-2xl transition-all">
-                  Go Pro Now
-                </Button>
-              </div>
-            </div>
-
+            {/* Pro Card moved to hero, so this sidebar section is now for Season Overview */}
             <div className="glass-panel p-12 rounded-[4rem] space-y-10 shadow-2xl border-slate-200">
               <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-[#0B1F3A] flex items-center gap-3">
                 <TrendingUp className="h-4 w-4 text-sky-500" /> Season Overview
