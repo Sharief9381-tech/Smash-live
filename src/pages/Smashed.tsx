@@ -81,7 +81,7 @@ const Smashed = () => {
   const filteredMyTourneys = useMemo(() => {
     return myTourneys.filter(t => 
       t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      t.location.toLowerCase().includes(searchQuery.toLowerCase())
+      (t.city || t.location || "").toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [searchQuery, myTourneys]);
 
@@ -237,10 +237,10 @@ const Smashed = () => {
                         <h3 className="text-xl font-black text-[#0B1F3A] leading-tight uppercase italic">{t.name}</h3>
                         <div className="flex flex-col gap-1">
                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                            <Calendar className="h-3 w-3 text-sky-500" /> {t.date}
+                            <Calendar className="h-3 w-3 text-sky-500" /> {t.startDate} {t.endDate && `— ${t.endDate}`}
                           </p>
                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                            <MapPin className="h-3 w-3 text-sky-500" /> {t.location}
+                            <MapPin className="h-3 w-3 text-sky-500" /> {t.city || t.location}
                           </p>
                         </div>
                       </div>
