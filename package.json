@@ -4,12 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "vite --config client/vite.config.ts",
+    "build": "vite build --config client/vite.config.ts",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "server": "node --loader ts-node/esm src/server.ts",
-    "server:dev": "nodemon --watch 'src/**/*.ts' --exec 'node --loader ts-node/esm' src/server.ts"
+    "preview": "vite preview --config client/vite.config.ts",
+    "server": "node --loader ts-node/esm server/src/server.ts",
+    "server:dev": "nodemon --watch 'server/src/**/*.ts' --exec 'node --loader ts-node/esm' server/src/server.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
