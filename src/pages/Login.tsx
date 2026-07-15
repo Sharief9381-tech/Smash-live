@@ -1,221 +1,320 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Phone, Globe, ChevronDown, Loader2, ShieldCheck } from 'lucide-react';
+import { Zap, ShieldCheck, Globe, Trophy, ChevronDown, Loader2, ArrowRight, CheckCircle2, Lock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 import { AuthService } from '@/services/auth.service';
 import { showError, showSuccess } from '@/utils/toast';
-
-const countryCodes = [
-  { code: '+62', country: 'ID', flag: '🇮🇩', name: 'Indonesia' },
-  { code: '+86', country: 'CN', flag: '🇨🇳', name: 'China' },
-  { code: '+45', country: 'DK', flag: '🇩🇰', name: 'Denmark' },
-  { code: '+60', country: 'MY', flag: '🇲🇾', name: 'Malaysia' },
-  { code: '+66', country: 'TH', flag: '🇹🇭', name: 'Thailand' },
-  { code: '+91', country: 'IN', flag: '🇮🇳', name: 'India' },
-  { code: '+81', country: 'JP', flag: '🇯🇵', name: 'Japan' },
-  { code: '+82', country: 'KR', flag: '🇰🇷', name: 'South Korea' },
-  { code: '+65', country: 'SG', flag: '🇸🇬', name: 'Singapore' },
-  { code: '+44', country: 'UK', flag: '🇬🇧', name: 'United Kingdom' },
-  { code: '+1', country: 'US', flag: '🇺🇸', name: 'USA' },
-];
+import { cn } from '@/lib/utils';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState(countryCodes[0]);
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+  const [step, setStep] = useState<'details' | 'otp'>('details');
   const [isLoading, setIsLoading] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+  
+  // Registration States
+  const [regData, setRegData] = useState({
+    name: "",
+    gender: "",
+  });
 
-  const fullPhone = `${selectedCountry.code}${phone}`;
+  const [timer, setTimer] = useState(30);
 
-  const handleAccessRequest = async () => {
-    if (phone.length < 8) {
-      showError("Please enter a valid mobile number");
+  useEffect(() => {
+    let interval: any;
+    if (step === 'otp' && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [step, timer]);
+
+  const handleSendOtp = () => {
+    if (phone.length < 10) {
+      showError("Please enter a valid 10-digit mobile number");
       return;
     }
-    
+    if (activeTab === 'register' && (!regData.name || !regData.gender)) {
+      showError("Please fill in all registration details");
+      return;
+    }
+
     setIsLoading(true);
-    
-    // Simulate intelligence network lookup
-    setTimeout(async () => {
-      const existingUser = AuthService.checkUserExists(fullPhone);
-      
-      if (existingUser) {
-        // INSTANT LOGIN: No OTP required for recognized dossiers
-        AuthService.setSession(existingUser);
-        showSuccess(`Identity Recognized: Welcome back, ${existingUser.name}`);
-        setIsLoading(false);
-        navigate('/court');
+    // Simulating OTP dispatch
+    setTimeout(() => {
+      setIsLoading(false);
+      setStep('otp');
+      setTimer(30);
+      showSuccess(`OTP sent to +91 ${phone}. Use 123456 for testing.`);
+    }, 1200);
+  };
+
+  const handleOtpChange = (index: number, value: string) => {
+    if (isNaN(Number(value))) return;
+    const newOtp = [...otp];
+    newOtp[index] = value.slice(-1);
+    setOtp(newOtp);
+
+    // Auto-focus next
+    if (value && index < 5) {
+      otpRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleVerify = () => {
+    const enteredOtp = otp.join("");
+    if (enteredOtp.length !== 6) {
+      showError("Please enter the 6-digit OTP");
+      return;
+    }
+
+    setIsLoading(true);
+    setTimeout(() => {
+      if (enteredOtp === "123456") {
+        const userData = {
+          phone: `+91${phone}`,
+          name: activeTab === 'register' ? regData.name : "Athlete",
+          gender: activeTab === 'register' ? regData.gender : undefined,
+          isLoggedIn: true,
+          onboardingComplete: activeTab === 'login' // Registering users will still need to complete onboarding
+        };
+        
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userProfile', JSON.stringify(userData));
+        
+        showSuccess(activeTab === 'register' ? "Account Created Successfully!" : "Login Successful!");
+        
+        if (activeTab === 'register') {
+            navigate('/onboarding');
+        } else {
+            navigate('/court');
+        }
       } else {
-        // NEW ATHLETE: Trigger security verification
+        showError("Invalid OTP. Try 123456");
         setIsLoading(false);
-        setStep(2);
-        showSuccess(`Security code [1234] sent to ${fullPhone}`);
       }
     }, 1000);
   };
 
-  const handleVerifyNewAthlete = async () => {
-    if (otp.length !== 4) {
-      showError("Please enter the 4-digit security code");
-      return;
-    }
-    setIsLoading(true);
-    
-    setTimeout(() => {
-      if (otp === "1234") {
-        // Verify identity and proceed to Dossier Creation (Onboarding)
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userProfile', JSON.stringify({
-          phone: fullPhone,
-          onboardingComplete: false
-        }));
-        showSuccess("Identity Verified. Initializing Athlete Dossier...");
-        navigate('/onboarding');
-      } else {
-        showError("Verification Failed. Use code 1234 for testing.");
-        setIsLoading(false);
-      }
-    }, 800);
-  };
-
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Decorative background glow */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
-      
-      <div className="w-full max-w-[400px] space-y-8 relative z-10">
-        <div className="text-center space-y-4">
-          <Link to="/" className="inline-flex items-center gap-2 group">
-            <div className="bg-[#0B1F3A] p-2.5 rounded-2xl text-white group-hover:scale-110 transition-transform shadow-xl">
-              <Zap className="h-6 w-6 fill-current text-sky-400" />
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#1DA1F2]/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#071D49]/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/2" />
+
+      <div className="w-full max-w-[480px] space-y-8 relative z-10">
+        {/* Header */}
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center gap-2 mb-2">
+            <div className="bg-[#071D49] p-2 rounded-xl text-white shadow-lg">
+              <Zap className="h-6 w-6 fill-current text-[#1DA1F2]" />
             </div>
-            <span className="text-3xl font-black text-[#0B1F3A] uppercase tracking-tighter">
-              Smash<span className="text-sky-500">Live</span>
+            <span className="text-2xl font-black text-[#071D49] tracking-tighter uppercase italic">
+              Smash<span className="text-[#1DA1F2]">Live</span>
             </span>
-          </Link>
-          <div className="space-y-1">
-            <h1 className="text-2xl font-black text-[#0B1F3A] tracking-tight">
-              {step === 1 ? 'Operational Access' : 'Security Checkpoint'}
-            </h1>
-            <p className="text-slate-400 font-bold uppercase text-[9px] tracking-[0.2em]">
-              {step === 1 ? 'Global Athlete Intelligence Network' : `Verification sent to ${fullPhone}`}
-            </p>
           </div>
+          <h1 className="text-4xl font-black text-[#071D49] tracking-tight leading-none">
+            Welcome to SmashLive
+          </h1>
+          <p className="text-[#64748B] font-semibold uppercase text-xs tracking-[0.2em]">
+            India's Home for Badminton
+          </p>
         </div>
 
-        <div className="glass-panel p-10 rounded-[3rem] space-y-8 shadow-2xl border-white bg-white/80 backdrop-blur-xl">
+        {/* Auth Card */}
+        <div className="bg-white rounded-[2.5rem] p-10 shadow-[0_20px_50px_rgba(7,29,73,0.08)] border border-[#E2E8F0]">
+          {/* Tabs */}
+          {step === 'details' && (
+            <div className="flex p-1.5 bg-[#F1F5F9] rounded-full mb-10">
+              <button 
+                onClick={() => setActiveTab('login')}
+                className={cn(
+                  "flex-1 py-3.5 rounded-full text-sm font-bold transition-all duration-300",
+                  activeTab === 'login' ? "bg-[#071D49] text-white shadow-lg" : "text-[#64748B] hover:text-[#071D49]"
+                )}
+              >
+                LOGIN
+              </button>
+              <button 
+                onClick={() => setActiveTab('register')}
+                className={cn(
+                  "flex-1 py-3.5 rounded-full text-sm font-bold transition-all duration-300",
+                  activeTab === 'register' ? "bg-[#071D49] text-white shadow-lg" : "text-[#64748B] hover:text-[#071D49]"
+                )}
+              >
+                REGISTER
+              </button>
+            </div>
+          )}
+
           <AnimatePresence mode="wait">
-            {step === 1 ? (
+            {step === 'details' ? (
               <motion.div 
-                key="step1"
-                initial={{ opacity: 0, y: 10 }}
+                key="details"
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
+                exit={{ opacity: 0, scale: 0.95 }}
                 className="space-y-6"
               >
-                <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Athlete Mobile Identifier</Label>
-                  <div className="flex gap-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="h-14 px-4 bg-white border-slate-100 rounded-2xl font-black flex items-center gap-2 min-w-[105px] hover:bg-slate-50 transition-all">
-                          <span className="text-base">{selectedCountry.flag}</span>
-                          <span className="text-xs">{selectedCountry.code}</span>
-                          <ChevronDown className="h-3 w-3 opacity-30" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-64 rounded-2xl p-2 shadow-2xl border-slate-100 max-h-80 overflow-y-auto">
-                        {countryCodes.map((c) => (
-                          <DropdownMenuItem key={c.code} onClick={() => setSelectedCountry(c)} className="rounded-xl p-3 flex justify-between cursor-pointer focus:bg-sky-50">
-                            <div className="flex items-center gap-3">
-                              <span className="text-lg">{c.flag}</span>
-                              <span className="text-xs font-bold text-[#0B1F3A]">{c.name}</span>
-                            </div>
-                            <span className="text-[10px] font-black text-slate-400">{c.code}</span>
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <div className="relative flex-1">
-                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
+                {activeTab === 'register' && (
+                  <>
+                    <div className="space-y-2.5">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-[#94A3B8] ml-4">Full Name</Label>
                       <Input 
-                        type="tel" 
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                        placeholder="Mobile digits" 
-                        className="h-14 bg-white border-slate-100 rounded-2xl pl-11 font-black text-lg focus:border-sky-500 shadow-sm transition-all"
+                        value={regData.name}
+                        onChange={(e) => setRegData({...regData, name: e.target.value})}
+                        placeholder="Enter your full name" 
+                        className="h-14 bg-white border-[#E2E8F0] rounded-[18px] px-6 text-[#071D49] font-bold placeholder:text-[#94A3B8] focus-visible:ring-0 focus-visible:border-[#1DA1F2] focus-visible:shadow-[0_0_0_4px_rgba(29,161,242,0.15)] transition-all"
                       />
                     </div>
+                    <div className="space-y-2.5">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-[#94A3B8] ml-4">Gender</Label>
+                      <Select value={regData.gender} onValueChange={(v) => setRegData({...regData, gender: v})}>
+                        <SelectTrigger className="h-14 bg-white border-[#E2E8F0] rounded-[18px] px-6 text-[#071D49] font-bold focus:ring-0 focus:border-[#1DA1F2] focus:shadow-[0_0_0_4px_rgba(29,161,242,0.15)]">
+                          <SelectValue placeholder="Select Gender" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-[#E2E8F0]">
+                          <SelectItem value="male" className="font-bold text-[#071D49]">Male</SelectItem>
+                          <SelectItem value="female" className="font-bold text-[#071D49]">Female</SelectItem>
+                          <SelectItem value="other" className="font-bold text-[#071D49]">Prefer not to say</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                )}
+
+                <div className="space-y-2.5">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-[#94A3B8] ml-4">Mobile Number</Label>
+                  <div className="flex gap-3">
+                    <div className="h-14 flex items-center gap-2 px-4 border border-[#E2E8F0] rounded-[18px] bg-white font-bold text-[#071D49]">
+                      <span className="text-lg">🇮🇳</span>
+                      <span className="text-sm">+91</span>
+                    </div>
+                    <Input 
+                      type="tel" 
+                      maxLength={10}
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                      placeholder="Enter mobile number" 
+                      className="h-14 bg-white border-[#E2E8F0] rounded-[18px] px-6 text-[#071D49] font-bold placeholder:text-[#94A3B8] focus-visible:ring-0 focus-visible:border-[#1DA1F2] focus-visible:shadow-[0_0_0_4px_rgba(29,161,242,0.15)] transition-all flex-1"
+                    />
                   </div>
                 </div>
+
                 <Button 
-                  onClick={handleAccessRequest} 
+                  onClick={handleSendOtp}
                   disabled={isLoading}
-                  className="w-full h-16 bg-[#0B1F3A] text-white font-black rounded-2xl shadow-xl hover:bg-sky-500 transition-all group border-none"
+                  className="w-full h-[56px] rounded-[18px] bg-gradient-to-r from-[#071D49] to-[#1DA1F2] text-white font-black text-sm uppercase tracking-widest shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50"
                 >
-                  {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : "REQUEST ACCESS"}
+                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Send OTP"}
                 </Button>
               </motion.div>
             ) : (
               <motion.div 
-                key="step2"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="space-y-6"
+                key="otp"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="space-y-8"
               >
-                <div className="space-y-4">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">4-Digit Security Code</Label>
-                  <Input 
-                    maxLength={4}
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                    placeholder="0 0 0 0" 
-                    className="h-20 bg-white border-slate-100 rounded-2xl font-black text-3xl text-center tracking-[0.5em] focus:border-sky-500 shadow-sm"
-                  />
-                  <div className="bg-sky-50 p-4 rounded-xl border border-sky-100">
-                    <p className="text-[9px] font-black text-sky-600 text-center uppercase tracking-widest leading-relaxed">
-                      Verification required for new dossiers. <br /> Use code <span className="text-[#0B1F3A] text-xs">1234</span>
-                    </p>
+                <div className="space-y-4 text-center">
+                   <div className="bg-[#F1F5F9] w-14 h-14 rounded-full flex items-center justify-center mx-auto text-[#071D49]">
+                      <Lock className="h-6 w-6" />
+                   </div>
+                   <div className="space-y-1">
+                      <h3 className="text-xl font-black text-[#071D49]">Enter OTP</h3>
+                      <p className="text-xs font-bold text-[#94A3B8]">Verification code sent to +91 {phone}</p>
+                   </div>
+                </div>
+
+                <div className="flex justify-between gap-2.5">
+                  {otp.map((digit, idx) => (
+                    <input
+                      key={idx}
+                      ref={(el) => (otpRefs.current[idx] = el)}
+                      type="text"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleOtpChange(idx, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(idx, e)}
+                      className="w-12 h-14 bg-white border-[#E2E8F0] rounded-[14px] text-center font-black text-xl text-[#071D49] focus:border-[#1DA1F2] focus:shadow-[0_0_0_4px_rgba(29,161,242,0.15)] outline-none transition-all"
+                    />
+                  ))}
+                </div>
+
+                <div className="space-y-6">
+                  <Button 
+                    onClick={handleVerify}
+                    disabled={isLoading}
+                    className="w-full h-[56px] rounded-[18px] bg-gradient-to-r from-[#071D49] to-[#1DA1F2] text-white font-black text-sm uppercase tracking-widest shadow-xl transition-all"
+                  >
+                    {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (activeTab === 'register' ? "Create Account" : "Verify & Login")}
+                  </Button>
+                  
+                  <div className="text-center space-y-4">
+                    {timer > 0 ? (
+                      <p className="text-[10px] font-black text-[#94A3B8] uppercase tracking-widest">
+                        Resend OTP in <span className="text-[#1DA1F2]">{timer}s</span>
+                      </p>
+                    ) : (
+                      <button 
+                        onClick={handleSendOtp}
+                        className="text-[10px] font-black text-[#1DA1F2] uppercase tracking-widest hover:underline"
+                      >
+                        Resend OTP Now
+                      </button>
+                    )}
+                    <button 
+                      onClick={() => setStep('details')}
+                      className="block mx-auto text-[10px] font-black text-[#94A3B8] uppercase tracking-widest hover:text-[#071D49] transition-colors"
+                    >
+                      Change Mobile Number
+                    </button>
                   </div>
                 </div>
-                <Button 
-                  onClick={handleVerifyNewAthlete} 
-                  disabled={isLoading}
-                  className="w-full h-16 bg-sky-500 text-white font-black rounded-2xl shadow-xl hover:bg-sky-600 transition-all border-none"
-                >
-                  {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : "VERIFY IDENTITY"}
-                </Button>
-                <button onClick={() => setStep(1)} className="w-full text-[9px] font-black text-slate-400 uppercase tracking-widest hover:text-sky-500 transition-colors">
-                  Wrong Identifier? Modify Phone
-                </button>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        <div className="flex items-center justify-center gap-8 opacity-40">
-          <div className="flex items-center gap-2">
-            <Globe className="h-3 w-3" />
-            <span className="text-[9px] font-black uppercase tracking-widest">Encrypted Cloud</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="h-3 w-3" />
-            <span className="text-[9px] font-black uppercase tracking-widest">Verified Athlete</span>
-          </div>
+        {/* Footer */}
+        <div className="space-y-6 text-center">
+           <p className="text-[10px] font-black text-[#94A3B8] uppercase tracking-[0.2em]">Premium sports-tech authentication.</p>
+           <div className="flex items-center justify-center gap-6 text-[#94A3B8]">
+              <div className="flex items-center gap-2">
+                 <ShieldCheck className="h-4 w-4" />
+                 <span className="text-[9px] font-bold uppercase">Secure Auth</span>
+              </div>
+              <div className="flex items-center gap-2">
+                 <Trophy className="h-4 w-4" />
+                 <span className="text-[9px] font-bold uppercase">Built for Badminton</span>
+              </div>
+              <div className="flex items-center gap-2">
+                 <Globe className="h-4 w-4" />
+                 <span className="text-[9px] font-bold uppercase">Made for India</span>
+              </div>
+           </div>
         </div>
       </div>
     </div>
