@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Zap, MapPin, Flag, User, Loader2, ArrowRight } from 'lucide-react';
+import { Zap, MapPin, Flag, User, Loader2, ArrowRight, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,9 +30,10 @@ const Onboarding = () => {
   const [state, setState] = useState("");
 
   useEffect(() => {
-    const temp = localStorage.getItem('temp_reg_data');
-    if (temp) {
-      setUserData(JSON.parse(temp));
+    // We check userProfile instead of temp_reg_data since Login now sets the profile early
+    const currentProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    if (currentProfile.name) {
+      setUserData(currentProfile);
     } else {
       navigate('/login');
     }
@@ -54,13 +55,17 @@ const Onboarding = () => {
       
       // Save to mock database
       const users = JSON.parse(localStorage.getItem('registered_users') || '[]');
-      users.push(finalProfile);
+      const existingIdx = users.findIndex((u: any) => u.phone === finalProfile.phone);
+      if (existingIdx > -1) {
+        users[existingIdx] = finalProfile;
+      } else {
+        users.push(finalProfile);
+      }
       localStorage.setItem('registered_users', JSON.stringify(users));
       
       // Set active session
       localStorage.setItem('userProfile', JSON.stringify(finalProfile));
       localStorage.setItem('isLoggedIn', 'true');
-      localStorage.removeItem('temp_reg_data');
       
       showSuccess("Athlete Dossier Initialized!");
       navigate('/court');
@@ -93,7 +98,7 @@ const Onboarding = () => {
             {/* Read-only Name Section */}
             <div className="p-5 bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] flex items-center gap-4">
                <div className="h-12 w-12 rounded-full bg-[#071D49] flex items-center justify-center text-[#1DA1F2] font-black">
-                  {userData.name.split(' ').map((n:any) => n[0]).join('')}
+                  {userData.name ? userData.name.split(' ').map((n:any) => n[0]).join('') : "?"}
                </div>
                <div>
                   <p className="text-[10px] font-black text-[#94A3B8] uppercase tracking-widest">Athlete Name</p>
