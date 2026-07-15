@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   History, Trophy, Zap, 
   Search, ListFilter, Play,
   Calendar, MapPin, Activity, 
-  User, ShieldCheck, Radio, Users
+  User, ShieldCheck, Radio, Users,
+  ChevronRight, X, Phone, Fingerprint,
+  ArrowRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,12 +18,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { showSuccess } from '@/utils/toast';
 
 const Smashed = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [myMatches, setMyMatches] = useState<any[]>([]);
   const [myTourneys, setMyTourneys] = useState<any[]>([]);
+  const [selectedTourney, setSelectedTourney] = useState<any>(null);
 
   useEffect(() => {
     const loadMyData = () => {
@@ -136,59 +140,159 @@ const Smashed = () => {
           </TabsContent>
 
           <TabsContent value="my-tourneys" className="m-0">
-            {filteredMyTourneys.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredMyTourneys.map((t) => (
-                  <motion.div 
-                    whileHover={{ y: -5 }}
-                    key={t.id} 
-                    className="glass-panel p-8 rounded-[2.5rem] border-slate-200 space-y-6 group bg-white shadow-sm"
+            {selectedTourney ? (
+              <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="space-y-8"
+              >
+                <div className="flex items-center justify-between">
+                  <button 
+                    onClick={() => setSelectedTourney(null)}
+                    className="flex items-center gap-2 text-[#64748B] hover:text-[#0B1F3A] transition-colors"
                   >
-                    <div className="flex justify-between items-start">
-                      <div className="h-14 w-14 rounded-2xl bg-[#0B1F3A] text-white flex items-center justify-center shadow-lg group-hover:bg-sky-500 transition-colors">
-                        <Trophy className="h-7 w-7" />
-                      </div>
-                      <Badge className="bg-green-500 text-white font-black px-4 h-6 text-[9px] uppercase animate-pulse">{t.status}</Badge>
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-xl font-black text-[#0B1F3A] leading-tight uppercase italic">{t.name}</h3>
-                      <div className="flex flex-col gap-1">
-                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                          <Calendar className="h-3 w-3 text-sky-500" /> {t.date}
-                        </p>
-                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                          <MapPin className="h-3 w-3 text-sky-500" /> {t.location}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                         <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#0B1F3A]">
-                            <Users className="h-5 w-5" />
-                         </div>
-                         <div>
-                            <p className="text-lg font-black text-[#0B1F3A] leading-none">{t.participants?.length || 0}</p>
-                            <p className="text-[8px] font-black text-slate-300 uppercase">Players</p>
-                         </div>
-                      </div>
-                      <Button onClick={() => {
-                        const link = `${window.location.origin}/register/${t.slug}`;
-                        navigator.clipboard.writeText(link);
-                        showSuccess("Registration link copied!");
-                      }} variant="outline" className="h-10 px-4 rounded-xl border-slate-200 font-black text-[9px] uppercase tracking-widest">
-                        Copy Link
-                      </Button>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+                    <X className="h-5 w-5" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Back to Tournaments</span>
+                  </button>
+                  <Badge className="bg-sky-500 text-white font-black px-4">{selectedTourney.name}</Badge>
+                </div>
+
+                <div className="bg-white border border-slate-200 rounded-[3rem] overflow-hidden shadow-xl">
+                  <Table>
+                    <TableHeader className="bg-slate-50">
+                      <TableRow className="hover:bg-transparent border-slate-100">
+                        <TableHead className="font-black text-[10px] uppercase tracking-widest py-8 px-10">Athlete Intelligence</TableHead>
+                        <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">Contact Identity</TableHead>
+                        <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">Smash ID</TableHead>
+                        <TableHead className="text-right font-black text-[10px] uppercase tracking-widest pr-10">Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {selectedTourney.participants && selectedTourney.participants.length > 0 ? (
+                        selectedTourney.participants.map((p: any, idx: number) => (
+                          <TableRow key={idx} className="border-slate-100 hover:bg-sky-50/30 h-24 transition-all">
+                            <TableCell className="px-10">
+                              <div className="flex items-center gap-4">
+                                <div className="h-12 w-12 rounded-full bg-[#0B1F3A] flex items-center justify-center text-[#1DA1F2] font-black">
+                                  {p.name ? p.name.split(' ').map((n:any) => n[0]).join('') : "?"}
+                                </div>
+                                <div>
+                                  <p className="font-black text-[#0B1F3A] text-lg leading-tight">{p.name}</p>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Registered athlete</p>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <div className="flex items-center justify-center gap-2 font-bold text-[#64748B]">
+                                <Phone className="h-3 w-3" />
+                                {p.phone}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant="outline" className="font-black border-slate-200 text-[#0B1F3A]">
+                                <Fingerprint className="h-3 w-3 mr-1.5 text-sky-500" /> {p.smashId}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right pr-10">
+                              <Button 
+                                onClick={() => navigate('/live-match/create')}
+                                className="h-11 px-6 rounded-xl bg-[#0B1F3A] text-white font-black text-[10px] uppercase tracking-widest hover:bg-sky-500 transition-all"
+                              >
+                                Create Match <ArrowRight className="ml-2 h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={4} className="h-48 text-center">
+                            <div className="space-y-4">
+                               <Users className="h-12 w-12 text-slate-100 mx-auto" />
+                               <p className="font-black text-slate-300 uppercase tracking-[0.2em]">No players registered yet</p>
+                               <Button 
+                                onClick={() => {
+                                  const link = `${window.location.origin}/register/${selectedTourney.slug}`;
+                                  navigator.clipboard.writeText(link);
+                                  showSuccess("Link copied! Share it with players.");
+                                }}
+                                variant="outline" className="rounded-xl border-sky-200 text-sky-600 h-10 px-6 font-black text-[10px] uppercase tracking-widest"
+                               >
+                                 Share Registration Link
+                               </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </motion.div>
             ) : (
-              <div className="py-32 text-center bg-white border-2 border-dashed border-slate-200 rounded-[3rem]">
-                <Trophy className="h-12 w-12 text-slate-200 mx-auto mb-4" />
-                <h3 className="text-xl font-black text-[#0B1F3A] uppercase italic">No studio events</h3>
-                <Button onClick={() => navigate('/tournaments/create')} className="mt-8 bg-[#0B1F3A] text-white font-black rounded-xl h-12 px-8 shadow-xl">
-                  Initialize Tourney
-                </Button>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredMyTourneys.length > 0 ? (
+                  filteredMyTourneys.map((t) => (
+                    <motion.div 
+                      whileHover={{ y: -5 }}
+                      key={t.id} 
+                      onClick={() => setSelectedTourney(t)}
+                      className="glass-panel p-8 rounded-[2.5rem] border-slate-200 space-y-6 group bg-white shadow-sm cursor-pointer hover:border-sky-500/30 transition-all"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="h-14 w-14 rounded-2xl bg-[#0B1F3A] text-white flex items-center justify-center shadow-lg group-hover:bg-sky-500 transition-colors">
+                          <Trophy className="h-7 w-7" />
+                        </div>
+                        <Badge className="bg-green-500 text-white font-black px-4 h-6 text-[9px] uppercase animate-pulse">{t.status}</Badge>
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-xl font-black text-[#0B1F3A] leading-tight uppercase italic">{t.name}</h3>
+                        <div className="flex flex-col gap-1">
+                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                            <Calendar className="h-3 w-3 text-sky-500" /> {t.date}
+                          </p>
+                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                            <MapPin className="h-3 w-3 text-sky-500" /> {t.location}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                           <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#0B1F3A]">
+                              <Users className="h-5 w-5" />
+                           </div>
+                           <div>
+                              <p className="text-lg font-black text-[#0B1F3A] leading-none">{t.participants?.length || 0}</p>
+                              <p className="text-[8px] font-black text-slate-300 uppercase">Players</p>
+                           </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const link = `${window.location.origin}/register/${t.slug}`;
+                              navigator.clipboard.writeText(link);
+                              showSuccess("Registration link copied!");
+                            }} 
+                            variant="ghost" 
+                            className="h-10 w-10 rounded-xl bg-slate-50 text-slate-400 hover:text-sky-500 transition-all"
+                          >
+                            <Users className="h-4 w-4" />
+                          </Button>
+                          <Button className="h-10 w-10 rounded-xl bg-[#0B1F3A] text-white hover:bg-sky-500 transition-all">
+                            <ChevronRight className="h-5 w-5" />
+                          </Button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
+                ) : (
+                  <div className="col-span-full py-32 text-center bg-white border-2 border-dashed border-slate-200 rounded-[3rem]">
+                    <Trophy className="h-12 w-12 text-slate-200 mx-auto mb-4" />
+                    <h3 className="text-xl font-black text-[#0B1F3A] uppercase italic">No studio events</h3>
+                    <Button onClick={() => navigate('/tournaments/create')} className="mt-8 bg-[#0B1F3A] text-white font-black rounded-xl h-12 px-8 shadow-xl">
+                      Initialize Tourney
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </TabsContent>
