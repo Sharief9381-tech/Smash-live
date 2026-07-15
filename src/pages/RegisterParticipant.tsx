@@ -24,16 +24,17 @@ const RegisterParticipant = () => {
   });
 
   useEffect(() => {
-    // Small delay to ensure storage is ready and prevent UI flicker
-    const timer = setTimeout(() => {
+    const checkTournament = () => {
       const tourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
       const found = tourneys.find((t: any) => t.slug === slug);
       if (found) {
         setTournament(found);
       }
       setIsInitializing(false);
-    }, 500);
+    };
 
+    // Small timeout to simulate network and ensure storage sync
+    const timer = setTimeout(checkTournament, 800);
     return () => clearTimeout(timer);
   }, [slug]);
 
@@ -50,8 +51,8 @@ const RegisterParticipant = () => {
       const updatedTourneys = tourneys.map((t: any) => {
         if (t.slug === slug) {
           const participants = t.participants || [];
-          // Ensure we don't add duplicate Smash IDs for this specific tournament
-          if (participants.some((existing: any) => existing.smashId === formData.smashId)) {
+          // Simple validation: check if Smash ID already exists in this tourney
+          if (participants.some((p: any) => p.smashId === formData.smashId)) {
             setIsLoading(false);
             showError("This Smash ID is already registered for this event.");
             return t;
@@ -74,8 +75,8 @@ const RegisterParticipant = () => {
   if (isInitializing) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center gap-4">
-        <Loader2 className="h-10 w-10 text-[#1DA1F2] animate-spin" />
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Validating Circuit Link...</p>
+        <Loader2 className="h-10 w-10 text-sky-500 animate-spin" />
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Validating Tournament Protocol...</p>
       </div>
     );
   }
@@ -89,13 +90,23 @@ const RegisterParticipant = () => {
           </div>
           <div className="space-y-2">
             <h1 className="text-3xl font-black text-[#071D49] tracking-tighter uppercase italic">Circuit Not Found</h1>
-            <p className="text-slate-500 font-medium leading-relaxed">The registration link you used is invalid or the tournament has been archived by the organizer.</p>
+            <p className="text-slate-500 font-medium leading-relaxed">
+              We couldn't find a tournament with the ID <span className="font-bold text-[#071D49]">"{slug}"</span> in your browser storage.
+            </p>
+          </div>
+          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-left space-y-3">
+             <p className="text-[10px] font-black text-[#071D49] uppercase tracking-widest">How to fix this:</p>
+             <ul className="text-xs text-slate-500 space-y-2">
+                <li className="flex gap-2"><span>1.</span> Go to <strong>Smashed</strong> dashboard.</li>
+                <li className="flex gap-2"><span>2.</span> Create a tournament if none exist.</li>
+                <li className="flex gap-2"><span>3.</span> Use the <strong>Copy Link</strong> button on the card.</li>
+             </ul>
           </div>
           <Button 
-            onClick={() => navigate('/')} 
-            className="w-full h-14 bg-[#071D49] text-white font-black rounded-2xl shadow-xl hover:bg-[#1DA1F2] transition-all"
+            onClick={() => navigate('/smashed')} 
+            className="w-full h-14 bg-[#071D49] text-white font-black rounded-2xl shadow-xl hover:bg-sky-600 transition-all"
           >
-            RETURN TO HOME
+            GO TO DASHBOARD
           </Button>
         </motion.div>
       </div>
@@ -104,7 +115,7 @@ const RegisterParticipant = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#1DA1F2]/5 blur-[120px] rounded-full" />
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-sky-500/5 blur-[120px] rounded-full" />
       
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -112,14 +123,14 @@ const RegisterParticipant = () => {
         className="w-full max-w-[500px] space-y-8 relative z-10"
       >
         <div className="text-center space-y-4">
-          <div className="bg-[#071D49] w-20 h-20 rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl shadow-navy/20">
-            <Trophy className="h-10 w-10 text-[#1DA1F2]" />
+          <div className="bg-[#071D49] w-20 h-20 rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl">
+            <Trophy className="h-10 w-10 text-sky-400" />
           </div>
           <div className="space-y-1">
-            <h1 className="text-4xl font-black text-[#071D49] tracking-tighter uppercase italic">
+            <h1 className="text-4xl font-black text-[#071D49] tracking-tighter uppercase italic leading-none">
               {tournament?.name}
             </h1>
-            <p className="text-[#64748B] font-bold uppercase text-[10px] tracking-[0.3em]">Event Registration Registry</p>
+            <p className="text-[#64748B] font-bold uppercase text-[10px] tracking-[0.3em]">Athlete Registry</p>
           </div>
         </div>
 
@@ -134,8 +145,8 @@ const RegisterParticipant = () => {
                     <Input 
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      placeholder="e.g. Viktor Axelsen" 
-                      className="h-14 bg-[#F8FAFC] border-[#E2E8F0] rounded-[18px] pl-12 font-bold text-[#071D49] focus:border-[#1DA1F2]"
+                      placeholder="Enter athlete name" 
+                      className="h-14 bg-[#F8FAFC] border-[#E2E8F0] rounded-[18px] pl-12 font-bold text-[#071D49] focus:border-sky-500"
                     />
                   </div>
                 </div>
@@ -149,7 +160,7 @@ const RegisterParticipant = () => {
                       value={formData.phone}
                       onChange={(e) => setFormData({...formData, phone: e.target.value})}
                       placeholder="Enter mobile number" 
-                      className="h-14 bg-[#F8FAFC] border-[#E2E8F0] rounded-[18px] pl-12 font-bold text-[#071D49] focus:border-[#1DA1F2]"
+                      className="h-14 bg-[#F8FAFC] border-[#E2E8F0] rounded-[18px] pl-12 font-bold text-[#071D49] focus:border-sky-500"
                     />
                   </div>
                 </div>
@@ -161,8 +172,8 @@ const RegisterParticipant = () => {
                     <Input 
                       value={formData.smashId}
                       onChange={(e) => setFormData({...formData, smashId: e.target.value})}
-                      placeholder="e.g. Smash#1234" 
-                      className="h-14 bg-[#F8FAFC] border-[#E2E8F0] rounded-[18px] pl-12 font-bold text-[#071D49] focus:border-[#1DA1F2] uppercase"
+                      placeholder="e.g. Smash#001" 
+                      className="h-14 bg-[#F8FAFC] border-[#E2E8F0] rounded-[18px] pl-12 font-bold text-[#071D49] focus:border-sky-500 uppercase"
                     />
                   </div>
                 </div>
@@ -171,22 +182,22 @@ const RegisterParticipant = () => {
               <Button 
                 onClick={handleRegister}
                 disabled={isLoading || !formData.name}
-                className="w-full h-16 bg-[#071D49] text-white font-black text-lg rounded-[22px] shadow-xl hover:bg-[#1DA1F2] transition-all group"
+                className="w-full h-16 bg-[#071D49] text-white font-black text-lg rounded-[22px] shadow-xl hover:bg-sky-500 transition-all group"
               >
-                {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : "JOIN TOURNAMENT"}
+                {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : "JOIN CIRCUIT"}
                 {!isLoading && <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />}
               </Button>
             </div>
           ) : (
             <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="text-center space-y-6">
-              <div className="h-20 w-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto text-green-500 shadow-lg">
+              <div className="h-20 w-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto text-green-500 shadow-lg border border-green-500/20">
                 <Check className="h-10 w-10 stroke-[3px]" />
               </div>
               <div className="space-y-2">
-                <h2 className="text-2xl font-black text-[#071D49] tracking-tight italic uppercase">Registration Complete</h2>
-                <p className="text-slate-500 font-medium">Your entry has been synchronized with the tournament director.</p>
+                <h2 className="text-2xl font-black text-[#071D49] tracking-tight italic uppercase">Entry Verified</h2>
+                <p className="text-slate-500 font-medium">Your profile has been synchronized with the tournament circuit.</p>
               </div>
-              <Button onClick={() => navigate('/')} className="w-full h-14 bg-[#071D49] text-white font-black rounded-2xl hover:bg-[#1DA1F2] transition-all uppercase tracking-widest text-xs">Return Home</Button>
+              <Button onClick={() => navigate('/')} className="w-full h-14 bg-[#071D49] text-white font-black rounded-2xl hover:bg-sky-600 transition-all uppercase tracking-widest text-xs">Return Home</Button>
             </motion.div>
           )}
         </div>
