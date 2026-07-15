@@ -31,7 +31,9 @@ const CreateTournament = () => {
 
   const [format, setFormat] = useState<'elimination' | 'round-robin' | 'league'>('elimination');
 
-  const registrationLink = `https://smashlive.sh/register/${formData.name.toLowerCase().replace(/\s+/g, '-') || 'new-event'}`;
+  // Use application origin so the link is actually reachable in this environment
+  const slug = formData.name.toLowerCase().replace(/\s+/g, '-') || 'new-event';
+  const registrationLink = `${window.location.origin}/register/${slug}`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(registrationLink);
@@ -50,6 +52,22 @@ const CreateTournament = () => {
     
     // Simulate API/Database call
     setTimeout(() => {
+      const tourneyId = `t_${Date.now()}`;
+      const newTourney = {
+        id: tourneyId,
+        slug: slug,
+        name: formData.name,
+        date: formData.date,
+        location: formData.location,
+        format: format,
+        status: 'Accepting',
+        participants: [],
+        createdAt: new Date().toISOString()
+      };
+      
+      const existing = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
+      localStorage.setItem('active_studio_tournaments', JSON.stringify([...existing, newTourney]));
+      
       setIsLoading(false);
       setShowLinkState(true);
       showSuccess(`Tournament "${formData.name}" initialized!`);
@@ -70,7 +88,6 @@ const CreateTournament = () => {
               exit={{ opacity: 0, scale: 0.95 }}
               className="space-y-12"
             >
-              {/* Header */}
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
                   <div className="bg-primary/20 p-2 rounded-xl text-primary">
@@ -244,10 +261,10 @@ const CreateTournament = () => {
 
               <div className="flex flex-col gap-4">
                 <Button 
-                  onClick={() => navigate('/tournaments')}
+                  onClick={() => navigate('/smashed')}
                   className="w-full h-16 bg-[#0B1F3A] text-white font-black rounded-2xl hover:bg-[#0B1F3A]/90 transition-all text-lg uppercase tracking-widest shadow-xl"
                 >
-                  Go to Dashboard <ArrowRight className="ml-2 h-5 w-5" />
+                  View My Tournaments <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
                 <button 
                   onClick={() => setShowLinkState(false)}

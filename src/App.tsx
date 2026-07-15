@@ -24,6 +24,7 @@ import BroadcastCenter from "./pages/BroadcastCenter";
 import CreateIndividualMatch from "./pages/CreateIndividualMatch";
 import ScoringPage from "./pages/ScoringPage";
 import Onboarding from "./pages/Onboarding";
+import RegisterParticipant from "./pages/RegisterParticipant";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,7 +35,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   if (!isLoggedIn) return <Navigate to="/login" replace />;
   
-  // If logged in but onboarding not done, force them to onboarding
   if (!userProfile.onboardingComplete && window.location.pathname !== '/onboarding') {
     return <Navigate to="/onboarding" replace />;
   }
@@ -80,6 +80,7 @@ const App = () => (
           <Route path="/broadcast/create" element={<ProtectedRoute><CreateBroadcast /></ProtectedRoute>} />
           <Route path="/broadcast/center" element={<ProtectedRoute><BroadcastCenter /></ProtectedRoute>} />
           <Route path="/broadcast/:id" element={<LiveBroadcast />} />
+          <Route path="/register/:slug" element={<RegisterParticipant />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
