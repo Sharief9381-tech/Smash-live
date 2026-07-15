@@ -2,162 +2,139 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, MapPin, Flag, Activity, ArrowRight, Zap, Target, Loader2 } from 'lucide-react';
+import { Zap, MapPin, Flag, User, Loader2, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 import { showSuccess } from '@/utils/toast';
-import { COUNTRIES_DATA } from '@/data/locations';
+
+const INDIAN_STATES = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", 
+  "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", 
+  "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", 
+  "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "Delhi", "Chandigarh", "Jammu and Kashmir", "Ladakh"
+];
 
 const Onboarding = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    country: "",
-    state: "",
-    category: "singles",
-    hand: "right",
-    height: ""
-  });
+  const [userData, setUserData] = useState<any>(null);
+  const [state, setState] = useState("");
 
-  const availableStates = formData.country ? COUNTRIES_DATA[formData.country] : [];
+  useEffect(() => {
+    const temp = localStorage.getItem('temp_reg_data');
+    if (temp) {
+      setUserData(JSON.parse(temp));
+    } else {
+      navigate('/login');
+    }
+  }, [navigate]);
 
   const handleComplete = () => {
-    if (!formData.name || !formData.country || !formData.state) return;
+    if (!state) return;
     
     setIsLoading(true);
-    
     setTimeout(() => {
-      const currentSession = JSON.parse(localStorage.getItem('userProfile') || '{}');
       const finalProfile = {
-        ...currentSession,
-        ...formData,
-        image: "https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?q=80&w=2070&auto=format&fit=crop",
+        ...userData,
+        state: state,
+        country: "India",
         onboardingComplete: true,
-        smashId: `Smash#${Math.floor(Math.random() * 9000) + 1000}`
+        smashId: `Smash#${Math.floor(1000 + Math.random() * 9000)}`,
+        image: "https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?q=80&w=2070&auto=format&fit=crop"
       };
       
-      // Save to "database" and session
+      // Save to mock database
       const users = JSON.parse(localStorage.getItem('registered_users') || '[]');
       users.push(finalProfile);
       localStorage.setItem('registered_users', JSON.stringify(users));
+      
+      // Set active session
       localStorage.setItem('userProfile', JSON.stringify(finalProfile));
       localStorage.setItem('isLoggedIn', 'true');
+      localStorage.removeItem('temp_reg_data');
       
       showSuccess("Athlete Dossier Initialized!");
       navigate('/court');
     }, 1500);
   };
 
+  if (!userData) return null;
+
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-sky-500/5 blur-[120px] rounded-full" />
+    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#1DA1F2]/5 blur-[120px] rounded-full" />
       
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-2xl space-y-8 relative z-10"
+        className="w-full max-w-[500px] space-y-8 relative z-10"
       >
         <div className="text-center space-y-4">
-          <div className="bg-[#0B1F3A] w-16 h-16 rounded-[2rem] flex items-center justify-center mx-auto shadow-xl">
-            <Zap className="h-8 w-8 text-sky-400 fill-current" />
+          <div className="bg-[#071D49] w-16 h-16 rounded-[2rem] flex items-center justify-center mx-auto shadow-xl">
+            <Zap className="h-8 w-8 text-[#1DA1F2] fill-current" />
           </div>
           <div className="space-y-1">
-            <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter uppercase italic">Athlete Dossier</h1>
-            <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.3em]">Configure your global intelligence profile</p>
+            <h1 className="text-4xl font-black text-[#071D49] tracking-tighter uppercase italic">Athlete Dossier</h1>
+            <p className="text-[#64748B] font-bold uppercase text-[10px] tracking-[0.3em]">Configure your global intelligence profile</p>
           </div>
         </div>
 
-        <div className="glass-panel p-10 rounded-[3.5rem] border-white shadow-2xl space-y-8 bg-white/90">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Full Name</Label>
-              <Input 
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                placeholder="e.g. Viktor Axelsen" 
-                className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold focus:border-sky-500 shadow-sm"
-              />
+        <div className="bg-white rounded-[3rem] p-10 shadow-[0_20px_50px_rgba(7,29,73,0.08)] border border-[#E2E8F0] space-y-8">
+          <div className="space-y-6">
+            {/* Read-only Name Section */}
+            <div className="p-5 bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] flex items-center gap-4">
+               <div className="h-12 w-12 rounded-full bg-[#071D49] flex items-center justify-center text-[#1DA1F2] font-black">
+                  {userData.name.split(' ').map((n:any) => n[0]).join('')}
+               </div>
+               <div>
+                  <p className="text-[10px] font-black text-[#94A3B8] uppercase tracking-widest">Athlete Name</p>
+                  <p className="text-lg font-bold text-[#071D49]">{userData.name}</p>
+               </div>
             </div>
 
-            <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Country</Label>
-              <Select value={formData.country} onValueChange={(v) => setFormData({...formData, country: v, state: ""})}>
-                <SelectTrigger className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold">
-                  <SelectValue placeholder="Select Country" />
+            {/* Locked Country */}
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-[#94A3B8] ml-2">Country</Label>
+              <div className="h-14 flex items-center gap-3 px-6 border border-[#E2E8F0] rounded-[18px] bg-[#F1F5F9] font-bold text-[#64748B] cursor-not-allowed">
+                <span className="text-lg">🇮🇳</span>
+                <span>India</span>
+                <div className="flex-1" />
+                <Lock className="h-4 w-4 opacity-30" />
+              </div>
+            </div>
+
+            {/* Select State */}
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-[#94A3B8] ml-2">Home State</Label>
+              <Select value={state} onValueChange={setState}>
+                <SelectTrigger className="h-14 rounded-[18px] border-[#E2E8F0] font-bold text-[#071D49] focus:ring-0 focus:border-[#1DA1F2] focus:shadow-[0_0_0_4px_rgba(29,161,242,0.15)]">
+                  <SelectValue placeholder="Select your state" />
                 </SelectTrigger>
-                <SelectContent className="rounded-2xl border-slate-100">
-                  {Object.keys(COUNTRIES_DATA).sort().map(country => (
-                    <SelectItem key={country} value={country}>{country}</SelectItem>
+                <SelectContent className="max-h-60 rounded-xl">
+                  {INDIAN_STATES.sort().map(s => (
+                    <SelectItem key={s} value={s} className="font-bold text-[#071D49]">{s}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">State / Region</Label>
-              <Select disabled={!formData.country} value={formData.state} onValueChange={(v) => setFormData({...formData, state: v})}>
-                <SelectTrigger className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold">
-                  <SelectValue placeholder={formData.country ? "Select State" : "Pick Country First"} />
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl border-slate-100">
-                  {availableStates.map(state => (
-                    <SelectItem key={state} value={state}>{state}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Category</Label>
-              <Select value={formData.category} onValueChange={(v) => setFormData({...formData, category: v})}>
-                <SelectTrigger className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-black uppercase italic">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl border-slate-100">
-                  <SelectItem value="singles">Singles</SelectItem>
-                  <SelectItem value="doubles">Doubles</SelectItem>
-                  <SelectItem value="mixed">Mixed Doubles</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-6">
-             <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Main Hand</Label>
-              <Select value={formData.hand} onValueChange={(v) => setFormData({...formData, hand: v})}>
-                <SelectTrigger className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl border-slate-100">
-                  <SelectItem value="right">Right Handed</SelectItem>
-                  <SelectItem value="left">Left Handed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Height (cm)</Label>
-              <Input 
-                type="number"
-                value={formData.height}
-                onChange={(e) => setFormData({...formData, height: e.target.value})}
-                placeholder="194" 
-                className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold focus:border-sky-500 shadow-sm"
-              />
             </div>
           </div>
 
           <Button 
             onClick={handleComplete}
-            disabled={isLoading || !formData.name || !formData.country || !formData.state}
-            className="w-full h-18 bg-[#0B1F3A] text-white font-black text-lg rounded-[2rem] shadow-2xl hover:bg-sky-500 transition-all group border-none"
+            disabled={isLoading || !state}
+            className="w-full h-16 bg-gradient-to-r from-[#071D49] to-[#1DA1F2] text-white font-black text-lg rounded-[22px] shadow-2xl hover:translate-y-[-2px] transition-all group"
           >
-            {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : "SYNC TO GLOBAL NETWORK"}
+            {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : "FINALIZE DOSSIER"}
+            {!isLoading && <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />}
           </Button>
         </div>
       </motion.div>

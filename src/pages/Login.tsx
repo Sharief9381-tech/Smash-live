@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, ShieldCheck, Globe, Trophy, ChevronDown, Loader2, ArrowRight, CheckCircle2, Lock, ArrowLeft } from 'lucide-react';
+import { Zap, ShieldCheck, Globe, Trophy, Loader2, Lock, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,12 +54,11 @@ const Login = () => {
     }
 
     setIsLoading(true);
-    // Simulation: Wait 1s then move to OTP step
     setTimeout(() => {
       setIsLoading(false);
       setStep('otp');
       setTimer(30);
-      showSuccess(`Simulation: Use code 123456 to verify.`);
+      showSuccess(`OTP sent to +91 ${phone}. Use 123456.`);
     }, 1000);
   };
 
@@ -68,16 +67,11 @@ const Login = () => {
     const newOtp = [...otp];
     newOtp[index] = value.slice(-1);
     setOtp(newOtp);
-
-    if (value && index < 5) {
-      otpRefs.current[index + 1]?.focus();
-    }
+    if (value && index < 5) otpRefs.current[index + 1]?.focus();
   };
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      otpRefs.current[index - 1]?.focus();
-    }
+    if (e.key === 'Backspace' && !otp[index] && index > 0) otpRefs.current[index - 1]?.focus();
   };
 
   const handleVerify = () => {
@@ -90,18 +84,31 @@ const Login = () => {
     setIsLoading(true);
     setTimeout(() => {
       if (enteredOtp === "123456") {
-        const userData = {
-          phone: `+91${phone}`,
-          name: activeTab === 'register' ? regData.name : "Athlete",
-          isLoggedIn: true,
-          onboardingComplete: activeTab === 'login'
-        };
-        
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userProfile', JSON.stringify(userData));
-        
-        showSuccess(activeTab === 'register' ? "Account Created!" : "Login Successful!");
-        navigate(activeTab === 'register' ? '/onboarding' : '/court');
+        const fullPhone = `+91${phone}`;
+        // Check if user already exists in our mock database
+        const users = JSON.parse(localStorage.getItem('registered_users') || '[]');
+        const existingUser = users.find((u: any) => u.phone === fullPhone);
+
+        if (existingUser) {
+          // USER ALREADY EXISTS - LOGIN DIRECTLY
+          localStorage.setItem('isLoggedIn', 'true');
+          localStorage.setItem('userProfile', JSON.stringify(existingUser));
+          showSuccess("Welcome back to the Court!");
+          navigate('/court');
+        } else {
+          // NEW USER OR REGISTERING
+          const userData = {
+            phone: fullPhone,
+            name: activeTab === 'register' ? regData.name : "Athlete",
+            gender: activeTab === 'register' ? regData.gender : "",
+            country: "India",
+            onboardingComplete: false
+          };
+          
+          localStorage.setItem('temp_reg_data', JSON.stringify(userData));
+          showSuccess(activeTab === 'register' ? "Account Created! Let's complete your profile." : "New number detected. Let's get you onboarded.");
+          navigate('/onboarding');
+        }
       } else {
         showError("Incorrect code. Try 123456");
         setIsLoading(false);
@@ -142,7 +149,6 @@ const Login = () => {
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-6"
               >
-                {/* Tabs */}
                 <div className="flex p-1 bg-[#F1F5F9] rounded-full mb-8">
                   <button 
                     onClick={() => setActiveTab('login')}
@@ -261,7 +267,7 @@ const Login = () => {
                     disabled={isLoading}
                     className="w-full h-14 rounded-[18px] bg-gradient-to-r from-[#071D49] to-[#1DA1F2] text-white font-black uppercase tracking-widest shadow-lg transition-all"
                   >
-                    {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (activeTab === 'register' ? "Complete Registration" : "Verify & Enter")}
+                    {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (activeTab === 'register' ? "Create Account" : "Verify & Enter")}
                   </Button>
                   
                   <div className="text-center">
@@ -277,7 +283,6 @@ const Login = () => {
                   </div>
                 </div>
 
-                {/* TEST HINT */}
                 <div className="p-4 bg-sky-50 rounded-2xl border border-sky-100 flex items-center gap-3">
                    <div className="bg-sky-500 p-1.5 rounded-lg text-white">
                       <Zap className="h-3 w-3 fill-current" />
