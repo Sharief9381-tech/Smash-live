@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, ShieldCheck, Globe, Trophy, Loader2, Lock, ArrowLeft } from 'lucide-react';
+import { Zap, ShieldCheck, Globe, Trophy, Loader2, Lock, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -49,7 +49,7 @@ const Login = () => {
       return;
     }
     if (activeTab === 'register' && (!regData.name || !regData.gender)) {
-      showError("Please fill in all registration details");
+      showError("Please fill in registration details");
       return;
     }
 
@@ -58,8 +58,8 @@ const Login = () => {
       setIsLoading(false);
       setStep('otp');
       setTimer(30);
-      showSuccess(`OTP sent to +91 ${phone}. Use 123456.`);
-    }, 1000);
+      showSuccess(`OTP sent to +91 ${phone}. Use code: 123456`);
+    }, 800);
   };
 
   const handleOtpChange = (index: number, value: string) => {
@@ -77,7 +77,7 @@ const Login = () => {
   const handleVerify = () => {
     const enteredOtp = otp.join("");
     if (enteredOtp.length !== 6) {
-      showError("Please enter the 6-digit OTP");
+      showError("Please enter the 6-digit code");
       return;
     }
 
@@ -85,32 +85,30 @@ const Login = () => {
     setTimeout(() => {
       if (enteredOtp === "123456") {
         const fullPhone = `+91${phone}`;
-        // Check if user already exists in our mock database
         const users = JSON.parse(localStorage.getItem('registered_users') || '[]');
         const existingUser = users.find((u: any) => u.phone === fullPhone);
 
         if (existingUser) {
-          // USER ALREADY EXISTS - LOGIN DIRECTLY
+          // USER EXISTS: Set session and go to Dashboard
           localStorage.setItem('isLoggedIn', 'true');
           localStorage.setItem('userProfile', JSON.stringify(existingUser));
-          showSuccess("Welcome back to the Court!");
+          showSuccess("Verification Successful. Welcome to the Court!");
           navigate('/court');
         } else {
-          // NEW USER OR REGISTERING
+          // NEW USER: Set temporary session and go to Onboarding
           const userData = {
             phone: fullPhone,
             name: activeTab === 'register' ? regData.name : "Athlete",
-            gender: activeTab === 'register' ? regData.gender : "",
-            country: "India",
             onboardingComplete: false
           };
           
-          localStorage.setItem('temp_reg_data', JSON.stringify(userData));
-          showSuccess(activeTab === 'register' ? "Account Created! Let's complete your profile." : "New number detected. Let's get you onboarded.");
+          localStorage.setItem('isLoggedIn', 'true'); // Allow access to Onboarding route
+          localStorage.setItem('userProfile', JSON.stringify(userData));
+          showSuccess("New identity verified. Completing dossier...");
           navigate('/onboarding');
         }
       } else {
-        showError("Incorrect code. Try 123456");
+        showError("Invalid OTP. Please try 123456");
         setIsLoading(false);
       }
     }, 800);
@@ -132,7 +130,7 @@ const Login = () => {
             </span>
           </div>
           <h1 className="text-4xl font-black text-[#071D49] tracking-tight">
-            {step === 'details' ? 'Welcome Back' : 'Security Pulse'}
+            {step === 'details' ? 'Court Access' : 'Security Pulse'}
           </h1>
           <p className="text-[#64748B] font-semibold uppercase text-xs tracking-[0.2em]">
             {step === 'details' ? "India's Home for Badminton" : "Verification in progress"}
@@ -190,7 +188,7 @@ const Login = () => {
                         <SelectContent className="rounded-xl">
                           <SelectItem value="male">Male</SelectItem>
                           <SelectItem value="female">Female</SelectItem>
-                          <SelectItem value="other">Prefer not to say</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -218,9 +216,9 @@ const Login = () => {
                 <Button 
                   onClick={handleSendOtp}
                   disabled={isLoading}
-                  className="w-full h-14 rounded-[18px] bg-gradient-to-r from-[#071D49] to-[#1DA1F2] text-white font-black uppercase tracking-widest shadow-lg hover:translate-y-[-2px] transition-all"
+                  className="w-full h-14 rounded-[18px] bg-gradient-to-r from-[#071D49] to-[#1DA1F2] text-white font-black uppercase tracking-widest shadow-lg transition-all"
                 >
-                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Send OTP"}
+                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify Identity"}
                 </Button>
               </motion.div>
             ) : (
@@ -235,14 +233,11 @@ const Login = () => {
                   className="flex items-center gap-2 text-[#94A3B8] hover:text-[#071D49] transition-colors"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Back to Phone</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest">Edit Number</span>
                 </button>
 
                 <div className="text-center space-y-2">
-                   <div className="bg-[#F1F5F9] w-12 h-12 rounded-full flex items-center justify-center mx-auto text-[#071D49]">
-                      <Lock className="h-5 w-5" />
-                   </div>
-                   <h3 className="text-xl font-black text-[#071D49]">Verify OTP</h3>
+                   <h3 className="text-xl font-black text-[#071D49]">Enter OTP</h3>
                    <p className="text-xs font-bold text-[#94A3B8]">Sent to +91 {phone}</p>
                 </div>
 
@@ -267,48 +262,25 @@ const Login = () => {
                     disabled={isLoading}
                     className="w-full h-14 rounded-[18px] bg-gradient-to-r from-[#071D49] to-[#1DA1F2] text-white font-black uppercase tracking-widest shadow-lg transition-all"
                   >
-                    {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (activeTab === 'register' ? "Create Account" : "Verify & Enter")}
+                    {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify & Login"}
                   </Button>
                   
                   <div className="text-center">
-                    {timer > 0 ? (
-                      <p className="text-[10px] font-black text-[#94A3B8] uppercase tracking-widest">
-                        Resend in <span className="text-[#1DA1F2]">{timer}s</span>
-                      </p>
-                    ) : (
-                      <button onClick={handleSendOtp} className="text-[10px] font-black text-[#1DA1F2] uppercase tracking-widest hover:underline">
-                        Resend OTP
-                      </button>
-                    )}
+                    <button onClick={handleSendOtp} className="text-[10px] font-black text-[#1DA1F2] uppercase tracking-widest hover:underline">
+                      Resend OTP {timer > 0 && `(${timer}s)`}
+                    </button>
                   </div>
                 </div>
 
                 <div className="p-4 bg-sky-50 rounded-2xl border border-sky-100 flex items-center gap-3">
-                   <div className="bg-sky-500 p-1.5 rounded-lg text-white">
-                      <Zap className="h-3 w-3 fill-current" />
-                   </div>
+                   <Zap className="h-4 w-4 text-sky-500 fill-current" />
                    <p className="text-[10px] font-bold text-sky-700 leading-tight">
-                     PROTOTYPE: Use code <span className="font-black underline">123456</span> to proceed.
+                     PROTOTYPE: Use code <span className="font-black underline">123456</span> to enter.
                    </p>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
-
-        <div className="flex items-center justify-center gap-8 text-[#94A3B8]">
-            <div className="flex flex-col items-center gap-1">
-                <ShieldCheck className="h-4 w-4" />
-                <span className="text-[8px] font-bold uppercase">Secure</span>
-            </div>
-            <div className="flex flex-col items-center gap-1">
-                <Trophy className="h-4 w-4" />
-                <span className="text-[8px] font-bold uppercase">Pro</span>
-            </div>
-            <div className="flex flex-col items-center gap-1">
-                <Globe className="h-4 w-4" />
-                <span className="text-[8px] font-bold uppercase">India</span>
-            </div>
         </div>
       </div>
     </div>

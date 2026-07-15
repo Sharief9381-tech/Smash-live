@@ -1,3 +1,5 @@
+"use client";
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,13 +30,26 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+  
   if (!isLoggedIn) return <Navigate to="/login" replace />;
+  
+  // If logged in but onboarding not done, force them to onboarding
+  if (!userProfile.onboardingComplete && window.location.pathname !== '/onboarding') {
+    return <Navigate to="/onboarding" replace />;
+  }
+  
   return <>{children}</>;
 };
 
 const AuthCheck = ({ children }: { children: React.ReactNode }) => {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  if (isLoggedIn) return <Navigate to="/court" replace />;
+  const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+  
+  if (isLoggedIn) {
+    if (!userProfile.onboardingComplete) return <Navigate to="/onboarding" replace />;
+    return <Navigate to="/court" replace />;
+  }
   return <>{children}</>;
 };
 
