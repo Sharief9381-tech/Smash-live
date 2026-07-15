@@ -48,9 +48,25 @@ const Login = () => {
       showError("Please enter a valid 10-digit mobile number");
       return;
     }
-    if (activeTab === 'register' && (!regData.name || !regData.gender)) {
-      showError("Please fill in registration details");
+
+    const fullPhone = `+91${phone}`;
+    const users = JSON.parse(localStorage.getItem('registered_users') || '[]');
+    const existingUser = users.find((u: any) => u.phone === fullPhone);
+
+    if (activeTab === 'login' && !existingUser) {
+      showError("Account not found. Please register as an athlete first.");
       return;
+    }
+
+    if (activeTab === 'register') {
+      if (!regData.name || !regData.gender) {
+        showError("Please provide athlete name and gender to register");
+        return;
+      }
+      if (existingUser) {
+        showError("This number is already registered. Please login instead.");
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -58,7 +74,7 @@ const Login = () => {
       setIsLoading(false);
       setStep('otp');
       setTimer(30);
-      showSuccess(`OTP sent to +91 ${phone}. Use code: 123456`);
+      showSuccess(`OTP sent to +91 ${phone}. Code: 123456`);
     }, 800);
   };
 
@@ -88,23 +104,24 @@ const Login = () => {
         const users = JSON.parse(localStorage.getItem('registered_users') || '[]');
         const existingUser = users.find((u: any) => u.phone === fullPhone);
 
-        if (existingUser) {
-          // USER EXISTS: Set session and go to Dashboard
+        if (activeTab === 'login') {
+          // LOGIN: User definitely exists here because of the check in handleSendOtp
           localStorage.setItem('isLoggedIn', 'true');
           localStorage.setItem('userProfile', JSON.stringify(existingUser));
-          showSuccess("Verification Successful. Welcome to the Court!");
+          showSuccess("Welcome back to the Court!");
           navigate('/court');
         } else {
-          // NEW USER: Set temporary session and go to Onboarding
-          const userData = {
+          // REGISTER: Create the preliminary profile
+          const newAthlete = {
             phone: fullPhone,
-            name: activeTab === 'register' ? regData.name : "Athlete",
+            name: regData.name,
+            gender: regData.gender,
             onboardingComplete: false
           };
           
-          localStorage.setItem('isLoggedIn', 'true'); // Allow access to Onboarding route
-          localStorage.setItem('userProfile', JSON.stringify(userData));
-          showSuccess("New identity verified. Completing dossier...");
+          localStorage.setItem('isLoggedIn', 'true');
+          localStorage.setItem('userProfile', JSON.stringify(newAthlete));
+          showSuccess("Identity verified. Complete your dossier.");
           navigate('/onboarding');
         }
       } else {
@@ -130,7 +147,7 @@ const Login = () => {
             </span>
           </div>
           <h1 className="text-4xl font-black text-[#071D49] tracking-tight">
-            {step === 'details' ? 'Court Access' : 'Security Pulse'}
+            {step === 'details' ? (activeTab === 'login' ? 'Welcome Back' : 'New Athlete') : 'Security Pulse'}
           </h1>
           <p className="text-[#64748B] font-semibold uppercase text-xs tracking-[0.2em]">
             {step === 'details' ? "India's Home for Badminton" : "Verification in progress"}
@@ -169,9 +186,13 @@ const Login = () => {
                 </div>
 
                 {activeTab === 'register' && (
-                  <div className="space-y-4">
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }} 
+                    animate={{ opacity: 1, height: 'auto' }} 
+                    className="space-y-4 pb-2"
+                  >
                     <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-[#94A3B8] ml-2">Full Name</Label>
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-[#94A3B8] ml-2">Athlete Name</Label>
                       <Input 
                         value={regData.name}
                         onChange={(e) => setRegData({...regData, name: e.target.value})}
@@ -192,7 +213,7 @@ const Login = () => {
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
+                  </motion.div>
                 )}
 
                 <div className="space-y-2">
@@ -218,7 +239,7 @@ const Login = () => {
                   disabled={isLoading}
                   className="w-full h-14 rounded-[18px] bg-gradient-to-r from-[#071D49] to-[#1DA1F2] text-white font-black uppercase tracking-widest shadow-lg transition-all"
                 >
-                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify Identity"}
+                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (activeTab === 'login' ? "Send OTP" : "Initialize Athlete Profile")}
                 </Button>
               </motion.div>
             ) : (
@@ -233,7 +254,7 @@ const Login = () => {
                   className="flex items-center gap-2 text-[#94A3B8] hover:text-[#071D49] transition-colors"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Edit Number</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest">Edit Details</span>
                 </button>
 
                 <div className="text-center space-y-2">
@@ -262,7 +283,7 @@ const Login = () => {
                     disabled={isLoading}
                     className="w-full h-14 rounded-[18px] bg-gradient-to-r from-[#071D49] to-[#1DA1F2] text-white font-black uppercase tracking-widest shadow-lg transition-all"
                   >
-                    {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify & Login"}
+                    {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify & Access"}
                   </Button>
                   
                   <div className="text-center">
