@@ -6,18 +6,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
-  Trophy, Users, Calendar, MapPin, 
-  Settings, Zap, Shield, Plus, X, Upload,
-  Loader2
+  Trophy, Calendar, MapPin, 
+  Settings, Zap, Shield, Copy, 
+  Check, ArrowRight, Loader2, Link as LinkIcon
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { showSuccess, showError } from '@/utils/toast';
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const CreateTournament = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [showLinkState, setShowLinkState] = useState(false);
+  const [copied, setCopied] = useState(false);
   
   // Form State
   const [formData, setFormData] = useState({
@@ -26,39 +29,20 @@ const CreateTournament = () => {
     location: ""
   });
 
-  const [participants, setParticipants] = useState(["", "", ""]);
   const [format, setFormat] = useState<'elimination' | 'round-robin' | 'league'>('elimination');
 
-  const handleAddParticipant = () => {
-    setParticipants([...participants, ""]);
+  const registrationLink = `https://smashlive.sh/register/${formData.name.toLowerCase().replace(/\s+/g, '-') || 'new-event'}`;
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(registrationLink);
+    setCopied(true);
+    showSuccess("Registration link copied to clipboard!");
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleRemoveParticipant = (index: number) => {
-    const newList = [...participants];
-    newList.splice(index, 1);
-    setParticipants(newList);
-  };
-
-  const handleParticipantChange = (index: number, value: string) => {
-    const newList = [...participants];
-    newList[index] = value;
-    setParticipants(newList);
-  };
-
-  const handleImportCSV = () => {
-    showSuccess("Parsing CSV data... Imported 16 players.");
-    setParticipants(Array(16).fill("").map((_, i) => `Seeded Player ${i + 1}`));
-  };
-
-  const handleGenerate = () => {
+  const handleInitialize = () => {
     if (!formData.name || !formData.date || !formData.location) {
       showError("Please complete Basic Intelligence details.");
-      return;
-    }
-
-    const activeParticipants = participants.filter(p => p.trim() !== "");
-    if (activeParticipants.length < 2) {
-      showError("Please add at least 2 participants.");
       return;
     }
 
@@ -67,8 +51,8 @@ const CreateTournament = () => {
     // Simulate API/Database call
     setTimeout(() => {
       setIsLoading(false);
-      showSuccess(`Tournament "${formData.name}" initialized successfully!`);
-      navigate('/tournaments');
+      setShowLinkState(true);
+      showSuccess(`Tournament "${formData.name}" initialized!`);
     }, 1500);
   };
 
@@ -77,191 +61,204 @@ const CreateTournament = () => {
       <Navbar />
       
       <main className="container max-w-4xl px-4 py-12">
-        <div className="space-y-12">
-          {/* Header */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <div className="bg-primary/20 p-2 rounded-xl text-primary">
-                <Trophy className="h-6 w-6" />
+        <AnimatePresence mode="wait">
+          {!showLinkState ? (
+            <motion.div 
+              key="form"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="space-y-12"
+            >
+              {/* Header */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary/20 p-2 rounded-xl text-primary">
+                    <Trophy className="h-6 w-6" />
+                  </div>
+                  <span className="text-xs font-black text-primary uppercase tracking-[0.3em]">Organizer Studio</span>
+                </div>
+                <h1 className="text-5xl font-black tracking-tighter">Initialize Event</h1>
+                <p className="text-muted-foreground font-medium">Configure rules and logistics. Participants will register via a custom link.</p>
               </div>
-              <span className="text-xs font-black text-primary uppercase tracking-[0.3em]">Organizer Studio</span>
-            </div>
-            <h1 className="text-5xl font-black tracking-tighter">Initialize Event</h1>
-            <p className="text-muted-foreground font-medium">Configure brackets, rules, and seeding for your tournament.</p>
-          </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Form Section */}
-            <div className="md:col-span-2 space-y-8">
-              <section className="glass-card p-8 rounded-[2.5rem] space-y-6">
-                <h3 className="text-xl font-black tracking-tight">Basic Intelligence</h3>
-                
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Event Name</Label>
-                    <Input 
-                      placeholder="e.g. Smash Masters 2024" 
-                      className="h-14 bg-white/5 border-white/5 rounded-2xl px-6 font-bold" 
-                      value={formData.name}
-                      onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Start Date</Label>
-                      <Input 
-                        type="date" 
-                        className="h-14 bg-white/5 border-white/5 rounded-2xl px-6 font-bold" 
-                        value={formData.date}
-                        onChange={(e) => setFormData({...formData, date: e.target.value})}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Location</Label>
-                      <Input 
-                        placeholder="City, Country" 
-                        className="h-14 bg-white/5 border-white/5 rounded-2xl px-6 font-bold" 
-                        value={formData.location}
-                        onChange={(e) => setFormData({...formData, location: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <section className="glass-card p-8 rounded-[2.5rem] space-y-6">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-xl font-black tracking-tight">Player Registry</h3>
-                  <Button 
-                    onClick={handleImportCSV}
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-primary font-black uppercase text-[10px] tracking-widest hover:bg-primary/10"
-                  >
-                    <Upload className="mr-2 h-4 w-4" /> Import CSV
-                  </Button>
-                </div>
-                
-                <div className="space-y-3">
-                  {participants.map((name, i) => (
-                    <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-transparent hover:border-primary/20 transition-all group">
-                      <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center font-bold text-xs">
-                        #{i + 1}
+              <div className="grid md:grid-cols-3 gap-8">
+                <div className="md:col-span-2 space-y-8">
+                  <section className="glass-card p-8 rounded-[2.5rem] space-y-6">
+                    <h3 className="text-xl font-black tracking-tight italic">Basic Intelligence</h3>
+                    
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Event Name</Label>
+                        <Input 
+                          placeholder="e.g. Smash Masters 2024" 
+                          className="h-14 bg-white/5 border-white/5 rounded-2xl px-6 font-bold" 
+                          value={formData.name}
+                          onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        />
                       </div>
-                      <Input 
-                        placeholder={`Seed ${i + 1} Player Name`} 
-                        className="h-10 bg-transparent border-none font-bold" 
-                        value={name}
-                        onChange={(e) => handleParticipantChange(i, e.target.value)}
-                      />
-                      <Button 
-                        onClick={() => handleRemoveParticipant(i)}
-                        variant="ghost" 
-                        size="icon" 
-                        className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/20 hover:text-red-500"
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Start Date</Label>
+                          <Input 
+                            type="date" 
+                            className="h-14 bg-white/5 border-white/5 rounded-2xl px-6 font-bold" 
+                            value={formData.date}
+                            onChange={(e) => setFormData({...formData, date: e.target.value})}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Location</Label>
+                          <Input 
+                            placeholder="City, Country" 
+                            className="h-14 bg-white/5 border-white/5 rounded-2xl px-6 font-bold" 
+                            value={formData.location}
+                            onChange={(e) => setFormData({...formData, location: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="glass-card p-8 rounded-[2.5rem] space-y-6">
+                    <h3 className="text-sm font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                      <Settings className="h-4 w-4 text-primary" /> Tournament Format
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div 
+                        onClick={() => setFormat('elimination')}
+                        className={cn(
+                          "p-6 rounded-2xl cursor-pointer transition-all border flex flex-col items-center text-center gap-2",
+                          format === 'elimination' ? "bg-primary text-black border-primary shadow-lg" : "bg-white/5 border-white/5 hover:bg-white/10"
+                        )}
                       >
-                        <X className="h-4 w-4" />
-                      </Button>
+                        <Shield className="h-6 w-6" />
+                        <span className="text-[10px] font-black uppercase">Elimination</span>
+                      </div>
+                      <div 
+                        onClick={() => setFormat('round-robin')}
+                        className={cn(
+                          "p-6 rounded-2xl cursor-pointer transition-all border flex flex-col items-center text-center gap-2",
+                          format === 'round-robin' ? "bg-primary text-black border-primary shadow-lg" : "bg-white/5 border-white/5 hover:bg-white/10"
+                        )}
+                      >
+                        <Trophy className="h-6 w-6" />
+                        <span className="text-[10px] font-black uppercase">Round Robin</span>
+                      </div>
+                      <div 
+                        onClick={() => setFormat('league')}
+                        className={cn(
+                          "p-6 rounded-2xl cursor-pointer transition-all border flex flex-col items-center text-center gap-2",
+                          format === 'league' ? "bg-primary text-black border-primary shadow-lg" : "bg-white/5 border-white/5 hover:bg-white/10"
+                        )}
+                      >
+                        <Zap className="h-6 w-6" />
+                        <span className="text-[10px] font-black uppercase">League</span>
+                      </div>
                     </div>
-                  ))}
-                  <Button 
-                    onClick={handleAddParticipant}
-                    variant="outline" 
-                    className="w-full h-14 border-dashed border-white/10 hover:border-primary/50 rounded-2xl font-bold gap-2"
-                  >
-                    <Plus className="h-4 w-4" /> Add Another Participant
-                  </Button>
+                  </section>
                 </div>
-              </section>
-            </div>
 
-            {/* Sidebar/Presets Section */}
-            <div className="space-y-8">
-              <section className="glass-card p-8 rounded-[2.5rem] space-y-6">
-                <h3 className="text-sm font-black uppercase tracking-[0.2em] flex items-center gap-2">
-                  <Settings className="h-4 w-4 text-primary" /> Configuration
-                </h3>
-                
-                <div className="space-y-4">
-                  <div 
-                    onClick={() => setFormat('elimination')}
-                    className={cn(
-                      "p-4 rounded-2xl cursor-pointer group transition-all",
-                      format === 'elimination' ? "bg-primary text-black" : "bg-white/5 hover:bg-white/10 border border-white/5"
-                    )}
-                  >
-                    <h4 className="font-bold flex items-center justify-between">
-                      Single Elimination
-                      {format === 'elimination' && <Shield className="h-4 w-4" />}
-                    </h4>
-                    <p className={cn("text-[10px] font-bold uppercase mt-1", format === 'elimination' ? "opacity-60" : "text-muted-foreground")}>
-                      Standard 16-Bracket
-                    </p>
-                  </div>
-                  
-                  <div 
-                    onClick={() => setFormat('round-robin')}
-                    className={cn(
-                      "p-4 rounded-2xl cursor-pointer group transition-all",
-                      format === 'round-robin' ? "bg-primary text-black" : "bg-white/5 hover:bg-white/10 border border-white/5"
-                    )}
-                  >
-                    <h4 className="font-bold flex items-center justify-between">
-                      Round Robin
-                      {format === 'round-robin' && <Shield className="h-4 w-4" />}
-                    </h4>
-                    <p className={cn("text-[10px] font-bold uppercase mt-1", format === 'round-robin' ? "opacity-60" : "text-muted-foreground")}>
-                      Group Stages • Best of 3
-                    </p>
-                  </div>
-                  
-                  <div 
-                    onClick={() => setFormat('league')}
-                    className={cn(
-                      "p-4 rounded-2xl cursor-pointer group transition-all",
-                      format === 'league' ? "bg-primary text-black" : "bg-white/5 hover:bg-white/10 border border-white/5"
-                    )}
-                  >
-                    <h4 className="font-bold flex items-center justify-between">
-                      League Format
-                      {format === 'league' && <Shield className="h-4 w-4" />}
-                    </h4>
-                    <p className={cn("text-[10px] font-bold uppercase mt-1", format === 'league' ? "opacity-60" : "text-muted-foreground")}>
-                      Season Long • Point Based
-                    </p>
-                  </div>
+                <div className="space-y-8">
+                  <section className="glass-card p-8 rounded-[2.5rem] space-y-6 bg-gradient-to-br from-primary/10 to-transparent border-primary/20">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Zap className="h-5 w-5 text-primary fill-current" />
+                        <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Summary</span>
+                      </div>
+                      <div className="space-y-4 pt-4 border-t border-white/5">
+                        <div className="flex justify-between text-xs font-bold">
+                          <span className="text-muted-foreground uppercase">Format</span>
+                          <span className="capitalize">{format}</span>
+                        </div>
+                        <div className="flex justify-between text-xs font-bold">
+                          <span className="text-muted-foreground uppercase">Access</span>
+                          <span>Open via Link</span>
+                        </div>
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={handleInitialize}
+                      disabled={isLoading}
+                      className="w-full h-14 bg-primary text-black font-black rounded-2xl shadow-[0_0_30px_rgba(182,255,42,0.2)] hover:scale-[1.02] transition-transform"
+                    >
+                      {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "INITIALIZE EVENT"}
+                    </Button>
+                  </section>
                 </div>
-              </section>
-
-              <section className="glass-card p-8 rounded-[2.5rem] space-y-6 bg-gradient-to-br from-primary/10 to-transparent border-primary/20">
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div 
+              key="success"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="max-w-xl mx-auto space-y-8 pt-12"
+            >
+              <div className="text-center space-y-4">
+                <div className="bg-green-500/20 w-20 h-20 rounded-[2.5rem] flex items-center justify-center mx-auto text-green-500 shadow-xl">
+                  <Check className="h-10 w-10 stroke-[3px]" />
+                </div>
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Zap className="h-4 w-4 text-primary fill-current" />
-                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Summary</span>
-                  </div>
-                  <div className="space-y-4 pt-4 border-t border-white/5">
-                    <div className="flex justify-between text-xs font-bold">
-                      <span className="text-muted-foreground uppercase">Participants</span>
-                      <span>{participants.filter(p => p.trim() !== "").length} Players</span>
+                  <h2 className="text-4xl font-black tracking-tighter uppercase italic">Event Initialized</h2>
+                  <p className="text-muted-foreground font-medium">Your tournament circuit is live. Share the registration link below.</p>
+                </div>
+              </div>
+
+              <div className="glass-card p-8 rounded-[3rem] space-y-6 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-primary ml-2">Public Registration Link</Label>
+                  <div className="flex gap-2 p-2 bg-black/20 rounded-2xl border border-white/5">
+                    <div className="flex-1 px-4 flex items-center overflow-hidden">
+                      <p className="text-sm font-mono font-bold text-muted-foreground truncate">{registrationLink}</p>
                     </div>
-                    <div className="flex justify-between text-xs font-bold">
-                      <span className="text-muted-foreground uppercase">Circuit Pts</span>
-                      <span className="text-primary">+1,200</span>
+                    <Button 
+                      onClick={handleCopyLink}
+                      className={cn(
+                        "h-12 px-6 rounded-xl font-black transition-all",
+                        copied ? "bg-green-500 text-white" : "bg-primary text-black"
+                      )}
+                    >
+                      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4 mr-2" />}
+                      {copied ? "COPIED" : "COPY"}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-4">
+                  <div className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                    <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Event ID</p>
+                    <p className="text-lg font-black text-white">{formData.name.split(' ').map(s => s[0]).join('') || 'SMASH'}-{Date.now().toString().slice(-4)}</p>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                    <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Status</p>
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                      <p className="text-lg font-black text-white">Accepting</p>
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <div className="flex flex-col gap-4">
                 <Button 
-                  onClick={handleGenerate}
-                  disabled={isLoading}
-                  className="w-full h-14 bg-primary text-black font-black rounded-2xl shadow-[0_0_30px_rgba(182,255,42,0.2)] hover:scale-[1.02] transition-transform"
+                  onClick={() => navigate('/tournaments')}
+                  className="w-full h-16 bg-white text-black font-black rounded-2xl hover:bg-primary transition-all text-lg uppercase tracking-widest"
                 >
-                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "GENERATE BRACKET"}
+                  Go to Dashboard <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
-              </section>
-            </div>
-          </div>
-        </div>
+                <button 
+                  onClick={() => setShowLinkState(false)}
+                  className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] hover:text-white transition-colors"
+                >
+                  Create Another Event
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );
