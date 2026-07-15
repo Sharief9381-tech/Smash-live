@@ -9,17 +9,23 @@ import {
   Calendar, MapPin, Activity, 
   ShieldCheck, Users,
   ChevronRight, X, Phone, Fingerprint,
-  ArrowRight
+  ArrowRight, MoreVertical, Trash2, Link as LinkIcon,
+  Plus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 import { useNavigate } from 'react-router-dom';
-import { showSuccess } from '@/utils/toast';
+import { showSuccess, showError } from '@/utils/toast';
 
-// Static historical data defined outside to prevent reference errors
 const GLOBAL_ARCHIVES = [
   { id: 1, date: "Dec 14, 2024", tournament: "BWF World Tour Finals", matchup: "Axelsen vs Lee Zii Jia", score: "21-19, 21-17", cat: "Men's Singles" },
   { id: 2, date: "Dec 12, 2024", tournament: "BWF World Tour Finals", matchup: "An Se-young vs Yamaguchi", score: "21-15, 21-12", cat: "Women's Singles" },
@@ -38,23 +44,39 @@ const Smashed = () => {
   const [myTourneys, setMyTourneys] = useState<any[]>([]);
   const [selectedTourney, setSelectedTourney] = useState<any>(null);
 
+  const loadMyData = () => {
+    const activeMatches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
+    const activeTourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
+    setMyMatches(activeMatches);
+    setMyTourneys(activeTourneys);
+    
+    if (selectedTourney) {
+      const updated = activeTourneys.find((t: any) => t.id === selectedTourney.id);
+      if (updated) setSelectedTourney(updated);
+    }
+  };
+
   useEffect(() => {
-    const loadMyData = () => {
-      const activeMatches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
-      const activeTourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
-      setMyMatches(activeMatches);
-      setMyTourneys(activeTourneys);
-      
-      // Keep selected tourney updated if entries come in
-      if (selectedTourney) {
-        const updated = activeTourneys.find((t: any) => t.id === selectedTourney.id);
-        if (updated) setSelectedTourney(updated);
-      }
-    };
     loadMyData();
     const interval = setInterval(loadMyData, 2000);
     return () => clearInterval(interval);
   }, [selectedTourney?.id]);
+
+  const handleDeleteTourney = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    const existing = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
+    const filtered = existing.filter((t: any) => t.id !== id);
+    localStorage.setItem('active_studio_tournaments', JSON.stringify(filtered));
+    showSuccess("Tournament deleted successfully");
+    loadMyData();
+  };
+
+  const handleCopyRegLink = (e: React.MouseEvent, slug: string) => {
+    e.stopPropagation();
+    const link = `${window.location.origin}/register/${slug}`;
+    navigator.clipboard.writeText(link);
+    showSuccess("Registration link copied!");
+  };
 
   const filteredMyTourneys = useMemo(() => {
     return myTourneys.filter(t => 
@@ -104,19 +126,11 @@ const Smashed = () => {
             <TabsTrigger value="history" className="flex-1 md:flex-none rounded-[1.5rem] px-10 h-12 data-[state=active]:bg-[#0B1F3A] data-[state=active]:text-white font-black text-xs uppercase tracking-widest transition-all">Global History</TabsTrigger>
           </TabsList>
 
-          {/* MY TOURNAMENTS & PARTICIPANTS */}
           <TabsContent value="my-tourneys" className="m-0">
             {selectedTourney ? (
-              <motion.div 
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="space-y-8"
-              >
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <button 
-                    onClick={() => setSelectedTourney(null)}
-                    className="flex items-center gap-2 text-[#64748B] hover:text-[#0B1F3A] transition-colors group"
-                  >
+                  <button onClick={() => setSelectedTourney(null)} className="flex items-center gap-2 text-[#64748B] hover:text-[#0B1F3A] transition-colors group">
                     <X className="h-5 w-5 group-hover:rotate-90 transition-transform" />
                     <span className="text-[10px] font-black uppercase tracking-widest">Back to Tournaments</span>
                   </button>
@@ -163,10 +177,7 @@ const Smashed = () => {
                               </Badge>
                             </TableCell>
                             <TableCell className="text-right pr-12">
-                              <Button 
-                                onClick={() => navigate('/live-match/create')}
-                                className="h-12 px-8 rounded-2xl bg-[#0B1F3A] text-white font-black text-[10px] uppercase tracking-widest hover:bg-sky-500 shadow-lg transition-all group/btn"
-                              >
+                              <Button onClick={() => navigate('/live-match/create')} className="h-12 px-8 rounded-2xl bg-[#0B1F3A] text-white font-black text-[10px] uppercase tracking-widest hover:bg-sky-500 shadow-lg transition-all group/btn">
                                 Create Match <Play className="ml-2 h-4 w-4 fill-current group-hover/btn:translate-x-1 transition-transform" />
                               </Button>
                             </TableCell>
@@ -181,14 +192,7 @@ const Smashed = () => {
                                  <h3 className="font-black text-slate-300 uppercase tracking-widest text-xl italic">Awaiting Participants</h3>
                                  <p className="text-[10px] font-bold text-slate-400 uppercase max-w-xs mx-auto">Share the link to synchronize players with this tournament.</p>
                                </div>
-                               <Button 
-                                onClick={() => {
-                                  const link = `${window.location.origin}/register/${selectedTourney.slug}`;
-                                  navigator.clipboard.writeText(link);
-                                  showSuccess("Link copied to clipboard!");
-                                }}
-                                variant="outline" className="rounded-2xl border-sky-200 text-sky-600 h-14 px-10 font-black text-[11px] uppercase tracking-widest hover:bg-sky-50"
-                               >
+                               <Button onClick={(e) => handleCopyRegLink(e, selectedTourney.slug)} variant="outline" className="rounded-2xl border-sky-200 text-sky-600 h-14 px-10 font-black text-[11px] uppercase tracking-widest hover:bg-sky-50">
                                  Copy Registration Link
                                </Button>
                             </div>
@@ -207,13 +211,27 @@ const Smashed = () => {
                       whileHover={{ y: -5 }}
                       key={t.id} 
                       onClick={() => setSelectedTourney(t)}
-                      className="glass-panel p-8 rounded-[2.5rem] border-slate-200 space-y-6 group bg-white shadow-sm cursor-pointer hover:border-sky-500/30 transition-all"
+                      className="glass-panel p-8 rounded-[2.5rem] border-slate-200 space-y-6 group bg-white shadow-sm cursor-pointer hover:border-sky-500/30 transition-all relative"
                     >
                       <div className="flex justify-between items-start">
                         <div className="h-14 w-14 rounded-2xl bg-[#0B1F3A] text-white flex items-center justify-center shadow-lg group-hover:bg-sky-500 transition-colors">
                           <Trophy className="h-7 w-7" />
                         </div>
-                        <Badge className="bg-green-500 text-white font-black px-4 h-6 text-[9px] uppercase animate-pulse">{t.status}</Badge>
+                        <div className="flex items-center gap-2">
+                           <Badge className="bg-green-500 text-white font-black px-4 h-6 text-[9px] uppercase animate-pulse">{t.status}</Badge>
+                           <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                 <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-slate-100" onClick={(e) => e.stopPropagation()}>
+                                    <MoreVertical className="h-4 w-4 text-slate-400" />
+                                 </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="rounded-xl border-slate-100">
+                                 <DropdownMenuItem className="text-red-500 font-bold focus:text-red-500 focus:bg-red-50 cursor-pointer" onClick={(e) => handleDeleteTourney(e, t.id)}>
+                                    <Trash2 className="h-4 w-4 mr-2" /> Delete Tournament
+                                 </DropdownMenuItem>
+                              </DropdownMenuContent>
+                           </DropdownMenu>
+                        </div>
                       </div>
                       <div className="space-y-1">
                         <h3 className="text-xl font-black text-[#0B1F3A] leading-tight uppercase italic">{t.name}</h3>
@@ -226,18 +244,21 @@ const Smashed = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                           <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#0B1F3A]">
-                              <Users className="h-5 w-5" />
-                           </div>
-                           <div>
-                              <p className="text-lg font-black text-[#0B1F3A] leading-none">{t.participants?.length || 0}</p>
-                              <p className="text-[8px] font-black text-slate-300 uppercase">Players</p>
-                           </div>
-                        </div>
-                        <Button className="h-10 w-10 rounded-xl bg-[#0B1F3A] text-white hover:bg-sky-500 transition-all">
-                          <ChevronRight className="h-5 w-5" />
+                      <div className="pt-4 border-t border-slate-50 flex items-center justify-between gap-4">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={(e) => handleCopyRegLink(e, t.slug)}
+                          className="flex-1 h-10 rounded-xl border-slate-100 font-black text-[9px] uppercase tracking-widest hover:bg-sky-50 hover:text-sky-600 transition-all"
+                        >
+                           <LinkIcon className="h-3 w-3 mr-2" /> Reg Link
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          onClick={(e) => { e.stopPropagation(); navigate('/live-match/create'); }}
+                          className="flex-1 h-10 rounded-xl bg-[#0B1F3A] text-white font-black text-[9px] uppercase tracking-widest hover:bg-sky-500 transition-all shadow-md"
+                        >
+                           <Zap className="h-3 w-3 mr-2 fill-current" /> Generate Matches
                         </Button>
                       </div>
                     </motion.div>
@@ -255,16 +276,11 @@ const Smashed = () => {
             )}
           </TabsContent>
 
-          {/* MY MATCHES */}
           <TabsContent value="my-matches" className="m-0">
             {filteredMyMatches.length > 0 ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredMyMatches.map((m) => (
-                  <motion.div 
-                    whileHover={{ y: -5 }}
-                    key={m.id} 
-                    className="glass-panel p-8 rounded-[2.5rem] border-sky-500/20 space-y-6 group bg-white shadow-sm"
-                  >
+                  <motion.div whileHover={{ y: -5 }} key={m.id} className="glass-panel p-8 rounded-[2.5rem] border-sky-500/20 space-y-6 group bg-white shadow-sm">
                     <div className="flex justify-between items-start">
                       <div className="h-14 w-14 rounded-2xl bg-sky-500 text-white flex items-center justify-center shadow-lg">
                         <Activity className="h-7 w-7" />
@@ -302,7 +318,6 @@ const Smashed = () => {
             )}
           </TabsContent>
 
-          {/* GLOBAL HISTORY */}
           <TabsContent value="history" className="m-0">
             <div className="bg-white border border-slate-200 rounded-[3rem] overflow-hidden shadow-sm">
               <Table>
