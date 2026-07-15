@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, Bell, Menu, X, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -20,6 +20,7 @@ const Navbar = () => {
   const [searchVal, setSearchVal] = useState("");
   
   const location = useLocation();
+  const navigate = useNavigate();
 
   const notifications = [
     { id: 1, text: "Viktor Axelsen just won Set 1 (21-19)", time: "2m ago", unread: true },
@@ -46,6 +47,15 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [location.pathname]);
 
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchVal.trim()) {
+      navigate(`/rankings?q=${encodeURIComponent(searchVal)}`);
+      setIsSearchExpanded(false);
+      setSearchVal("");
+    }
+  };
+
   const navItems = [
     { name: isLoggedIn ? 'COURT' : 'Home', path: isLoggedIn ? '/court' : '/' },
     { name: 'Live', path: '/live-match/active' },
@@ -69,7 +79,6 @@ const Navbar = () => {
       <div className="container flex items-center justify-between px-6">
         <div className="flex items-center gap-10">
           <div className="flex items-center gap-4">
-            {/* Mobile Menu Toggle */}
             <button 
               onClick={() => setIsMobileMenuOpen(true)}
               className="lg:hidden p-2 text-[#0B1F3A] hover:bg-slate-50 rounded-xl transition-colors"
@@ -105,7 +114,8 @@ const Navbar = () => {
           <div className="flex items-center relative">
             <AnimatePresence>
               {isSearchExpanded ? (
-                <motion.div
+                <motion.form
+                  onSubmit={handleSearchSubmit}
                   initial={{ width: 40, opacity: 0 }}
                   animate={{ width: 200, opacity: 1 }}
                   exit={{ width: 40, opacity: 0 }}
@@ -114,18 +124,19 @@ const Navbar = () => {
                   <Search className="absolute left-4 h-4 w-4 text-slate-400 pointer-events-none" />
                   <input 
                     autoFocus
-                    placeholder="Search"
+                    placeholder="Search Intel..."
                     className="w-full h-11 bg-slate-50 border border-slate-200 rounded-full pl-11 pr-10 text-xs font-bold focus:border-sky-500 outline-none shadow-sm"
                     value={searchVal}
                     onChange={(e) => setSearchVal(e.target.value)}
                   />
                   <button 
+                    type="button"
                     onClick={() => setIsSearchExpanded(false)}
                     className="absolute right-3 p-1 hover:bg-slate-200 rounded-full transition-colors"
                   >
                     <X className="h-4 w-4 text-slate-400" />
                   </button>
-                </motion.div>
+                </motion.form>
               ) : (
                 <button 
                   onClick={() => setIsSearchExpanded(true)}
@@ -182,7 +193,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Navigation Overlay */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>

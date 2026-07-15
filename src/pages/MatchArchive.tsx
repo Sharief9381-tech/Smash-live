@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { motion } from 'framer-motion';
 import { 
@@ -14,6 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const MatchArchive = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+
   const archives = [
     { id: 1, date: "Dec 14, 2024", tournament: "BWF World Tour Finals", matchup: "Axelsen vs Lee Zii Jia", score: "21-19, 21-17", cat: "Men's Singles", dur: "42m" },
     { id: 2, date: "Dec 12, 2024", tournament: "BWF World Tour Finals", matchup: "An Se-young vs Yamaguchi", score: "21-15, 21-12", cat: "Women's Singles", dur: "38m" },
@@ -22,12 +24,19 @@ const MatchArchive = () => {
     { id: 5, date: "Oct 18, 2024", tournament: "Denmark Open", matchup: "Antonsen vs Christie", score: "21-17, 21-14", cat: "Men's Singles", dur: "40m" },
   ];
 
+  const filteredArchives = useMemo(() => {
+    return archives.filter(row => 
+      row.matchup.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      row.tournament.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row.cat.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery]);
+
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
       
       <main className="container px-6 py-16 space-y-12">
-        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0B1F3A]/5 text-[#0B1F3A]">
@@ -44,19 +53,19 @@ const MatchArchive = () => {
           </div>
         </div>
 
-        {/* Search Bar */}
         <div className="bg-slate-50 border border-slate-200 rounded-[2.5rem] p-4 flex flex-col md:flex-row gap-4 items-center">
           <div className="flex-1 w-full flex items-center bg-white rounded-2xl px-6 h-14 border border-slate-100 focus-within:border-sky-500 transition-all shadow-sm">
             <Search className="h-5 w-5 text-slate-400" />
             <input 
               type="text" 
-              placeholder="Smash Here" 
+              placeholder="Search Matchup, Tournament or Category..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-transparent border-none outline-none text-sm font-black px-4 w-full"
             />
           </div>
         </div>
 
-        {/* Results Table */}
         <div className="bg-white border border-slate-200 rounded-[3rem] overflow-hidden shadow-sm">
           <Table>
             <TableHeader className="bg-slate-50">
@@ -68,7 +77,7 @@ const MatchArchive = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {archives.map((row) => (
+              {filteredArchives.length > 0 ? filteredArchives.map((row) => (
                 <TableRow key={row.id} className="border-slate-100 hover:bg-sky-50/50 transition-all group h-24">
                   <TableCell className="px-10">
                     <div className="flex items-center gap-4">
@@ -95,12 +104,17 @@ const MatchArchive = () => {
                     </Button>
                   </TableCell>
                 </TableRow>
-              ))}
+              )) : (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-32 text-center font-bold text-slate-400 uppercase tracking-widest">
+                    No results match your search
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>
 
-        {/* Load More */}
         <div className="flex flex-col items-center gap-4 py-8">
            <Button variant="outline" className="rounded-full px-12 h-16 font-black text-[#0B1F3A] border-slate-200 hover:bg-slate-50 text-lg uppercase tracking-widest italic shadow-sm">
              LOAD MORE SCORES

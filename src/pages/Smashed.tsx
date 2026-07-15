@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { motion } from 'framer-motion';
 import { 
   History, Trophy, Zap, 
   Search, ListFilter, Play,
   Calendar, MapPin, Activity, 
-  User, ShieldCheck
+  User, ShieldCheck, Radio
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,12 +42,34 @@ const Smashed = () => {
     { id: "T3", name: "Denmark Open", loc: "Odense, DK", status: "Completed", winner: "Viktor Axelsen" },
   ];
 
+  const filteredArchives = useMemo(() => {
+    return archives.filter(m => 
+      m.matchup.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      m.tournament.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery]);
+
+  const filteredTournaments = useMemo(() => {
+    return tournaments.filter(t => 
+      t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      t.loc.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.winner.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery]);
+
+  const filteredMyMatches = useMemo(() => {
+    return myMatches.filter(m => 
+      m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (m.players?.p1?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (m.players?.p2?.name || "").toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery, myMatches]);
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
       
       <main className="container px-6 py-16 space-y-12">
-        {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-sky-500/10 text-sky-600">
@@ -76,7 +98,6 @@ const Smashed = () => {
             <TabsTrigger value="my-matches" className="flex-1 md:flex-none rounded-[1.5rem] px-10 h-12 data-[state=active]:bg-[#0B1F3A] data-[state=active]:text-white font-black text-xs uppercase tracking-widest transition-all">My Matches</TabsTrigger>
           </TabsList>
 
-          {/* Past Matches Section */}
           <TabsContent value="history" className="m-0">
             <div className="bg-white border border-slate-200 rounded-[3rem] overflow-hidden shadow-sm">
               <Table>
@@ -89,7 +110,7 @@ const Smashed = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {archives.map((match) => (
+                  {filteredArchives.length > 0 ? filteredArchives.map((match) => (
                     <TableRow key={match.id} className="border-slate-100 hover:bg-sky-50/50 transition-all group h-24">
                       <TableCell className="px-10">
                         <div className="flex items-center gap-4">
@@ -114,16 +135,21 @@ const Smashed = () => {
                         </Button>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )) : (
+                    <TableRow>
+                      <TableCell colSpan={4} className="h-32 text-center font-bold text-slate-400 uppercase tracking-widest italic">
+                        No matches found in the archive.
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </div>
           </TabsContent>
 
-          {/* Tournaments Section */}
           <TabsContent value="tournaments" className="m-0">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {tournaments.map((t) => (
+              {filteredTournaments.length > 0 ? filteredTournaments.map((t) => (
                 <motion.div 
                   whileHover={{ y: -5 }}
                   key={t.id} 
@@ -153,15 +179,19 @@ const Smashed = () => {
                     </Button>
                   </div>
                 </motion.div>
-              ))}
+              )) : (
+                <div className="col-span-full py-32 text-center bg-white border-2 border-dashed border-slate-200 rounded-[3rem]">
+                   <Trophy className="h-12 w-12 text-slate-200 mx-auto" />
+                   <p className="text-sm font-black text-slate-400 uppercase tracking-widest mt-6 italic">No tournaments match your search.</p>
+                </div>
+              )}
             </div>
           </TabsContent>
 
-          {/* My Matches Section */}
           <TabsContent value="my-matches" className="m-0">
-            {myMatches.length > 0 ? (
+            {filteredMyMatches.length > 0 ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {myMatches.map((m) => (
+                {filteredMyMatches.map((m) => (
                   <motion.div 
                     whileHover={{ y: -5 }}
                     key={m.id} 
@@ -198,13 +228,17 @@ const Smashed = () => {
                 <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <Activity className="h-8 w-8 text-slate-300" />
                 </div>
-                <h3 className="text-xl font-black text-[#0B1F3A] uppercase italic">No Matches Initialized</h3>
+                <h3 className="text-xl font-black text-[#0B1F3A] uppercase italic">
+                  {searchQuery ? "No Matches Found" : "No Matches Initialized"}
+                </h3>
                 <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest mt-2 max-w-xs mx-auto">
-                  You haven't created any matches in your studio yet.
+                  {searchQuery ? `No matches in your studio named "${searchQuery}"` : "You haven't created any matches in your studio yet."}
                 </p>
-                <Button onClick={() => navigate('/broadcast/center')} className="mt-8 bg-sky-500 text-white font-black rounded-xl h-12 px-8 shadow-xl">
-                  Go to Studio
-                </Button>
+                {!searchQuery && (
+                  <Button onClick={() => navigate('/broadcast/center')} className="mt-8 bg-sky-500 text-white font-black rounded-xl h-12 px-8 shadow-xl">
+                    Go to Studio
+                  </Button>
+                )}
               </div>
             )}
           </TabsContent>

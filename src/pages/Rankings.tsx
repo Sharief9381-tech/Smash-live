@@ -26,7 +26,7 @@ const Rankings = () => {
     const saved = localStorage.getItem('userProfile');
     if (saved) setUserProfile(JSON.parse(saved));
     
-    // Check for search query in URL
+    // Check for search query in URL to handle global navbar search
     const params = new URLSearchParams(window.location.search);
     const q = params.get('q');
     if (q) setSearchQuery(q);
@@ -50,7 +50,7 @@ const Rankings = () => {
           matches: 842,
           winRate: "88.4",
           smashAcc: "94.2",
-          img: userProfile.name.split(' ').map((n: string) => n[0]).join(''),
+          img: userProfile.name ? userProfile.name.split(' ').map((n: string) => n[0]).join('') : "??",
           isUser: true,
           smashId: userProfile.smashId
         });
