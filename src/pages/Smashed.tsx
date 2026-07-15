@@ -5,9 +5,9 @@ import Navbar from '@/components/layout/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   History, Trophy, Zap, 
-  Search, ListFilter, Play,
+  Search, Play,
   Calendar, MapPin, Activity, 
-  User, ShieldCheck, Radio, Users,
+  ShieldCheck, Users,
   ChevronRight, X, Phone, Fingerprint,
   ArrowRight
 } from 'lucide-react';
@@ -17,8 +17,19 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
 import { showSuccess } from '@/utils/toast';
+
+// Static historical data defined outside to prevent reference errors
+const GLOBAL_ARCHIVES = [
+  { id: 1, date: "Dec 14, 2024", tournament: "BWF World Tour Finals", matchup: "Axelsen vs Lee Zii Jia", score: "21-19, 21-17", cat: "Men's Singles" },
+  { id: 2, date: "Dec 12, 2024", tournament: "BWF World Tour Finals", matchup: "An Se-young vs Yamaguchi", score: "21-15, 21-12", cat: "Women's Singles" },
+  { id: 3, date: "Nov 28, 2024", tournament: "China Masters", matchup: "Shi Yuqi vs Naraoka", score: "19-21, 21-18, 21-19", cat: "Men's Singles" },
+];
+
+const getInitials = (name: string) => {
+  if (!name) return "??";
+  return name.split(' ').map(n => n[0]).join('').toUpperCase();
+};
 
 const Smashed = () => {
   const navigate = useNavigate();
@@ -34,7 +45,7 @@ const Smashed = () => {
       setMyMatches(activeMatches);
       setMyTourneys(activeTourneys);
       
-      // Update selected tourney state if it's currently open to reflect new registrations
+      // Keep selected tourney updated if entries come in
       if (selectedTourney) {
         const updated = activeTourneys.find((t: any) => t.id === selectedTourney.id);
         if (updated) setSelectedTourney(updated);
@@ -60,11 +71,6 @@ const Smashed = () => {
     );
   }, [searchQuery, myMatches]);
 
-  const getInitials = (name: string) => {
-    if (!name) return "??";
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
-  };
-
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
@@ -76,14 +82,14 @@ const Smashed = () => {
               <Zap className="h-4 w-4 fill-current" />
               <span className="text-[10px] font-black uppercase tracking-widest">Intelligence Archive</span>
             </div>
-            <h1 className="text-6xl font-black text-[#0B1F3A] tracking-tighter uppercase italic">SMASHED</h1>
-            <p className="text-slate-500 font-medium max-w-xl">A unified view of global badminton history and your personal studio metrics.</p>
+            <h1 className="text-6xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-none">SMASHED</h1>
+            <p className="text-slate-500 font-medium max-w-xl">Unified view of global badminton history and your studio metrics.</p>
           </div>
           
           <div className="relative w-full md:w-80">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
             <Input 
-              placeholder="Search My Studio..." 
+              placeholder="Search Studio Assets..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="h-14 pl-12 bg-white border-slate-200 rounded-[2rem] font-bold focus:border-sky-500 transition-all shadow-sm"
@@ -91,59 +97,14 @@ const Smashed = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="my-matches" className="space-y-10">
+        <Tabs defaultValue="my-tourneys" className="space-y-10">
           <TabsList className="bg-white border border-slate-200 p-1.5 rounded-[2rem] shadow-sm w-full md:w-auto h-auto flex flex-wrap">
-            <TabsTrigger value="my-matches" className="flex-1 md:flex-none rounded-[1.5rem] px-10 h-12 data-[state=active]:bg-[#0B1F3A] data-[state=active]:text-white font-black text-xs uppercase tracking-widest transition-all">My Matches</TabsTrigger>
             <TabsTrigger value="my-tourneys" className="flex-1 md:flex-none rounded-[1.5rem] px-10 h-12 data-[state=active]:bg-[#0B1F3A] data-[state=active]:text-white font-black text-xs uppercase tracking-widest transition-all">My Tournaments</TabsTrigger>
+            <TabsTrigger value="my-matches" className="flex-1 md:flex-none rounded-[1.5rem] px-10 h-12 data-[state=active]:bg-[#0B1F3A] data-[state=active]:text-white font-black text-xs uppercase tracking-widest transition-all">My Matches</TabsTrigger>
             <TabsTrigger value="history" className="flex-1 md:flex-none rounded-[1.5rem] px-10 h-12 data-[state=active]:bg-[#0B1F3A] data-[state=active]:text-white font-black text-xs uppercase tracking-widest transition-all">Global History</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="my-matches" className="m-0">
-            {filteredMyMatches.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredMyMatches.map((m) => (
-                  <motion.div 
-                    whileHover={{ y: -5 }}
-                    key={m.id} 
-                    className="glass-panel p-8 rounded-[2.5rem] border-sky-500/20 space-y-6 group bg-white shadow-sm"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="h-14 w-14 rounded-2xl bg-sky-500 text-white flex items-center justify-center shadow-lg">
-                        <Activity className="h-7 w-7" />
-                      </div>
-                      <Badge className="bg-[#0B1F3A] text-white font-black px-4 h-6 text-[9px] uppercase">MY STUDIO</Badge>
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-xl font-black text-[#0B1F3A] leading-tight">
-                        {m.players?.p1?.name || "Player 1"} vs {m.players?.p2?.name || "Player 2"}
-                      </h3>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <ShieldCheck className="h-3 w-3 text-sky-500" /> {m.name}
-                      </p>
-                    </div>
-                    <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
-                      <div>
-                        <p className="text-[8px] font-black text-slate-300 uppercase">Live Score</p>
-                        <p className="text-2xl font-black text-sky-600 font-mono">{m.currentScore?.[0]}-{m.currentScore?.[1]}</p>
-                      </div>
-                      <Button onClick={() => navigate(`/scoring/${m.id}`)} className="h-11 px-6 rounded-xl bg-[#0B1F3A] text-white font-black text-[10px] uppercase tracking-widest hover:bg-sky-500 transition-colors">
-                        Resume Scoring
-                      </Button>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            ) : (
-              <div className="py-32 text-center bg-white border-2 border-dashed border-slate-200 rounded-[3rem]">
-                <Activity className="h-12 w-12 text-slate-200 mx-auto mb-4" />
-                <h3 className="text-xl font-black text-[#0B1F3A] uppercase italic">No Active Matches</h3>
-                <Button onClick={() => navigate('/live-match/create')} className="mt-8 bg-sky-500 text-white font-black rounded-xl h-12 px-8 shadow-xl">
-                  Start Match
-                </Button>
-              </div>
-            )}
-          </TabsContent>
-
+          {/* MY TOURNAMENTS & PARTICIPANTS */}
           <TabsContent value="my-tourneys" className="m-0">
             {selectedTourney ? (
               <motion.div 
@@ -157,14 +118,10 @@ const Smashed = () => {
                     className="flex items-center gap-2 text-[#64748B] hover:text-[#0B1F3A] transition-colors group"
                   >
                     <X className="h-5 w-5 group-hover:rotate-90 transition-transform" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">Exit Participant List</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest">Back to Tournaments</span>
                   </button>
                   <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Active Circuit</p>
-                      <h4 className="text-xl font-black text-[#0B1F3A] italic uppercase">{selectedTourney.name}</h4>
-                    </div>
-                    <div className="h-12 w-px bg-slate-200 hidden md:block" />
+                    <h4 className="text-xl font-black text-[#0B1F3A] italic uppercase">{selectedTourney.name}</h4>
                     <Badge className="bg-sky-500 text-white font-black px-6 h-10 rounded-xl text-xs">{selectedTourney.participants?.length || 0} Registered</Badge>
                   </div>
                 </div>
@@ -173,35 +130,35 @@ const Smashed = () => {
                   <Table>
                     <TableHeader className="bg-slate-50">
                       <TableRow className="hover:bg-transparent border-slate-100">
-                        <TableHead className="font-black text-[10px] uppercase tracking-widest py-8 px-10">Athlete Intelligence</TableHead>
-                        <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">Contact Identity</TableHead>
+                        <TableHead className="font-black text-[10px] uppercase tracking-widest py-8 px-10">Athlete</TableHead>
+                        <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">Contact</TableHead>
                         <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">Smash ID</TableHead>
-                        <TableHead className="text-right font-black text-[10px] uppercase tracking-widest pr-12">Broadcast Setup</TableHead>
+                        <TableHead className="text-right font-black text-[10px] uppercase tracking-widest pr-12">Action</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {selectedTourney.participants && selectedTourney.participants.length > 0 ? (
                         selectedTourney.participants.map((p: any, idx: number) => (
-                          <TableRow key={p.id || idx} className="border-slate-100 hover:bg-sky-50/30 h-24 transition-all group">
+                          <TableRow key={idx} className="border-slate-100 hover:bg-sky-50/30 h-24 transition-all">
                             <TableCell className="px-10">
                               <div className="flex items-center gap-4">
-                                <div className="h-12 w-12 rounded-full bg-[#0B1F3A] flex items-center justify-center text-sky-400 font-black border-2 border-slate-100 group-hover:border-sky-500 transition-colors">
+                                <div className="h-12 w-12 rounded-full bg-[#071D49] flex items-center justify-center text-[#1DA1F2] font-black border-2 border-slate-100">
                                   {getInitials(p.name)}
                                 </div>
                                 <div>
-                                  <p className="font-black text-[#0B1F3A] text-lg leading-tight group-hover:text-sky-600 transition-colors">{p.name}</p>
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Verified Participant</p>
+                                  <p className="font-black text-[#0B1F3A] text-lg leading-tight">{p.name}</p>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Verified Entry</p>
                                 </div>
                               </div>
                             </TableCell>
                             <TableCell className="text-center">
                               <div className="inline-flex items-center gap-2 font-bold text-[#64748B] bg-slate-50 px-4 py-2 rounded-xl">
-                                <Phone className="h-3 w-3 text-sky-500" />
+                                <Phone className="h-3 w-3 text-[#1DA1F2]" />
                                 {p.phone}
                               </div>
                             </TableCell>
                             <TableCell className="text-center">
-                              <Badge variant="outline" className="font-black border-slate-200 text-[#0B1F3A] h-9 px-4 rounded-xl bg-white shadow-sm">
+                              <Badge variant="outline" className="font-black border-slate-200 text-[#0B1F3A]">
                                 <Fingerprint className="h-3.5 w-3.5 mr-2 text-sky-500" /> {p.smashId}
                               </Badge>
                             </TableCell>
@@ -210,7 +167,7 @@ const Smashed = () => {
                                 onClick={() => navigate('/live-match/create')}
                                 className="h-12 px-8 rounded-2xl bg-[#0B1F3A] text-white font-black text-[10px] uppercase tracking-widest hover:bg-sky-500 shadow-lg transition-all group/btn"
                               >
-                                CREATE MATCH <Play className="ml-2 h-4 w-4 fill-current group-hover/btn:translate-x-1 transition-transform" />
+                                Create Match <Play className="ml-2 h-4 w-4 fill-current group-hover/btn:translate-x-1 transition-transform" />
                               </Button>
                             </TableCell>
                           </TableRow>
@@ -218,19 +175,19 @@ const Smashed = () => {
                       ) : (
                         <TableRow>
                           <TableCell colSpan={4} className="h-64 text-center">
-                            <div className="flex flex-col items-center justify-center space-y-6">
-                               <Users className="h-14 w-14 text-slate-100 animate-pulse" />
+                            <div className="space-y-6">
+                               <Users className="h-14 w-14 text-slate-100 mx-auto animate-pulse" />
                                <div className="space-y-1">
-                                 <h3 className="font-black text-slate-300 uppercase tracking-widest text-xl italic">Awaiting Entries</h3>
-                                 <p className="text-[10px] font-bold text-slate-400 uppercase max-w-xs mx-auto">Share the public registration link to synchronize athletes with this tournament.</p>
+                                 <h3 className="font-black text-slate-300 uppercase tracking-widest text-xl italic">Awaiting Participants</h3>
+                                 <p className="text-[10px] font-bold text-slate-400 uppercase max-w-xs mx-auto">Share the link to synchronize players with this tournament.</p>
                                </div>
                                <Button 
                                 onClick={() => {
                                   const link = `${window.location.origin}/register/${selectedTourney.slug}`;
                                   navigator.clipboard.writeText(link);
-                                  showSuccess("Registration link copied to clipboard!");
+                                  showSuccess("Link copied to clipboard!");
                                 }}
-                                variant="outline" className="rounded-2xl border-sky-200 text-sky-600 h-14 px-10 font-black text-[11px] uppercase tracking-widest hover:bg-sky-50 transition-all"
+                                variant="outline" className="rounded-2xl border-sky-200 text-sky-600 h-14 px-10 font-black text-[11px] uppercase tracking-widest hover:bg-sky-50"
                                >
                                  Copy Registration Link
                                </Button>
@@ -279,24 +236,9 @@ const Smashed = () => {
                               <p className="text-[8px] font-black text-slate-300 uppercase">Players</p>
                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const link = `${window.location.origin}/register/${t.slug}`;
-                              navigator.clipboard.writeText(link);
-                              showSuccess("Registration link copied!");
-                            }} 
-                            variant="ghost" 
-                            className="h-10 w-10 rounded-xl bg-slate-50 text-slate-400 hover:text-sky-500 transition-all"
-                            title="Copy registration link"
-                          >
-                            <Users className="h-4 w-4" />
-                          </Button>
-                          <Button className="h-10 w-10 rounded-xl bg-[#0B1F3A] text-white hover:bg-sky-500 transition-all">
-                            <ChevronRight className="h-5 w-5" />
-                          </Button>
-                        </div>
+                        <Button className="h-10 w-10 rounded-xl bg-[#0B1F3A] text-white hover:bg-sky-500 transition-all">
+                          <ChevronRight className="h-5 w-5" />
+                        </Button>
                       </div>
                     </motion.div>
                   ))
@@ -313,6 +255,54 @@ const Smashed = () => {
             )}
           </TabsContent>
 
+          {/* MY MATCHES */}
+          <TabsContent value="my-matches" className="m-0">
+            {filteredMyMatches.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredMyMatches.map((m) => (
+                  <motion.div 
+                    whileHover={{ y: -5 }}
+                    key={m.id} 
+                    className="glass-panel p-8 rounded-[2.5rem] border-sky-500/20 space-y-6 group bg-white shadow-sm"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="h-14 w-14 rounded-2xl bg-sky-500 text-white flex items-center justify-center shadow-lg">
+                        <Activity className="h-7 w-7" />
+                      </div>
+                      <Badge className="bg-[#0B1F3A] text-white font-black px-4 h-6 text-[9px] uppercase">MY STUDIO</Badge>
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-xl font-black text-[#0B1F3A] leading-tight">
+                        {m.players?.p1?.name || "Player 1"} vs {m.players?.p2?.name || "Player 2"}
+                      </h3>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <ShieldCheck className="h-3 w-3 text-sky-500" /> {m.name}
+                      </p>
+                    </div>
+                    <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
+                      <div>
+                        <p className="text-[8px] font-black text-slate-300 uppercase">Live Score</p>
+                        <p className="text-2xl font-black text-sky-600 font-mono">{m.currentScore?.[0]}-{m.currentScore?.[1]}</p>
+                      </div>
+                      <Button onClick={() => navigate(`/scoring/${m.id}`)} className="h-11 px-6 rounded-xl bg-[#0B1F3A] text-white font-black text-[10px] uppercase tracking-widest hover:bg-sky-500 transition-colors">
+                        Resume Scoring
+                      </Button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-32 text-center bg-white border-2 border-dashed border-slate-200 rounded-[3rem]">
+                <Activity className="h-12 w-12 text-slate-200 mx-auto mb-4" />
+                <h3 className="text-xl font-black text-[#0B1F3A] uppercase italic">No Active Matches</h3>
+                <Button onClick={() => navigate('/live-match/create')} className="mt-8 bg-sky-500 text-white font-black rounded-xl h-12 px-8 shadow-xl">
+                  Start Match
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* GLOBAL HISTORY */}
           <TabsContent value="history" className="m-0">
             <div className="bg-white border border-slate-200 rounded-[3rem] overflow-hidden shadow-sm">
               <Table>
@@ -325,7 +315,7 @@ const Smashed = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {archives.map((match) => (
+                  {GLOBAL_ARCHIVES.map((match) => (
                     <TableRow key={match.id} className="border-slate-100 hover:bg-sky-50/50 transition-all group h-24">
                       <TableCell className="px-10">
                         <div className="flex items-center gap-4">
