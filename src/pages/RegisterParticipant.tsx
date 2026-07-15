@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Trophy, User, ArrowRight, Zap, Check, Loader2, Phone, Fingerprint } from 'lucide-react';
+import { Trophy, User, ArrowRight, Zap, Check, Loader2, Phone, Fingerprint, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,6 +13,7 @@ const RegisterParticipant = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [tournament, setTournament] = useState<any>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   
@@ -23,11 +24,17 @@ const RegisterParticipant = () => {
   });
 
   useEffect(() => {
-    const tourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
-    const found = tourneys.find((t: any) => t.slug === slug);
-    if (found) {
-      setTournament(found);
-    }
+    // Small delay to ensure storage is ready and prevent UI flicker
+    const timer = setTimeout(() => {
+      const tourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
+      const found = tourneys.find((t: any) => t.slug === slug);
+      if (found) {
+        setTournament(found);
+      }
+      setIsInitializing(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
   }, [slug]);
 
   const handleRegister = () => {
@@ -43,6 +50,12 @@ const RegisterParticipant = () => {
       const updatedTourneys = tourneys.map((t: any) => {
         if (t.slug === slug) {
           const participants = t.participants || [];
+          // Ensure we don't add duplicate Smash IDs for this specific tournament
+          if (participants.some((existing: any) => existing.smashId === formData.smashId)) {
+            setIsLoading(false);
+            showError("This Smash ID is already registered for this event.");
+            return t;
+          }
           return { 
             ...t, 
             participants: [...participants, { ...formData, id: Date.now() }] 
@@ -50,21 +63,41 @@ const RegisterParticipant = () => {
         }
         return t;
       });
-      localStorage.setItem('active_studio_tournaments', JSON.stringify(updatedTourneys));
       
+      localStorage.setItem('active_studio_tournaments', JSON.stringify(updatedTourneys));
       setIsLoading(false);
       setIsSuccess(true);
       showSuccess("Athlete Dossier submitted successfully!");
     }, 1200);
   };
 
-  if (!tournament && !isLoading && !isSuccess) {
+  if (isInitializing) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
-        <div className="text-center space-y-4">
-          <h1 className="text-3xl font-black text-[#071D49]">Tournament Not Found</h1>
-          <Button onClick={() => navigate('/')} variant="outline">Go Home</Button>
-        </div>
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center gap-4">
+        <Loader2 className="h-10 w-10 text-[#1DA1F2] animate-spin" />
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Validating Circuit Link...</p>
+      </div>
+    );
+  }
+
+  if (!tournament && !isSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-6">
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center space-y-8 max-w-sm">
+          <div className="bg-red-50 w-20 h-20 rounded-[2.5rem] flex items-center justify-center mx-auto text-red-500 shadow-xl border border-red-100">
+            <AlertCircle className="h-10 w-10" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-3xl font-black text-[#071D49] tracking-tighter uppercase italic">Circuit Not Found</h1>
+            <p className="text-slate-500 font-medium leading-relaxed">The registration link you used is invalid or the tournament has been archived by the organizer.</p>
+          </div>
+          <Button 
+            onClick={() => navigate('/')} 
+            className="w-full h-14 bg-[#071D49] text-white font-black rounded-2xl shadow-xl hover:bg-[#1DA1F2] transition-all"
+          >
+            RETURN TO HOME
+          </Button>
+        </motion.div>
       </div>
     );
   }
@@ -84,9 +117,9 @@ const RegisterParticipant = () => {
           </div>
           <div className="space-y-1">
             <h1 className="text-4xl font-black text-[#071D49] tracking-tighter uppercase italic">
-              {tournament?.name || 'Athlete Registry'}
+              {tournament?.name}
             </h1>
-            <p className="text-[#64748B] font-bold uppercase text-[10px] tracking-[0.3em]">Event Registration</p>
+            <p className="text-[#64748B] font-bold uppercase text-[10px] tracking-[0.3em]">Event Registration Registry</p>
           </div>
         </div>
 
@@ -146,11 +179,14 @@ const RegisterParticipant = () => {
             </div>
           ) : (
             <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="text-center space-y-6">
-              <div className="h-20 w-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto text-green-500">
+              <div className="h-20 w-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto text-green-500 shadow-lg">
                 <Check className="h-10 w-10 stroke-[3px]" />
               </div>
-              <h2 className="text-2xl font-black text-[#071D49]">REGISTRATION COMPLETE</h2>
-              <Button onClick={() => navigate('/')} className="w-full bg-[#071D49] text-white rounded-xl h-12">Return Home</Button>
+              <div className="space-y-2">
+                <h2 className="text-2xl font-black text-[#071D49] tracking-tight italic uppercase">Registration Complete</h2>
+                <p className="text-slate-500 font-medium">Your entry has been synchronized with the tournament director.</p>
+              </div>
+              <Button onClick={() => navigate('/')} className="w-full h-14 bg-[#071D49] text-white font-black rounded-2xl hover:bg-[#1DA1F2] transition-all uppercase tracking-widest text-xs">Return Home</Button>
             </motion.div>
           )}
         </div>
