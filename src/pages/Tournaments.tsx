@@ -9,7 +9,7 @@ import {
   Trophy, Calendar, MapPin, 
   Search, ListFilter, ArrowRight,
   Zap, Globe, Award,
-  Activity, Users, TrendingUp, ChevronRight
+  Activity, Users, TrendingUp, ChevronRight, Plus
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -103,17 +103,19 @@ const Tournaments = () => {
             <div className="lg:col-span-5">
               <div className="bg-[#0B1F3A] p-8 rounded-[3rem] text-white relative overflow-hidden group shadow-xl">
                 <div className="absolute -right-8 -bottom-8 opacity-10 group-hover:rotate-12 transition-transform duration-1000">
-                  <Award className="h-40 w-40 text-white" />
+                  <Trophy className="h-40 w-40 text-white" />
                 </div>
                 <div className="space-y-6 relative z-10">
-                  <Badge className="bg-sky-500 border-none font-black text-[9px] px-4 h-6 rounded-full">CIRCUIT PRO</Badge>
+                  <Badge className="bg-sky-500 border-none font-black text-[9px] px-4 h-6 rounded-full uppercase tracking-widest">Organizer Studio</Badge>
                   <div className="space-y-2">
-                    <h4 className="text-2xl font-black italic tracking-tighter uppercase">Platform Dominance</h4>
-                    <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest">Access proprietary data analysis for all circuit players.</p>
+                    <h4 className="text-2xl font-black italic tracking-tighter uppercase">Start Tournament</h4>
+                    <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest">Organize your own circuit with bracket intelligence and official seeding.</p>
                   </div>
-                  <Button className="w-full h-12 bg-white text-[#0B1F3A] rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-sky-500 hover:text-white transition-all shadow-lg border-none">
-                    Go Pro Now
-                  </Button>
+                  <Link to="/tournaments/create">
+                    <Button className="w-full h-12 bg-white text-[#0B1F3A] rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-sky-500 hover:text-white transition-all shadow-lg border-none group">
+                      Initialize Event <Plus className="ml-2 h-4 w-4 group-hover:rotate-90 transition-transform" />
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </div>
