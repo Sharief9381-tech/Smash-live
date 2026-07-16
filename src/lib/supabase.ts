@@ -1,9 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
-// These variables are provided after linking a Supabase project via the Integrations tab
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
+// These variables are automatically injected once you link Supabase in the Integrations tab.
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-// Initialize the client
-// Note: If you haven't linked Supabase yet, the app will now use these placeholders instead of throwing an error on load.
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn("Supabase connection missing. Please link your project in the Integrations tab.");
+}
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
