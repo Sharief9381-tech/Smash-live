@@ -28,13 +28,15 @@ const Tournaments = () => {
       const activeTourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
       setTournaments(activeTourneys.map((t: any) => ({
         ...t,
-        category: t.format.charAt(0).toUpperCase() + t.format.slice(1),
+        category: t.format ? (t.format.charAt(0).toUpperCase() + t.format.slice(1)) : "Elimination",
         prize: "TBD",
         points: "Dynamic",
         img: "https://images.unsplash.com/photo-1626224580175-340ad0e3a242?q=80&w=2070&auto=format&fit=crop"
       })));
     };
     loadData();
+    window.addEventListener('storage', loadData);
+    return () => window.removeEventListener('storage', loadData);
   }, []);
 
   const filtered = useMemo(() => {
@@ -164,7 +166,12 @@ const Tournaments = () => {
                        </Button>
                     </div>
                   </motion.div>
-                ))}
+                )) : (
+                  <div className="col-span-2 py-32 text-center bg-slate-50 rounded-[4rem] border-2 border-dashed border-slate-200">
+                    <Trophy className="h-12 w-12 text-slate-200 mx-auto mb-4" />
+                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest italic">No Circuits Found</p>
+                  </div>
+                )}
               </AnimatePresence>
             </div>
           </div>
@@ -198,6 +205,7 @@ const Tournaments = () => {
           </div>
         </div>
       </main>
+
       <Footer />
     </div>
   );
