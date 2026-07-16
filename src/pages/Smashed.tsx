@@ -9,6 +9,7 @@ import {
   Settings2, CheckCircle2, RotateCcw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -52,7 +53,6 @@ const Smashed = () => {
     }
 
     // Filter participants who are eligible (not eliminated)
-    // For round 1, everyone is eligible.
     const eligible = selectedTourney.participants.filter((p: any) => !p.isEliminated);
     
     if (eligible.length < 2) {
