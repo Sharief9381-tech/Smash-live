@@ -164,12 +164,7 @@ const Tournaments = () => {
                        </Button>
                     </div>
                   </motion.div>
-                )) : (
-                  <div className="col-span-2 py-32 text-center bg-slate-50 rounded-[4rem] border-2 border-dashed border-slate-200">
-                    <Trophy className="h-12 w-12 text-slate-200 mx-auto mb-4" />
-                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest italic">No Active Tournaments Found</p>
-                  </div>
-                )}
+                ))}
               </AnimatePresence>
             </div>
           </div>
@@ -181,7 +176,7 @@ const Tournaments = () => {
               </h4>
               <div className="space-y-6">
                 <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-500">
+                  <div className="h-10 w-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-500 shadow-inner">
                     <Users className="h-5 w-5" />
                   </div>
                   <div>
@@ -190,7 +185,7 @@ const Tournaments = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-500">
+                  <div className="h-10 w-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-500 shadow-inner">
                     <Activity className="h-5 w-5" />
                   </div>
                   <div>
