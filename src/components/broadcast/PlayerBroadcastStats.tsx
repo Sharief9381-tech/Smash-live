@@ -5,13 +5,24 @@ import { Target, Trophy, Zap, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const PlayerBroadcastStats = () => {
-  const [userName, setUserName] = useState("Player");
+  const [stats, setStats] = useState({ name: "Athlete", matches: 0, tourneys: 0 });
 
   useEffect(() => {
-    const saved = localStorage.getItem('userProfile');
-    if (saved) {
-      setUserName(JSON.parse(saved).name);
-    }
+    const loadStats = () => {
+      const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+      const matches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
+      const tourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
+      
+      setStats({
+        name: profile.name || "Athlete",
+        matches: matches.length,
+        tourneys: tourneys.length
+      });
+    };
+
+    loadStats();
+    window.addEventListener('storage', loadStats);
+    return () => window.removeEventListener('storage', loadStats);
   }, []);
 
   return (
@@ -22,8 +33,8 @@ const PlayerBroadcastStats = () => {
             <User className="h-6 w-6" />
           </div>
           <div>
-            <h3 className="text-xl font-black text-[#0B1F3A] italic">Personal Studio Stats</h3>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{userName}'s Activity</p>
+            <h3 className="text-xl font-black text-[#0B1F3A] italic uppercase">Personal Studio Pulse</h3>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{stats.name}'s Active Session</p>
           </div>
         </div>
         <Zap className="h-5 w-5 text-amber-500 fill-current" />
@@ -38,7 +49,7 @@ const PlayerBroadcastStats = () => {
             <Target className="h-8 w-8" />
           </div>
           <div>
-            <p className="text-4xl font-black text-[#0B1F3A] tracking-tighter">42</p>
+            <p className="text-4xl font-black text-[#0B1F3A] tracking-tighter">{stats.matches}</p>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Matches Initialized</p>
           </div>
         </motion.div>
@@ -51,7 +62,7 @@ const PlayerBroadcastStats = () => {
             <Trophy className="h-8 w-8" />
           </div>
           <div>
-            <p className="text-4xl font-black text-[#0B1F3A] tracking-tighter">8</p>
+            <p className="text-4xl font-black text-[#0B1F3A] tracking-tighter">{stats.tourneys}</p>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tournaments Hosted</p>
           </div>
         </motion.div>
@@ -60,9 +71,9 @@ const PlayerBroadcastStats = () => {
       <div className="bg-[#0B1F3A] p-6 rounded-[2rem] text-white flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-[10px] font-black uppercase tracking-widest opacity-80">Sync Status: Real-time</span>
+          <span className="text-[10px] font-black uppercase tracking-widest opacity-80">Studio Protocol: Live</span>
         </div>
-        <span className="text-[10px] font-bold text-sky-400 uppercase">Dossier #LIVE_001</span>
+        <span className="text-[10px] font-bold text-sky-400 uppercase">Operational Node active</span>
       </div>
     </div>
   );

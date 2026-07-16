@@ -15,13 +15,13 @@ const Rankings = () => {
   useEffect(() => {
     const loadUsers = () => {
       const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
-      // Adding some simulated stats for registered users to make the board look functional
+      // Points and wins are initialized to 0. 
+      // This board only populates when real users register.
       setUsers(registered.map((u: any, idx: number) => ({
         ...u,
-        rank: idx + 1,
-        matches: Math.floor(Math.random() * 50),
-        winRate: (70 + Math.random() * 20).toFixed(1),
-        points: 1000 + Math.floor(Math.random() * 5000),
+        matches: 0,
+        winRate: "0.0",
+        points: 0,
         img: u.name ? u.name.split(' ').map((n: string) => n[0]).join('') : "?"
       })).sort((a: any, b: any) => b.points - a.points));
     };
