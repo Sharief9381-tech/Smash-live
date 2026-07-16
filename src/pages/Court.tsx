@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { motion } from 'framer-motion';
 import { 
@@ -16,16 +16,38 @@ import { cn } from '@/lib/utils';
 
 const Court = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [matches, setMatches] = useState<any[]>([]);
+  const [tournaments, setTournaments] = useState<any[]>([]);
 
-  const matches = [
-    { id: "M1", p1: "Viktor Axelsen", p2: "Shi Yuqi", score: "21-19, 14-11", tournament: "BWF World Finals", viewers: "1.2M" },
-    { id: "M2", p1: "An Se-young", p2: "Tai Tzu-ying", score: "21-12, 18-20", tournament: "BWF World Finals", viewers: "840K" },
-  ];
+  useEffect(() => {
+    const loadData = () => {
+      const activeMatches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
+      const activeTourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
+      
+      setMatches(activeMatches.map((m: any) => ({
+        id: m.id,
+        p1: m.players?.p1?.name || (m.players?.tA1?.name ? `${m.players.tA1.name} / ${m.players.tA2.name}` : "Player 1"),
+        p2: m.players?.p2?.name || (m.players?.tB1?.name ? `${m.players.tB1.name} / ${m.players.tB2.name}` : "Player 2"),
+        score: m.currentScore ? `${m.currentScore[0]}-${m.currentScore[1]}` : "0-0",
+        tournament: m.name,
+        viewers: "LIVE"
+      })));
 
-  const tournaments = [
-    { id: "T1", name: "BWF World Tour Finals", loc: "Jakarta, Indonesia", status: "Live", players: 32, cat: "Major", prize: "$2.5M" },
-    { id: "T2", name: "China Masters 2024", loc: "Shenzhen, China", status: "Live", players: 64, cat: "Super 750", prize: "$1.15M" },
-  ];
+      setTournaments(activeTourneys.map((t: any) => ({
+        id: t.id,
+        name: t.name,
+        loc: t.city,
+        status: t.status,
+        players: t.participants?.length || 0,
+        cat: t.format,
+        prize: "TBD"
+      })));
+    };
+
+    loadData();
+    window.addEventListener('storage', loadData);
+    return () => window.removeEventListener('storage', loadData);
+  }, []);
 
   const filteredMatches = useMemo(() => {
     return matches.filter(m => 
@@ -33,14 +55,14 @@ const Court = () => {
       m.p2.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.tournament.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, matches]);
 
   const filteredTournaments = useMemo(() => {
     return tournaments.filter(t => 
       t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.loc.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, tournaments]);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -69,17 +91,17 @@ const Court = () => {
 
         <div className="grid lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 space-y-8">
-            <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 border-sky-500/10 shadow-sky-500/5">
+            <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 border-sky-500/10 shadow-sky-500/5 bg-white">
               <div className="flex items-center justify-between border-b border-slate-50 pb-6">
                 <h3 className="text-xl font-black text-[#0B1F3A] flex items-center gap-3 italic">
-                  <Activity className="h-5 w-5 text-red-500 animate-pulse" /> Global Live Feed
+                  <Activity className="h-5 w-5 text-red-500 animate-pulse" /> Live Feed
                 </h3>
                 <Badge className="bg-sky-500 text-white border-none font-black px-4 text-[9px]">REAL-TIME SYNC</Badge>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
                 {filteredMatches.length > 0 ? filteredMatches.map((match, i) => (
-                  <Link to="/live-match/active" key={i} className="bg-white border border-slate-100 p-8 rounded-[2.5rem] hover:border-sky-500/30 transition-all cursor-pointer group shadow-sm">
+                  <Link to={`/broadcast/${match.id}`} key={i} className="bg-white border border-slate-100 p-8 rounded-[2.5rem] hover:border-sky-500/30 transition-all cursor-pointer group shadow-sm">
                     <div className="flex justify-between items-start mb-4">
                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{match.tournament}</p>
                       <div className="flex items-center gap-1.5">
@@ -103,7 +125,7 @@ const Court = () => {
               </div>
             </div>
 
-            <div className="glass-panel p-10 rounded-[3.5rem] space-y-8">
+            <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 bg-white border-slate-200 shadow-sm">
               <div className="flex items-center justify-between border-b border-slate-50 pb-6">
                 <h3 className="text-xl font-black text-[#0B1F3A] flex items-center gap-3 italic">
                   <Trophy className="h-5 w-5 text-sky-500" /> Active Circuit Events
@@ -145,7 +167,7 @@ const Court = () => {
           </div>
 
           <div className="lg:col-span-4 space-y-8">
-            <div className="bg-[#0B1F3A] p-10 rounded-[3.5rem] text-white space-y-8 relative overflow-hidden group">
+            <div className="bg-[#0B1F3A] p-10 rounded-[3.5rem] text-white space-y-8 relative overflow-hidden group border-none shadow-2xl">
               <div className="absolute -right-10 -bottom-10 opacity-10 group-hover:rotate-12 group-hover:scale-125 transition-transform duration-700">
                 <Radio className="h-40 w-40" />
               </div>
@@ -163,7 +185,7 @@ const Court = () => {
               </div>
             </div>
 
-            <div className="glass-panel p-10 rounded-[3.5rem] space-y-8">
+            <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 bg-white border-slate-200 shadow-sm">
                <h4 className="text-[10px] font-black text-[#0B1F3A] uppercase tracking-[0.3em] flex items-center gap-3">
                  <ShieldCheck className="h-4 w-4 text-sky-500" /> Security Intelligence
                </h4>

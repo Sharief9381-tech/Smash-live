@@ -2,35 +2,16 @@
 
 import React, { useState, useMemo } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import { motion } from 'framer-motion';
-import { 
-  History, Search, Filter, Calendar, 
-  MapPin, Play, ChevronRight, Download,
-  BarChart2, Star, Zap
-} from 'lucide-react';
+import { History, Search, Play, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const MatchArchive = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const archives = [
-    { id: 1, date: "Dec 14, 2024", tournament: "BWF World Tour Finals", matchup: "Axelsen vs Lee Zii Jia", score: "21-19, 21-17", cat: "Men's Singles", dur: "42m" },
-    { id: 2, date: "Dec 12, 2024", tournament: "BWF World Tour Finals", matchup: "An Se-young vs Yamaguchi", score: "21-15, 21-12", cat: "Women's Singles", dur: "38m" },
-    { id: 3, date: "Nov 28, 2024", tournament: "China Masters", matchup: "Shi Yuqi vs Naraoka", score: "19-21, 21-18, 21-19", cat: "Men's Singles", dur: "1h 12m" },
-    { id: 4, date: "Nov 25, 2024", tournament: "China Masters", matchup: "Chen/Jia vs Baek/Lee", score: "21-12, 21-15", cat: "Women's Doubles", dur: "45m" },
-    { id: 5, date: "Oct 18, 2024", tournament: "Denmark Open", matchup: "Antonsen vs Christie", score: "21-17, 21-14", cat: "Men's Singles", dur: "40m" },
-  ];
-
-  const filteredArchives = useMemo(() => {
-    return archives.filter(row => 
-      row.matchup.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      row.tournament.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.cat.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery]);
+  // Archives would normally come from a completed matches array in localStorage
+  const archives: any[] = [];
 
   return (
     <div className="min-h-screen bg-white">
@@ -44,21 +25,16 @@ const MatchArchive = () => {
               <span className="text-xs font-black uppercase tracking-widest">Global Match Database</span>
             </div>
             <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter italic uppercase">Score Archive</h1>
-            <p className="text-slate-500 font-medium max-w-lg">Complete history of final scores and match results across the global circuit.</p>
-          </div>
-          <div className="flex gap-4">
-            <Button variant="outline" className="h-12 rounded-xl border-slate-200 font-bold px-6">
-              Export CSV
-            </Button>
+            <p className="text-slate-500 font-medium max-w-lg">Historical log of finalized scores and match results across the circuit.</p>
           </div>
         </div>
 
-        <div className="bg-slate-50 border border-slate-200 rounded-[2.5rem] p-4 flex flex-col md:flex-row gap-4 items-center">
-          <div className="flex-1 w-full flex items-center bg-white rounded-2xl px-6 h-14 border border-slate-100 focus-within:border-sky-500 transition-all shadow-sm">
+        <div className="bg-slate-50 border border-slate-200 rounded-[2.5rem] p-4">
+          <div className="flex items-center bg-white rounded-2xl px-6 h-14 border border-slate-100 shadow-sm">
             <Search className="h-5 w-5 text-slate-400" />
             <input 
               type="text" 
-              placeholder="Search Matchup, Tournament or Category..." 
+              placeholder="Filter archives..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-transparent border-none outline-none text-sm font-black px-4 w-full"
@@ -77,8 +53,8 @@ const MatchArchive = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredArchives.length > 0 ? filteredArchives.map((row) => (
-                <TableRow key={row.id} className="border-slate-100 hover:bg-sky-50/50 transition-all group h-24">
+              {archives.length > 0 ? archives.map((row) => (
+                <TableRow key={row.id} className="border-slate-100 h-24">
                   <TableCell className="px-10">
                     <div className="flex items-center gap-4">
                       <div className="h-10 w-10 rounded-xl bg-[#0B1F3A] flex items-center justify-center text-sky-500">
@@ -106,20 +82,13 @@ const MatchArchive = () => {
                 </TableRow>
               )) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="h-32 text-center font-bold text-slate-400 uppercase tracking-widest">
-                    No results match your search
+                  <TableCell colSpan={4} className="h-40 text-center font-bold text-slate-300 uppercase tracking-widest">
+                    No matching archives in the circuit database
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
-        </div>
-
-        <div className="flex flex-col items-center gap-4 py-8">
-           <Button variant="outline" className="rounded-full px-12 h-16 font-black text-[#0B1F3A] border-slate-200 hover:bg-slate-50 text-lg uppercase tracking-widest italic shadow-sm">
-             LOAD MORE SCORES
-           </Button>
-           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Showing historical score data for 2024 circuit</p>
         </div>
       </main>
     </div>
