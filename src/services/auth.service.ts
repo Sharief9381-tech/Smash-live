@@ -1,40 +1,58 @@
 "use client";
 
+import { supabase } from '@/lib/supabase';
+
 export const AuthService = {
-  // Simulates checking if a user exists by phone
-  checkUserExists(phone: string) {
-    const users = JSON.parse(localStorage.getItem('registered_users') || '[]');
-    return users.find((u: any) => u.phone === phone);
-  },
+  async login(email: string) {
+    // For demo/prototype simplicity, we'll use a direct profile check.
+    // In a full production app, you'd use supabase.auth.signInWithOtp()
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('email', email)
+        .single();
 
-  async login(credentials: { phone: string, email?: string }) {
-    const existingUser = this.checkUserExists(credentials.phone);
-    
-    if (existingUser) {
-      this.setSession(existingUser);
-      return existingUser;
+      if (error && error.code !== 'PGRST116') throw error;
+
+      if (!profile) {
+        // Create new athlete profile if they don't exist
+        const { data: newProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert([{ 
+            email, 
+            name: email.split('@')[0],
+            onboarding_complete: false 
+          }])
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        return newProfile;
+      }
+
+      return profile;
+    } catch (err) {
+      console.error("Auth Service Error:", err);
+      throw err;
     }
-
-    // If new user, we create a placeholder until onboarding
-    const newUser = {
-      phone: credentials.phone,
-      name: "New Player",
-      onboardingComplete: false
-    };
-    
-    return newUser;
   },
 
-  setSession(userProfile: any) {
+  async updateProfile(id: string, updates: any) {
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  setLocalSession(profile: any) {
     localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userProfile', JSON.stringify(userProfile));
-    
-    // Track globally for the "database" simulation
-    const users = JSON.parse(localStorage.getItem('registered_users') || '[]');
-    if (!users.find((u: any) => u.phone === userProfile.phone)) {
-      users.push(userProfile);
-      localStorage.setItem('registered_users', JSON.stringify(users));
-    }
+    localStorage.setItem('userProfile', JSON.stringify(profile));
   },
 
   logout() {
