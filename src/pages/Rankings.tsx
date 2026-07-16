@@ -2,100 +2,56 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import { motion } from 'framer-motion';
-import { 
-  Trophy, TrendingUp, TrendingDown, 
-  Minus, Search, Globe,
-  Flag, MapPin, Building,
-  Target, Zap, ChevronUp, ChevronDown, ChevronsDown
-} from 'lucide-react';
+import { Search, Globe, Flag, MapPin, Building, Target, ChevronUp, Minus } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { playersDatabase, Player } from '@/data/players';
 
 const Rankings = () => {
-  const [activeCategory, setActiveCategory] = useState("ms");
   const [searchQuery, setSearchQuery] = useState("");
   const [scope, setScope] = useState("world");
-  const [visibleCount, setVisibleCount] = useState(7);
-  const [userProfile, setUserProfile] = useState<any>(null);
+  const [users, setUsers] = useState<any[]>([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem('userProfile');
-    if (saved) setUserProfile(JSON.parse(saved));
-    
-    // Check for search query in URL to handle global navbar search
-    const params = new URLSearchParams(window.location.search);
-    const q = params.get('q');
-    if (q) setSearchQuery(q);
+    const loadUsers = () => {
+      const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
+      // Adding some simulated stats for registered users to make the board look functional
+      setUsers(registered.map((u: any, idx: number) => ({
+        ...u,
+        rank: idx + 1,
+        matches: Math.floor(Math.random() * 50),
+        winRate: (70 + Math.random() * 20).toFixed(1),
+        points: 1000 + Math.floor(Math.random() * 5000),
+        img: u.name ? u.name.split(' ').map((n: string) => n[0]).join('') : "?"
+      })).sort((a: any, b: any) => b.points - a.points));
+    };
+
+    loadUsers();
+    window.addEventListener('storage', loadUsers);
+    return () => window.removeEventListener('storage', loadUsers);
   }, []);
 
-  const filteredRankings = useMemo(() => {
-    let list = [...playersDatabase];
-    
-    if (userProfile) {
-      const userExists = list.some(p => p.name === userProfile.name);
-      if (!userExists) {
-        list.push({
-          id: 9999,
-          rank: 1,
-          name: userProfile.name,
-          country: userProfile.country,
-          state: userProfile.state,
-          points: 115000,
-          change: "up",
-          diff: 1,
-          matches: 842,
-          winRate: "88.4",
-          smashAcc: "94.2",
-          img: userProfile.name ? userProfile.name.split(' ').map((n: string) => n[0]).join('') : "??",
-          isUser: true,
-          smashId: userProfile.smashId
-        });
-      }
-    }
-
-    if (scope === 'country' && userProfile) {
-      list = list.filter(p => p.country === userProfile.country);
-    } else if (scope === 'state' && userProfile) {
-      list = list.filter(p => p.state === userProfile.state);
-    }
-
-    list.sort((a, b) => b.points - a.points);
-
-    return list.filter(p => 
+  const filtered = useMemo(() => {
+    return users.filter(p => 
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.smashId && p.smashId.toLowerCase().includes(searchQuery.toLowerCase()))
+      p.smashId?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery, scope, userProfile]);
-
-  const displayedRankings = useMemo(() => {
-    return filteredRankings.slice(0, visibleCount);
-  }, [filteredRankings, visibleCount]);
-
-  const handleSmashIt = () => {
-    setVisibleCount(filteredRankings.length);
-  };
+  }, [searchQuery, users]);
 
   const scopes = [
     { id: 'world', label: 'World', icon: Globe },
     { id: 'country', label: 'Country', icon: Flag },
     { id: 'state', label: 'State', icon: MapPin },
-    { id: 'regional', label: 'Regional', icon: Building },
   ];
 
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
-      
-      <main className="container px-6 py-16 space-y-16">
+      <main className="container px-6 py-16 space-y-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="space-y-4">
-            <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter">Live Rankings</h1>
-            <p className="text-slate-500 font-medium">Global intelligence database containing 100+ professional athletes.</p>
+            <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter italic">LADDER</h1>
+            <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest">Real-time Athlete Performance Metrics</p>
           </div>
           <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl">
             {scopes.map((s) => (
@@ -114,110 +70,54 @@ const Rankings = () => {
         </div>
 
         <div className="space-y-8">
-          <Tabs defaultValue="ms" onValueChange={setActiveCategory} className="w-full">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4 gap-4">
-              <TabsList className="bg-slate-100 p-1 rounded-2xl">
-                <TabsTrigger value="ms" className="rounded-xl px-6 font-black text-xs uppercase data-[state=active]:bg-[#0B1F3A] data-[state=active]:text-white">Men's Singles</TabsTrigger>
-                <TabsTrigger value="ws" className="rounded-xl px-6 font-black text-xs uppercase data-[state=active]:bg-[#0B1F3A] data-[state=active]:text-white">Women's Singles</TabsTrigger>
-              </TabsList>
-              
-              <div className="flex-1 max-w-xs relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-                <input 
-                  type="text" 
-                  placeholder="Search by name or ID (e.g. Smash#1)" 
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 h-10 text-xs font-bold focus:border-sky-500 outline-none transition-all"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <input 
+              placeholder="Search Athletes..." 
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 h-12 text-sm font-bold focus:border-sky-500 outline-none"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
 
-            <TabsContent value="ms" className="mt-8 space-y-12">
-              <div className="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm">
-                <Table>
-                  <TableHeader className="bg-slate-50">
-                    <TableRow className="hover:bg-transparent border-slate-100">
-                      <TableHead className="w-24 text-center font-black text-[10px] uppercase tracking-widest py-6">Rank</TableHead>
-                      <TableHead className="font-black text-[10px] uppercase tracking-widest">Player</TableHead>
-                      <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">Matches</TableHead>
-                      <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">Win %</TableHead>
-                      <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">Smash Acc.</TableHead>
-                      <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">Points</TableHead>
-                      <TableHead className="text-right font-black text-[10px] uppercase tracking-widest pr-12">Trend</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {displayedRankings.length > 0 ? displayedRankings.map((row, idx) => (
-                      <TableRow key={row.id} className={cn("border-slate-100 h-24", row.isUser && "bg-sky-50/30")}>
-                        <TableCell className="text-center">
-                          <div className={cn(
-                            "inline-flex items-center justify-center w-10 h-10 rounded-lg font-black text-sm text-white",
-                            idx === 0 ? "bg-amber-500" :
-                            idx === 1 ? "bg-slate-400" :
-                            idx === 2 ? "bg-orange-500" : "bg-slate-200 text-slate-500"
-                          )}>
-                            #{idx + 1}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-full bg-[#0B1F3A] flex items-center justify-center text-xs font-black text-sky-500">{row.img}</div>
-                            <div>
-                              <h4 className="font-black text-[#0B1F3A] text-base">
-                                {row.name} {row.isUser && <span className="ml-1 text-[8px] bg-sky-500 text-white px-1.5 py-0.5 rounded-full">YOU</span>}
-                              </h4>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{row.country} • {row.state} • {row.smashId}</p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center font-black text-lg">{row.matches}</TableCell>
-                        <TableCell className="text-center font-black text-green-500 text-lg">{row.winRate}%</TableCell>
-                        <TableCell className="text-center font-black text-sky-500 text-lg">{row.smashAcc}%</TableCell>
-                        <TableCell className="text-center font-black text-[#0B1F3A] text-xl">{row.points.toLocaleString()}</TableCell>
-                        <TableCell className="text-right pr-12">
-                          <div className="flex items-center justify-end gap-1">
-                            {row.change === 'up' && (
-                              <div className="flex items-center text-green-500 font-black">
-                                <ChevronUp className="h-4 w-4" /> <span className="text-xs">{row.diff || 1}</span>
-                              </div>
-                            )}
-                            {row.change === 'down' && (
-                              <div className="flex items-center text-red-500 font-black">
-                                <ChevronDown className="h-4 w-4" /> <span className="text-xs">{row.diff || 1}</span>
-                              </div>
-                            )}
-                            {row.change === 'none' && <Minus className="h-4 w-4 text-slate-300" />}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )) : (
-                      <TableRow>
-                        <TableCell colSpan={7} className="h-64 text-center">
-                          <div className="flex flex-col items-center justify-center space-y-4">
-                            <Target className="h-12 w-12 text-slate-200" />
-                            <p className="font-black text-[#0B1F3A] uppercase tracking-widest">Nothing In This Court</p>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-
-              {visibleCount < filteredRankings.length && (
-                <div className="flex flex-col items-center gap-4">
-                   <Button 
-                    onClick={handleSmashIt}
-                    className="rounded-full px-12 h-16 bg-[#0B1F3A] text-white font-black text-lg hover:bg-sky-500 transition-all shadow-2xl"
-                   >
-                     SMASH IT
-                   </Button>
-                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Explore all {filteredRankings.length} intelligence entries</p>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+          <div className="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm">
+            <Table>
+              <TableHeader className="bg-slate-50">
+                <TableRow className="border-slate-100">
+                  <TableHead className="w-24 text-center font-black text-[10px] uppercase py-6">Rank</TableHead>
+                  <TableHead className="font-black text-[10px] uppercase">Athlete</TableHead>
+                  <TableHead className="text-center font-black text-[10px] uppercase">Points</TableHead>
+                  <TableHead className="text-center font-black text-[10px] uppercase">Win %</TableHead>
+                  <TableHead className="text-right font-black text-[10px] uppercase pr-12">Trend</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.length > 0 ? filtered.map((row, idx) => (
+                  <TableRow key={idx} className="border-slate-100 h-20">
+                    <TableCell className="text-center font-black text-slate-400">#{idx + 1}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-full bg-[#0B1F3A] flex items-center justify-center text-[10px] font-black text-sky-500">{row.img}</div>
+                        <div>
+                          <p className="font-black text-[#0B1F3A] uppercase italic text-sm">{row.name}</p>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase">{row.smashId}</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center font-black text-lg text-[#0B1F3A]">{row.points}</TableCell>
+                    <TableCell className="text-center font-black text-green-500">{row.winRate}%</TableCell>
+                    <TableCell className="text-right pr-12">
+                       <Minus className="h-4 w-4 text-slate-200 ml-auto" />
+                    </TableCell>
+                  </TableRow>
+                )) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="h-40 text-center text-slate-300 font-black uppercase text-xs">No active athletes in this scope</TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </main>
     </div>
