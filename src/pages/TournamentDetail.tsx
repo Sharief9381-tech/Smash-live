@@ -6,24 +6,55 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   Trophy, Calendar, Users, MapPin, 
-  Play, ChevronLeft, Activity, Globe
+  Play, ChevronLeft, Activity, Globe, Loader2
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
 const TournamentDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [tournament, setTournament] = useState<any>(null);
+  const [participants, setParticipants] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadTourney = () => {
-      const tourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
-      const found = tourneys.find((t: any) => t.id === id);
-      setTournament(found);
+    const loadData = async () => {
+      try {
+        const { data: tourney, error: tError } = await supabase
+          .from('tournaments')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (tError) throw tError;
+        setTournament(tourney);
+
+        const { data: athletes, error: pError } = await supabase
+          .from('participants')
+          .select('*')
+          .eq('tournament_id', id);
+
+        if (pError) throw pError;
+        setParticipants(athletes || []);
+
+      } catch (err) {
+        console.error("Data fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
     };
-    loadTourney();
+    if (id) loadData();
   }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Loader2 className="h-10 w-10 text-sky-500 animate-spin" />
+      </div>
+    );
+  }
 
   if (!tournament) {
     return (
@@ -33,7 +64,7 @@ const TournamentDetail = () => {
            <Trophy className="h-16 w-16 text-slate-200" />
            <div className="space-y-2">
              <h2 className="text-3xl font-black text-[#0B1F3A] uppercase italic">Circuit Intelligence Lost</h2>
-             <p className="text-slate-500 font-medium max-w-sm">This tournament is no longer active in the global registry or has been moved.</p>
+             <p className="text-slate-500 font-medium max-w-sm">This tournament is no longer active in the global registry.</p>
            </div>
            <Button onClick={() => navigate('/tournaments')} className="bg-[#0B1F3A] text-white px-10 h-14 rounded-2xl font-black uppercase tracking-widest text-[10px]">Return to Circuit</Button>
         </main>
@@ -47,7 +78,7 @@ const TournamentDetail = () => {
       
       <div className="relative h-[400px] w-full overflow-hidden bg-[#0B1F3A]">
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0B1F3A] via-[#0B1F3A]/60 to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0B1F3A] via-[#0B1F3A]/40 to-transparent z-10" />
         
         <img 
           src="https://images.unsplash.com/photo-1626224580175-340ad0e3a242?q=80&w=2070&auto=format&fit=crop" 
@@ -84,9 +115,9 @@ const TournamentDetail = () => {
             </div>
             
             <div className="flex flex-wrap items-center gap-8 text-xs text-white/70 font-black uppercase tracking-[0.2em]">
-              <span className="flex items-center gap-2.5 bg-white/5 px-4 py-2 rounded-xl border border-white/10"><Calendar className="h-4 w-4 text-sky-500" /> {tournament.startDate}</span>
+              <span className="flex items-center gap-2.5 bg-white/5 px-4 py-2 rounded-xl border border-white/10"><Calendar className="h-4 w-4 text-sky-500" /> {tournament.start_date}</span>
               <span className="flex items-center gap-2.5 bg-white/5 px-4 py-2 rounded-xl border border-white/10"><MapPin className="h-4 w-4 text-sky-500" /> {tournament.city}</span>
-              <span className="flex items-center gap-2.5 bg-white/5 px-4 py-2 rounded-xl border border-white/10"><Users className="h-4 w-4 text-sky-500" /> {tournament.participants?.length || 0} Participants</span>
+              <span className="flex items-center gap-2.5 bg-white/5 px-4 py-2 rounded-xl border border-white/10"><Users className="h-4 w-4 text-sky-500" /> {participants.length} Participants</span>
             </div>
           </div>
         </div>
@@ -101,12 +132,12 @@ const TournamentDetail = () => {
                      <Activity className="h-5 w-5 text-sky-500" />
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
-                    {tournament.participants?.length > 0 ? tournament.participants.map((p: any, idx: number) => (
+                    {participants.length > 0 ? participants.map((p: any, idx: number) => (
                       <div key={idx} className="p-6 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-4">
                          <div className="h-10 w-10 rounded-full bg-[#0B1F3A] flex items-center justify-center text-sky-400 font-black text-xs uppercase">{p.name[0]}</div>
                          <div>
                             <p className="font-black text-[#0B1F3A] uppercase text-sm">{p.name}</p>
-                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{p.smashId}</p>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{p.smash_id}</p>
                          </div>
                       </div>
                     )) : (
@@ -128,7 +159,7 @@ const TournamentDetail = () => {
                      </div>
                      <div className="flex justify-between items-center">
                         <span className="text-sm font-bold text-[#0B1F3A]">System</span>
-                        <span className="text-[10px] font-black uppercase text-slate-400">Round Based Elimination</span>
+                        <span className="text-[10px] font-black uppercase text-slate-400">Database Synchronized</span>
                      </div>
                   </div>
                </div>
@@ -143,7 +174,7 @@ const TournamentDetail = () => {
                     onClick={() => {
                       const link = `${window.location.origin}/register/${tournament.slug}`;
                       navigator.clipboard.writeText(link);
-                      alert("Registration Link Copied!");
+                      showSuccess("Entry Link Copied!");
                     }}
                     className="w-full h-14 bg-sky-500 hover:bg-sky-400 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all"
                   >

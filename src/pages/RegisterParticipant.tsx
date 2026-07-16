@@ -7,6 +7,7 @@ import { Trophy, User, ArrowRight, Zap, Check, Loader2, Phone, Fingerprint, Aler
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { supabase } from '@/lib/supabase';
 import { showSuccess, showError } from '@/utils/toast';
 
 const RegisterParticipant = () => {
@@ -24,21 +25,27 @@ const RegisterParticipant = () => {
   });
 
   useEffect(() => {
-    const checkTournament = () => {
-      const tourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
-      const found = tourneys.find((t: any) => t.slug === slug);
-      if (found) {
-        setTournament(found);
+    const fetchTournament = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('tournaments')
+          .select('*')
+          .eq('slug', slug)
+          .single();
+
+        if (error) throw error;
+        setTournament(data);
+      } catch (err) {
+        console.error("Tournament fetch error:", err);
+      } finally {
+        setIsInitializing(false);
       }
-      setIsInitializing(false);
     };
 
-    // Small timeout to simulate network and ensure storage sync
-    const timer = setTimeout(checkTournament, 800);
-    return () => clearTimeout(timer);
+    if (slug) fetchTournament();
   }, [slug]);
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!formData.name || !formData.phone || !formData.smashId) {
       showError("Please complete all registration fields.");
       return;
@@ -46,37 +53,35 @@ const RegisterParticipant = () => {
     
     setIsLoading(true);
     
-    setTimeout(() => {
-      const tourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
-      const updatedTourneys = tourneys.map((t: any) => {
-        if (t.slug === slug) {
-          const participants = t.participants || [];
-          // Simple validation: check if Smash ID already exists in this tourney
-          if (participants.some((p: any) => p.smashId === formData.smashId)) {
-            setIsLoading(false);
-            showError("This Smash ID is already registered for this event.");
-            return t;
-          }
-          return { 
-            ...t, 
-            participants: [...participants, { ...formData, id: Date.now() }] 
-          };
-        }
-        return t;
-      });
-      
-      localStorage.setItem('active_studio_tournaments', JSON.stringify(updatedTourneys));
-      setIsLoading(false);
+    try {
+      // First, we check if this athlete is already in the participants list for this tournament
+      // In a more complex app, we'd use a many-to-many junction table. 
+      // For this prototype, we store them in a 'participants' table linked by tournament_id.
+      const { error } = await supabase
+        .from('participants')
+        .insert([{
+          tournament_id: tournament.id,
+          name: formData.name,
+          phone: formData.phone,
+          smash_id: formData.smashId
+        }]);
+
+      if (error) throw error;
+
       setIsSuccess(true);
-      showSuccess("Athlete Dossier submitted successfully!");
-    }, 1200);
+      showSuccess("Athlete Entry Synchronized!");
+    } catch (err: any) {
+      showError(err.message || "Failed to register. Ensure the 'participants' table exists.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (isInitializing) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center gap-4">
         <Loader2 className="h-10 w-10 text-sky-500 animate-spin" />
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Validating Tournament Protocol...</p>
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Syncing Circuit Protocol...</p>
       </div>
     );
   }
@@ -91,22 +96,14 @@ const RegisterParticipant = () => {
           <div className="space-y-2">
             <h1 className="text-3xl font-black text-[#071D49] tracking-tighter uppercase italic">Circuit Not Found</h1>
             <p className="text-slate-500 font-medium leading-relaxed">
-              We couldn't find a tournament with the ID <span className="font-bold text-[#071D49]">"{slug}"</span> in your browser storage.
+              This tournament slug does not exist in the database.
             </p>
           </div>
-          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-left space-y-3">
-             <p className="text-[10px] font-black text-[#071D49] uppercase tracking-widest">How to fix this:</p>
-             <ul className="text-xs text-slate-500 space-y-2">
-                <li className="flex gap-2"><span>1.</span> Go to <strong>Smashed</strong> dashboard.</li>
-                <li className="flex gap-2"><span>2.</span> Create a tournament if none exist.</li>
-                <li className="flex gap-2"><span>3.</span> Use the <strong>Copy Link</strong> button on the card.</li>
-             </ul>
-          </div>
           <Button 
-            onClick={() => navigate('/smashed')} 
+            onClick={() => navigate('/')} 
             className="w-full h-14 bg-[#071D49] text-white font-black rounded-2xl shadow-xl hover:bg-sky-600 transition-all"
           >
-            GO TO DASHBOARD
+            RETURN HOME
           </Button>
         </motion.div>
       </div>
@@ -181,7 +178,7 @@ const RegisterParticipant = () => {
 
               <Button 
                 onClick={handleRegister}
-                disabled={isLoading || !formData.name}
+                disabled={isLoading}
                 className="w-full h-16 bg-[#071D49] text-white font-black text-lg rounded-[22px] shadow-xl hover:bg-sky-500 transition-all group"
               >
                 {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : "JOIN CIRCUIT"}
