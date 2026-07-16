@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, ShieldCheck, Globe, Trophy, Loader2, Lock, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Zap, ShieldCheck, Globe, Trophy, Loader2, Lock, ArrowLeft, ArrowRight, RefreshCw, Trash2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,6 +42,14 @@ const Login = () => {
     }
     return () => clearInterval(interval);
   }, [step, timer]);
+
+  const handleResetData = () => {
+    if (confirm("This will clear all local login sessions and registered athlete data. Continue?")) {
+      localStorage.clear();
+      showSuccess("All local data cleared. System reset.");
+      window.location.reload();
+    }
+  };
 
   const handleSendOtp = () => {
     if (phone.length < 10) {
@@ -105,13 +113,11 @@ const Login = () => {
         const existingUser = users.find((u: any) => u.phone === fullPhone);
 
         if (activeTab === 'login') {
-          // LOGIN: User definitely exists here because of the check in handleSendOtp
           localStorage.setItem('isLoggedIn', 'true');
           localStorage.setItem('userProfile', JSON.stringify(existingUser));
           showSuccess("Welcome back to the Court!");
           navigate('/court');
         } else {
-          // REGISTER: Create the preliminary profile
           const newAthlete = {
             phone: fullPhone,
             name: regData.name,
@@ -302,6 +308,15 @@ const Login = () => {
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+
+        <div className="text-center">
+           <button 
+             onClick={handleResetData}
+             className="inline-flex items-center gap-2 text-[10px] font-black text-slate-300 uppercase tracking-widest hover:text-red-500 transition-colors"
+           >
+             <Trash2 className="h-3 w-3" /> Reset App Data
+           </button>
         </div>
       </div>
     </div>

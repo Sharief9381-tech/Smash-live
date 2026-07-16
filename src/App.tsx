@@ -42,17 +42,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const AuthCheck = ({ children }: { children: React.ReactNode }) => {
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-  
-  if (isLoggedIn) {
-    if (!userProfile.onboardingComplete) return <Navigate to="/onboarding" replace />;
-    return <Navigate to="/court" replace />;
-  }
-  return <>{children}</>;
-};
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -60,8 +49,8 @@ const App = () => (
       <Sonner position="top-center" />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<AuthCheck><Index /></AuthCheck>} />
-          <Route path="/login" element={<AuthCheck><Login /></AuthCheck>} />
+          <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
           <Route path="/court" element={<ProtectedRoute><Court /></ProtectedRoute>} />
           <Route path="/dashboard" element={<Navigate to="/court" replace />} />
