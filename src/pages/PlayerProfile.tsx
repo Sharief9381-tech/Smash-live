@@ -15,21 +15,12 @@ import { ShieldCheck, Zap, Activity, Target } from 'lucide-react';
 
 const PlayerProfile = () => {
   const [activeTab, setActiveTab] = useState('analytics');
-  const [profileName, setProfileName] = useState("Viktor Axelsen");
-
-  useEffect(() => {
-    const saved = localStorage.getItem('userProfile');
-    if (saved) {
-      setProfileName(JSON.parse(saved).name);
-    }
-  }, []);
 
   return (
-    <div className="min-h-screen bg-white text-[#0B1F3A] selection:bg-sky-500/30">
+    <div className="min-h-screen bg-slate-50 text-[#0B1F3A] selection:bg-sky-500/30">
       <Navbar />
       
-      <main className="container max-w-7xl px-6 py-16 space-y-16">
-        {/* Dossier Header */}
+      <main className="container max-w-7xl px-6 py-12 space-y-12">
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <div className="h-1.5 w-16 bg-sky-500 rounded-full" />
@@ -38,11 +29,9 @@ const PlayerProfile = () => {
           <ProfileHero />
         </div>
 
-        {/* Tab Navigation */}
         <ProfileNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
-        {/* Dynamic Section Container */}
-        <div className="pt-8 min-h-[600px]">
+        <div className="pt-4 min-h-[600px]">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -52,42 +41,40 @@ const PlayerProfile = () => {
               transition={{ duration: 0.3 }}
               className="space-y-12"
             >
-              {/* Analytics Tab (Default) */}
               {activeTab === 'analytics' && (
                 <div className="space-y-12">
                   <section className="space-y-10">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between px-2">
                       <div className="space-y-1">
                         <h2 className="text-3xl font-black tracking-tighter uppercase italic">Performance Core</h2>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Real-time synchronized career metrics</p>
                       </div>
                       <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-sky-50 text-sky-600 border border-sky-100">
                         <ShieldCheck className="h-4 w-4" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">BWF Verified Standings</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest">System Verified</span>
                       </div>
                     </div>
                     <PerformanceStats />
                   </section>
                   <div className="space-y-8">
-                    <h2 className="text-3xl font-black tracking-tighter uppercase">Strategic Analytics</h2>
+                    <h2 className="text-3xl font-black tracking-tighter uppercase px-2 italic">Strategic Analytics</h2>
                     <AnalyticsSection />
                   </div>
                 </div>
               )}
 
-              {/* Detailed Stats Tab */}
               {activeTab === 'stats' && (
                 <div className="space-y-12">
-                  <h2 className="text-3xl font-black tracking-tighter uppercase">Detailed Intelligence</h2>
+                  <h2 className="text-3xl font-black tracking-tighter uppercase italic px-2">Detailed Intelligence</h2>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {[
-                      { label: "Smash Accuracy", val: "94.2%", icon: Target, desc: "Landing within 15cm of sidelines" },
-                      { label: "Net Kill Ratio", val: "78.4%", icon: Zap, desc: "Successful finishes from front court" },
-                      { label: "Fatigue Index", val: "12%", icon: Activity, desc: "Performance drop after 40 mins" },
-                      { label: "Rally Endurance", val: "24.2s", icon: Activity, desc: "Average duration of point winning rallies" },
-                      { label: "Service Error Rate", val: "1.2%", icon: Target, desc: "Faults per 100 service points" },
+                      { label: "Smash Accuracy", val: "0%", icon: Target, desc: "Landing within 15cm of sidelines" },
+                      { label: "Net Kill Ratio", val: "0%", icon: Zap, desc: "Successful finishes from front court" },
+                      { label: "Fatigue Index", val: "--", icon: Activity, desc: "Performance drop after 40 mins" },
+                      { label: "Rally Endurance", val: "0s", icon: Activity, desc: "Average duration of point winning rallies" },
+                      { label: "Service Error Rate", val: "0%", icon: Target, desc: "Faults per 100 service points" },
                     ].map((s, i) => (
-                      <div key={i} className="glass-panel p-8 rounded-[2.5rem] border-slate-100 hover:border-sky-500/30 transition-all">
+                      <div key={i} className="glass-panel p-8 rounded-[2.5rem] border-slate-100 bg-white shadow-sm">
                         <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center text-sky-500 mb-6">
                           <s.icon className="h-6 w-6" />
                         </div>
@@ -100,48 +87,22 @@ const PlayerProfile = () => {
                 </div>
               )}
 
-              {/* Rankings Tab */}
-              {activeTab === 'rankings' && (
-                <div className="space-y-12">
-                  <h2 className="text-3xl font-black tracking-tighter uppercase">Global Standing</h2>
-                  <RankingSection />
-                </div>
-              )}
-
-              {/* History Tab */}
-              {activeTab === 'history' && (
-                <div className="space-y-12">
-                  <h2 className="text-3xl font-black tracking-tighter uppercase">Circuit History</h2>
-                  <TournamentSection />
-                </div>
-              )}
-
-              {/* Teams Tab */}
+              {activeTab === 'rankings' && <RankingSection />}
+              {activeTab === 'history' && <TournamentSection />}
               {activeTab === 'teams' && <TeamSection />}
-
-              {/* Achievements Tab */}
-              {activeTab === 'achievements' && (
-                <div className="space-y-16">
-                  <div className="text-center space-y-4">
-                    <h2 className="text-5xl font-black tracking-tighter uppercase italic">Hall of Fame</h2>
-                    <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.3em]">Global career milestones and verified badges</p>
-                  </div>
-                  <AchievementSection />
-                </div>
-              )}
+              {activeTab === 'achievements' && <AchievementSection />}
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* Bottom CTA */}
         <section className="bg-[#0B1F3A] p-20 rounded-[4.5rem] flex flex-col md:flex-row items-center justify-between gap-12 relative overflow-hidden shadow-2xl">
           <div className="absolute -right-20 -bottom-20 opacity-10 pointer-events-none">
             <Zap className="h-[400px] w-[400px] text-sky-400" />
           </div>
           <div className="space-y-6 max-w-2xl relative z-10">
-            <h2 className="text-5xl font-black text-white tracking-tighter leading-tight italic">ELEVATE YOUR <br /> INTELLIGENCE.</h2>
-            <p className="text-white/60 font-medium text-lg">SmashLive Pro gives you access to biomechanical data, court coverage heatmaps, and opponent simulation AI.</p>
-            <button className="bg-sky-500 text-white rounded-full font-black px-12 h-16 text-lg hover:bg-sky-400 shadow-xl">
+            <h2 className="text-5xl font-black text-white tracking-tighter leading-tight italic uppercase">Elevate Your <br /> Intelligence.</h2>
+            <p className="text-white/60 font-medium text-lg leading-relaxed">SmashLive Pro gives you access to biomechanical data, court coverage heatmaps, and opponent simulation AI.</p>
+            <button className="bg-sky-500 text-white rounded-full font-black px-12 h-16 text-lg hover:bg-sky-400 shadow-xl transition-all">
               GO PRO NOW
             </button>
           </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { TrendingUp, PieChart as PieIcon, BarChart3, Activity } from 'lucide-react';
+import { Activity } from 'lucide-react';
 
 const AnalyticsSection = () => {
   return (
