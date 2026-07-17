@@ -23,9 +23,8 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const notifications = [
-    { id: 1, text: "Viktor Axelsen just won Set 1 (21-19)", time: "2m ago", unread: true },
-    { id: 2, text: "Tournament 'BWF Finals' is now LIVE", time: "15m ago", unread: true },
-    { id: 3, text: "Match Alert: Ginting vs Christie starting soon", time: "1h ago", unread: false },
+    { id: 1, text: "System Pulse: New circuit active in Mumbai", time: "2m ago", unread: true },
+    { id: 2, text: "Athlete entry verified for Open Circuit", time: "15m ago", unread: true },
   ];
 
   useEffect(() => {
@@ -38,13 +37,19 @@ const Navbar = () => {
       const saved = localStorage.getItem('userProfile');
       if (saved) {
         const parsed = JSON.parse(saved);
-        setUserName(parsed.name || "New Athlete");
+        setUserName(parsed.name || "Athlete");
         setUserImage(parsed.image || "");
       }
     };
     
     checkAuth();
-    return () => window.removeEventListener('scroll', handleScroll);
+    // Listen for storage events to update navbar state (login/logout)
+    window.addEventListener('storage', checkAuth);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('storage', checkAuth);
+    };
   }, [location.pathname]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -57,11 +62,11 @@ const Navbar = () => {
   };
 
   const navItems = [
-    { name: isLoggedIn ? 'COURT' : 'Home', path: isLoggedIn ? '/court' : '/' },
+    { name: isLoggedIn ? 'DASHBOARD' : 'Home', path: isLoggedIn ? '/dashboard' : '/' },
     { name: 'Live', path: '/live-match/active' },
     { name: 'Tournaments', path: '/tournaments' },
     { name: 'Studio', path: '/broadcast/center' },
-    { name: 'Rankings', path: '/rankings' },
+    { name: 'Ladder', path: '/rankings' },
     { name: 'News', path: '/news' },
     { name: 'Smashed', path: '/smashed' },
   ];
@@ -161,8 +166,8 @@ const Navbar = () => {
                 <button className="text-[10px] font-bold text-sky-500 uppercase">Mark All Read</button>
               </div>
               <div className="max-h-96 overflow-y-auto">
-                {notifications.map((n) => (
-                  <div key={n.id} className={cn("p-4 flex gap-4 hover:bg-slate-50 transition-colors cursor-pointer", n.unread && "bg-sky-50/30")}>
+                {notifications.map((n, i) => (
+                  <div key={i} className="p-4 flex gap-4 hover:bg-slate-50 transition-colors cursor-pointer">
                     <div className="h-8 w-8 rounded-full bg-sky-500/10 flex items-center justify-center text-sky-500 shrink-0">
                       <Zap className="h-4 w-4 fill-current" />
                     </div>
@@ -240,7 +245,7 @@ const Navbar = () => {
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Network Status</p>
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-xs font-bold text-[#0B1F3A]">All Servers Operational</span>
+                  <span className="text-xs font-bold text-[#0B1F3A]">All Nodes Active</span>
                 </div>
               </div>
             </motion.div>

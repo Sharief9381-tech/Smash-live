@@ -8,7 +8,7 @@ export const AuthService = {
   async getProfileByMobile(mobile: string) {
     let profile = null;
 
-    // 1. Try Cloud Database
+    // 1. Try Cloud Database first
     if (isConfigured) {
       try {
         const { data, error } = await supabase
@@ -17,21 +17,23 @@ export const AuthService = {
           .eq('mobile', mobile)
           .single();
         
-        if (!error) profile = data;
+        if (!error && data) {
+          profile = data;
+        }
       } catch (err) {
-        console.warn("Cloud sync unavailable.");
+        console.warn("Cloud sync unavailable or table missing.");
       }
     }
 
-    // 2. Local Storage check
+    // 2. Check local registry if cloud failed or row not found
     if (!profile) {
       const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
       profile = registered.find((u: any) => u.mobile === mobile || u.phone === mobile);
     }
 
-    // 3. AUTO-CREATE FALLBACK (Prevents getting stuck)
-    if (!profile && !isConfigured) {
-      console.log("Athlete not found, initializing auto-dossier for local session.");
+    // 3. SEAMLESS FALLBACK: If athlete still not found, initialize a temporary dossier
+    // This ensures the login always proceeds to the next step (onboarding)
+    if (!profile) {
       profile = {
         name: "New Athlete",
         mobile: mobile,
@@ -39,7 +41,7 @@ export const AuthService = {
         state: "Maharashtra",
         gender: "male",
         smashId: 'SMASH#' + Math.floor(1000 + Math.random() * 9000),
-        onboardingComplete: false // This will trigger the onboarding flow
+        onboardingComplete: false 
       };
     }
 
@@ -53,21 +55,29 @@ export const AuthService = {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .insert([{ ...profileData, country: 'India', onboarding_complete: true }])
+          .upsert([{ 
+            ...profileData, 
+            country: 'India', 
+            onboarding_complete: true,
+            updated_at: new Date().toISOString()
+          }], { onConflict: 'mobile' })
           .select().single();
+        
         if (!error) savedProfile = data;
       } catch (err) {
-        console.warn("Cloud registration failed.");
+        console.warn("Cloud registration sync failed.");
       }
     }
 
+    // Return the cloud profile or create a local copy
     const mockProfile = savedProfile || { 
       ...profileData, 
-      id: 'local_' + Math.random().toString(36).substr(2, 9),
+      id: 'athlete_' + Date.now(),
       onboardingComplete: true,
       smashId: 'SMASH#' + Math.floor(1000 + Math.random() * 9000)
     };
     
+    // Sync to local registry
     const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
     const exists = registered.findIndex((u: any) => u.mobile === profileData.mobile);
     if (exists > -1) registered[exists] = mockProfile;
@@ -81,9 +91,13 @@ export const AuthService = {
     if (!profile) return;
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('userProfile', JSON.stringify(profile));
+    // Dispatch event to update navbar instantly
+    window.dispatchEvent(new Event('storage'));
   },
 
   logout() {
-    localStorage.clear();
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('userProfile');
+    window.dispatchEvent(new Event('storage'));
   }
 };
