@@ -28,12 +28,9 @@ const Login = () => {
       showError("Please enter a valid 10-digit mobile number");
       return;
     }
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setStep('otp');
-      showSuccess("Security code [123456] sent successfully.");
-    }, 800);
+    // Artificial delay removed for speed
+    setStep('otp');
+    showSuccess("Security code [123456] sent successfully.");
   };
 
   const handleVerify = async () => {
@@ -56,9 +53,7 @@ const Login = () => {
       } else {
         const profile = await AuthService.getProfileByMobile(phone);
         AuthService.setLocalSession(profile);
-        showSuccess("Identity Verified. Welcome!");
         
-        // Redirection logic: Priority to Dashboard if onboarding is done
         if (profile.onboardingComplete) {
           navigate('/dashboard', { replace: true });
         } else {
@@ -95,7 +90,7 @@ const Login = () => {
 
   useEffect(() => {
     if (step === 'otp') {
-      setTimeout(() => otpRefs.current[0]?.focus(), 100);
+      setTimeout(() => otpRefs.current[0]?.focus(), 10);
     }
   }, [step]);
 

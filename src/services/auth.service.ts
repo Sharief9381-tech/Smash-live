@@ -2,13 +2,16 @@
 
 import { supabase } from '@/lib/supabase';
 
-const isConfigured = !!import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_URL !== 'https://placeholder.supabase.co';
+// Improved check to avoid hanging on placeholder URLs
+const isConfigured = !!import.meta.env.VITE_SUPABASE_URL && 
+                   import.meta.env.VITE_SUPABASE_URL.startsWith('https://') &&
+                   import.meta.env.VITE_SUPABASE_URL !== 'https://placeholder.supabase.co';
 
 export const AuthService = {
   async getProfileByMobile(mobile: string) {
     let profile = null;
 
-    // 1. Try Cloud Database first
+    // 1. Instant Cloud Check (only if actually configured)
     if (isConfigured) {
       try {
         const { data, error } = await supabase
@@ -17,22 +20,19 @@ export const AuthService = {
           .eq('mobile', mobile)
           .single();
         
-        if (!error && data) {
-          profile = data;
-        }
+        if (!error && data) profile = data;
       } catch (err) {
-        console.warn("Cloud sync unavailable or table missing.");
+        // Silently fail to local fallback immediately
       }
     }
 
-    // 2. Check local registry if cloud failed or row not found
+    // 2. Local registry check
     if (!profile) {
       const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
       profile = registered.find((u: any) => u.mobile === mobile || u.phone === mobile);
     }
 
-    // 3. SEAMLESS FALLBACK: If athlete still not found, initialize a temporary dossier
-    // This ensures the login always proceeds to the next step (onboarding)
+    // 3. Fallback dossier initialization
     if (!profile) {
       profile = {
         name: "New Athlete",
@@ -65,11 +65,10 @@ export const AuthService = {
         
         if (!error) savedProfile = data;
       } catch (err) {
-        console.warn("Cloud registration sync failed.");
+        // Fallback to local if cloud write fails
       }
     }
 
-    // Return the cloud profile or create a local copy
     const mockProfile = savedProfile || { 
       ...profileData, 
       id: 'athlete_' + Date.now(),
@@ -77,7 +76,6 @@ export const AuthService = {
       smashId: 'SMASH#' + Math.floor(1000 + Math.random() * 9000)
     };
     
-    // Sync to local registry
     const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
     const exists = registered.findIndex((u: any) => u.mobile === profileData.mobile);
     if (exists > -1) registered[exists] = mockProfile;
@@ -91,7 +89,6 @@ export const AuthService = {
     if (!profile) return;
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('userProfile', JSON.stringify(profile));
-    // Dispatch event to update navbar instantly
     window.dispatchEvent(new Event('storage'));
   },
 

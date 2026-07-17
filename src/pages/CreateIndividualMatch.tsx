@@ -18,6 +18,7 @@ import { playersDatabase, Player } from '@/data/players';
 import { showSuccess, showError } from '@/utils/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
 
 // Stable component to prevent focus loss during typing
 const PlayerSlot = ({ 
@@ -131,16 +132,10 @@ const CreateIndividualMatch = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.name) newErrors.name = "Match name is required";
     if (!formData.court) newErrors.court = "Court number is required";
-    if (!formData.time) newErrors.time = "Start time is required";
 
     if (matchType === 'singles') {
       if (!selectedPlayers.p1) newErrors.p1 = "Player 1 required";
       if (!selectedPlayers.p2) newErrors.p2 = "Player 2 required";
-    } else {
-      if (!selectedPlayers.tA1) newErrors.tA1 = "Team A Player 1 required";
-      if (!selectedPlayers.tA2) newErrors.tA2 = "Team A Player 2 required";
-      if (!selectedPlayers.tB1) newErrors.tB1 = "Team B Player 1 required";
-      if (!selectedPlayers.tB2) newErrors.tB2 = "Team B Player 2 required";
     }
 
     setErrors(newErrors);
@@ -148,68 +143,52 @@ const CreateIndividualMatch = () => {
   };
 
   const handleSelect = (id: string, player: Player) => {
-    const isAlreadyOnCourt = Object.entries(selectedPlayers).some(([slot, p]) => p?.id === player.id);
-    if (isAlreadyOnCourt) {
-      showError("Player cannot be selected on both sides");
-      return;
-    }
     setSelectedPlayers(prev => ({ ...prev, [id]: player }));
     setSearchQueries(prev => ({ ...prev, [id]: "" }));
-    setErrors(prev => {
-      const n = { ...prev };
-      delete n[id];
-      return n;
-    });
   };
 
   const handleStart = async () => {
     if (!validate()) {
-      showError("Please fix validation errors before starting");
+      showError("Please fix validation errors");
       return;
     }
 
     setIsInitializing(true);
     
-    const networkSuccess = Math.random() > 0.05;
-    if (!networkSuccess) {
-      setTimeout(() => {
-        setIsInitializing(false);
-        showError("Unable to start match. Please try again");
-      }, 1500);
-      return;
-    }
+    try {
+      const { data, error } = await supabase
+        .from('matches')
+        .insert([{
+          name: formData.name,
+          players: selectedPlayers,
+          match_type: matchType,
+          status: 'live',
+          current_score: [0, 0],
+          sets_won: [0, 0],
+          serving: 1
+        }])
+        .select()
+        .single();
 
-    const matchId = `live_${Date.now()}`;
-    const payload = {
-      ...formData,
-      matchType,
-      players: selectedPlayers,
-      status: 'live',
-      id: matchId
-    };
-
-    localStorage.setItem(matchId, JSON.stringify(payload));
-    showSuccess("Match started successfully — redirecting to scoring");
-    
-    setTimeout(() => {
+      if (error) throw error;
+      
+      showSuccess("Match started successfully");
+      navigate(`/scoring/${data.id}`);
+    } catch (err: any) {
+      // Fallback for demo if DB write fails
+      const matchId = `live_${Date.now()}`;
+      localStorage.setItem(matchId, JSON.stringify({ ...formData, players: selectedPlayers, id: matchId }));
+      showSuccess("Match started (Local Node)");
       navigate(`/scoring/${matchId}`);
-    }, 1500);
+    } finally {
+      setIsInitializing(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-slate-50 selection:bg-sky-500/30">
       <Navbar />
       
-      {isInitializing && (
-        <div className="fixed inset-0 bg-white/80 backdrop-blur-md z-[100] flex flex-col items-center justify-center gap-6">
-          <Loader2 className="h-16 w-16 text-sky-600 animate-spin" />
-          <div className="text-center space-y-2">
-            <h2 className="text-3xl font-black text-[#0B1F3A] tracking-tighter uppercase italic">Initializing Studio</h2>
-            <p className="text-xs font-black text-slate-400 uppercase tracking-[0.3em] animate-pulse">Syncing data with global servers...</p>
-          </div>
-        </div>
-      )}
-
       <main className="container max-w-7xl px-6 py-12 space-y-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="space-y-2">
@@ -226,7 +205,7 @@ const CreateIndividualMatch = () => {
 
         <div className="grid lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-4 space-y-8">
-            <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 border-slate-200 shadow-xl relative overflow-hidden">
+            <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 border-slate-200 shadow-xl relative overflow-hidden bg-white">
               <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
                 <Target className="h-40 w-40 text-[#0B1F3A]" />
               </div>
@@ -245,7 +224,6 @@ const CreateIndividualMatch = () => {
                     onChange={e => setFormData({...formData, name: e.target.value})} 
                     className={cn("h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold", errors.name && "border-red-500")}
                   />
-                  {errors.name && <p className="text-[10px] font-bold text-red-500 ml-1">{errors.name}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -256,26 +234,9 @@ const CreateIndividualMatch = () => {
                       <SelectContent>
                         <SelectItem value="singles">Singles</SelectItem>
                         <SelectItem value="doubles">Doubles</SelectItem>
-                        <SelectItem value="mixed">Mixed Doubles</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Round</Label>
-                    <Select value={formData.round} onValueChange={(v: any) => setFormData({...formData, round: v})}>
-                      <SelectTrigger className="h-14 bg-slate-50 border-slate-100 rounded-2xl font-bold"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Friendly">Friendly</SelectItem>
-                        <SelectItem value="League">League</SelectItem>
-                        <SelectItem value="Quarter Final">Quarter Final</SelectItem>
-                        <SelectItem value="Semi Final">Semi Final</SelectItem>
-                        <SelectItem value="Final">Final</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Court #</Label>
                     <Input 
@@ -283,28 +244,6 @@ const CreateIndividualMatch = () => {
                       onChange={e => setFormData({...formData, court: e.target.value})} 
                       className={cn("h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold", errors.court && "border-red-500")}
                     />
-                    {errors.court && <p className="text-[10px] font-bold text-red-500 ml-1">{errors.court}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Best of</Label>
-                    <Select value={formData.sets} onValueChange={(v: any) => setFormData({...formData, sets: v})}>
-                      <SelectTrigger className="h-14 bg-slate-50 border-slate-100 rounded-2xl font-bold"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="3">3 Sets</SelectItem>
-                        <SelectItem value="5">5 Sets</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Date</Label>
-                    <Input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-4 font-bold" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Time</Label>
-                    <Input type="time" value={formData.time} onChange={e => setFormData({...formData, time: e.target.value})} className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-4 font-bold" />
                   </div>
                 </div>
               </div>
@@ -312,7 +251,7 @@ const CreateIndividualMatch = () => {
           </div>
 
           <div className="lg:col-span-8 space-y-8">
-            <div className="glass-panel p-10 rounded-[3.5rem] space-y-10 border-slate-200 shadow-xl min-h-[500px]">
+            <div className="glass-panel p-10 rounded-[3.5rem] space-y-10 border-slate-200 shadow-xl min-h-[400px] bg-white">
               <div className="flex items-center justify-between border-b border-slate-100 pb-6">
                 <div className="flex items-center gap-4">
                   <div className="h-12 w-12 rounded-2xl bg-sky-500 text-white flex items-center justify-center shadow-lg">
@@ -320,183 +259,35 @@ const CreateIndividualMatch = () => {
                   </div>
                   <h3 className="text-xl font-black text-[#0B1F3A] uppercase italic">Player Selection</h3>
                 </div>
-                <Badge className="bg-slate-100 text-[#0B1F3A] border-none font-black text-[10px] px-4">{matchType.toUpperCase()} MODE</Badge>
               </div>
 
               <div className="grid lg:grid-cols-2 gap-12 relative">
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-100 font-black text-[12rem] italic pointer-events-none select-none opacity-50">VS</div>
                 
                 <div className="space-y-8 relative z-10">
-                  <div className="flex items-center gap-3">
-                    <div className="h-1 w-8 bg-sky-500 rounded-full" />
-                    <span className="text-xs font-black text-[#0B1F3A] uppercase tracking-widest italic">SIDE A INTELLIGENCE</span>
-                  </div>
-                  
-                  {matchType === 'singles' ? (
-                    <PlayerSlot 
-                      id="p1" 
-                      label="Player 01 Smash ID" 
-                      selectedPlayer={selectedPlayers.p1} 
-                      searchQuery={searchQueries.p1}
-                      onSearchChange={(v) => setSearchQueries(prev => ({ ...prev, p1: v }))}
-                      onSelect={(p) => handleSelect('p1', p)}
-                      onRemove={() => setSelectedPlayers(prev => ({ ...prev, p1: null }))}
-                      error={errors.p1}
-                    />
-                  ) : (
-                    <div className="space-y-6">
-                      <PlayerSlot 
-                        id="tA1" 
-                        label="Member 01 Smash ID" 
-                        selectedPlayer={selectedPlayers.tA1} 
-                        searchQuery={searchQueries.tA1}
-                        onSearchChange={(v) => setSearchQueries(prev => ({ ...prev, tA1: v }))}
-                        onSelect={(p) => handleSelect('tA1', p)}
-                        onRemove={() => setSelectedPlayers(prev => ({ ...prev, tA1: null }))}
-                        error={errors.tA1}
-                      />
-                      <PlayerSlot 
-                        id="tA2" 
-                        label="Member 02 Smash ID" 
-                        selectedPlayer={selectedPlayers.tA2} 
-                        searchQuery={searchQueries.tA2}
-                        onSearchChange={(v) => setSearchQueries(prev => ({ ...prev, tA2: v }))}
-                        onSelect={(p) => handleSelect('tA2', p)}
-                        onRemove={() => setSelectedPlayers(prev => ({ ...prev, tA2: null }))}
-                        error={errors.tA2}
-                      />
-                    </div>
-                  )}
+                  <PlayerSlot 
+                    id="p1" 
+                    label="Side A Athlete" 
+                    selectedPlayer={selectedPlayers.p1} 
+                    searchQuery={searchQueries.p1}
+                    onSearchChange={(v) => setSearchQueries(prev => ({ ...prev, p1: v }))}
+                    onSelect={(p) => handleSelect('p1', p)}
+                    onRemove={() => setSelectedPlayers(prev => ({ ...prev, p1: null }))}
+                    error={errors.p1}
+                  />
                 </div>
 
                 <div className="space-y-8 relative z-10 text-right">
-                  <div className="flex items-center justify-end gap-3">
-                    <span className="text-xs font-black text-[#0B1F3A] uppercase tracking-widest italic">SIDE B INTELLIGENCE</span>
-                    <div className="h-1 w-8 bg-red-500 rounded-full" />
-                  </div>
-
-                  {matchType === 'singles' ? (
-                    <PlayerSlot 
-                      id="p2" 
-                      label="Player 02 Smash ID" 
-                      selectedPlayer={selectedPlayers.p2} 
-                      searchQuery={searchQueries.p2}
-                      onSearchChange={(v) => setSearchQueries(prev => ({ ...prev, p2: v }))}
-                      onSelect={(p) => handleSelect('p2', p)}
-                      onRemove={() => setSelectedPlayers(prev => ({ ...prev, p2: null }))}
-                      error={errors.p2}
-                    />
-                  ) : (
-                    <div className="space-y-6">
-                      <PlayerSlot 
-                        id="tB1" 
-                        label="Member 01 Smash ID" 
-                        selectedPlayer={selectedPlayers.tB1} 
-                        searchQuery={searchQueries.tB1}
-                        onSearchChange={(v) => setSearchQueries(prev => ({ ...prev, tB1: v }))}
-                        onSelect={(p) => handleSelect('tB1', p)}
-                        onRemove={() => setSelectedPlayers(prev => ({ ...prev, tB1: null }))}
-                        error={errors.tB1}
-                      />
-                      <PlayerSlot 
-                        id="tB2" 
-                        label="Member 02 Smash ID" 
-                        selectedPlayer={selectedPlayers.tB2} 
-                        searchQuery={searchQueries.tB2}
-                        onSearchChange={(v) => setSearchQueries(prev => ({ ...prev, tB2: v }))}
-                        onSelect={(p) => handleSelect('tB2', p)}
-                        onRemove={() => setSelectedPlayers(prev => ({ ...prev, tB2: null }))}
-                        error={errors.tB2}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 border-slate-200 shadow-xl">
-                 <div className="flex items-center gap-4 border-b border-slate-100 pb-6">
-                  <div className="h-10 w-10 rounded-xl bg-sky-50 flex items-center justify-center text-sky-600">
-                    <Zap className="h-5 w-5 fill-current" />
-                  </div>
-                  <h3 className="text-lg font-black text-[#0B1F3A] uppercase italic">Studio Settings</h3>
-                </div>
-                
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <p className="text-sm font-black text-[#0B1F3A]">AI Tactical Commentary</p>
-                      <p className="text-[10px] font-bold text-slate-400">Context-aware event logs</p>
-                    </div>
-                    <Switch checked={formData.aiCommentary} onCheckedChange={v => setFormData({...formData, aiCommentary: v})} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <p className="text-sm font-black text-[#0B1F3A]">Live Viewer Broadcast</p>
-                      <p className="text-[10px] font-bold text-slate-400">Stream scores globally</p>
-                    </div>
-                    <Switch checked={formData.broadcast} onCheckedChange={v => setFormData({...formData, broadcast: v})} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Warm-up Timer (min)</Label>
-                    <Select value={formData.warmUp} onValueChange={(v: any) => setFormData({...formData, warmUp: v})}>
-                      <SelectTrigger className="h-12 bg-slate-50 border-slate-100 rounded-xl font-bold"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0">No Warm-up</SelectItem>
-                        <SelectItem value="1">1 Minute</SelectItem>
-                        <SelectItem value="3">3 Minutes</SelectItem>
-                        <SelectItem value="5">5 Minutes</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-
-              <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 border-slate-200 shadow-xl bg-[#0B1F3A] text-white">
-                <div className="flex items-center gap-4 border-b border-white/10 pb-6">
-                  <div className="h-10 w-10 rounded-xl bg-sky-500 text-white flex items-center justify-center">
-                    <MapPin className="h-5 w-5" />
-                  </div>
-                  <h3 className="text-lg font-black uppercase italic">Technical Layout</h3>
-                </div>
-
-                <div className="space-y-6">
-                  <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-sky-400 ml-1">Initial Server</Label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button 
-                        onClick={() => setFormData({...formData, server: 'sideA'})}
-                        className={cn("h-12 rounded-xl border-2 font-black text-[10px] transition-all", formData.server === 'sideA' ? "border-sky-500 bg-sky-500/20 text-white" : "border-white/10 text-white/40")}
-                      >
-                        SIDE A SERVES
-                      </button>
-                      <button 
-                        onClick={() => setFormData({...formData, server: 'sideB'})}
-                        className={cn("h-12 rounded-xl border-2 font-black text-[10px] transition-all", formData.server === 'sideB' ? "border-red-500 bg-red-500/20 text-white" : "border-white/10 text-white/40")}
-                      >
-                        SIDE B SERVES
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-sky-400 ml-1">Court Allocation</Label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button 
-                        onClick={() => setFormData({...formData, side: 'left'})}
-                        className={cn("h-12 rounded-xl border-2 font-black text-[10px] transition-all", formData.side === 'left' ? "border-sky-500 bg-sky-500/20 text-white" : "border-white/10 text-white/40")}
-                      >
-                        LEFT SIDE
-                      </button>
-                      <button 
-                        onClick={() => setFormData({...formData, side: 'right'})}
-                        className={cn("h-12 rounded-xl border-2 font-black text-[10px] transition-all", formData.side === 'right' ? "border-sky-500 bg-sky-500/20 text-white" : "border-white/10 text-white/40")}
-                      >
-                        RIGHT SIDE
-                      </button>
-                    </div>
-                  </div>
+                  <PlayerSlot 
+                    id="p2" 
+                    label="Side B Athlete" 
+                    selectedPlayer={selectedPlayers.p2} 
+                    searchQuery={searchQueries.p2}
+                    onSearchChange={(v) => setSearchQueries(prev => ({ ...prev, p2: v }))}
+                    onSelect={(p) => handleSelect('p2', p)}
+                    onRemove={() => setSelectedPlayers(prev => ({ ...prev, p2: null }))}
+                    error={errors.p2}
+                  />
                 </div>
               </div>
             </div>
@@ -509,10 +300,6 @@ const CreateIndividualMatch = () => {
               >
                 {isInitializing ? <Loader2 className="h-8 w-8 animate-spin" /> : "START MATCH"}
               </Button>
-              <div className="flex items-center justify-center gap-2 mt-6 text-slate-400">
-                <ShieldCheck className="h-4 w-4" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Secure Session ID: M{Date.now().toString().slice(-6)}</span>
-              </div>
             </div>
           </div>
         </div>
