@@ -6,14 +6,11 @@ import Footer from '@/components/layout/Footer';
 import { motion } from 'framer-motion';
 import { 
   ArrowRight, Activity, Trophy, Users, 
-  Target, Globe, Radio, Zap, Bell, Flame,
-  TrendingUp, ShieldCheck, Play, ChevronRight,
-  Layers, BarChart3
+  Zap, TrendingUp, ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
-import { cn } from '@/lib/utils';
 
 const Index = () => {
   const [stats, setStats] = useState({ athletes: 124, tourneys: 8 });
@@ -26,10 +23,10 @@ const Index = () => {
   }, []);
 
   const modules = [
-    { title: "Live Scoring", icon: Activity, features: ["Millisecond precision", "Dynamic court tracking"], color: "sky" },
-    { title: "AI Commentary", icon: Zap, features: ["Real-time event analysis", "Highlight generation"], color: "amber" },
-    { title: "Circuit Hub", icon: Trophy, features: ["Automated brackets", "Player seeding logic"], color: "sky" },
-    { title: "Athlete Dossier", icon: Users, features: ["Global performance ID", "Historical tracking"], color: "sky" },
+    { title: "Live Scoring", icon: Activity, features: ["Millisecond precision", "Dynamic court tracking"] },
+    { title: "AI Commentary", icon: Zap, features: ["Real-time event analysis", "Highlight generation"] },
+    { title: "Circuit Hub", icon: Trophy, features: ["Automated brackets", "Player seeding logic"] },
+    { title: "Athlete Dossier", icon: Users, features: ["Global performance ID", "Historical tracking"] },
   ];
 
   return (
@@ -84,7 +81,6 @@ const Index = () => {
             </div>
           </motion.div>
 
-          {/* Floating UI Elements Mockup */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -132,76 +128,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* 2. LIVE INTELLIGENCE VISUALIZATION */}
+      {/* 2. PLATFORM CORE MODULES */}
       <section className="py-32 bg-white">
-        <div className="container px-6">
-          <div className="grid lg:grid-cols-12 gap-20 items-center">
-            <div className="lg:col-span-5 space-y-8">
-              <Badge className="bg-sky-500 text-white font-black px-6 py-1.5 rounded-full uppercase tracking-widest text-[10px]">Technical Edge</Badge>
-              <h2 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-[0.95]">
-                Real-Time <br />
-                Court <span className="text-sky-500">Tracking</span>
-              </h2>
-              <p className="text-lg text-slate-500 font-medium leading-relaxed">
-                SmashLive monitors match flow with millisecond precision, mapping every smash, net kill, and strategic error into a unified intelligence feed.
-              </p>
-              
-              <div className="space-y-6 pt-4">
-                {[
-                  { label: "Biomechanical Analysis", desc: "Mapping athlete movement and stamina in real-time.", icon: Activity },
-                  { label: "Heatmap Intelligence", desc: "Identifying dominant zones on the professional court.", icon: Target },
-                ].map((item, i) => (
-                  <div key={i} className="flex gap-5 group">
-                    <div className="h-12 w-12 rounded-2xl bg-[#0B1F3A] text-white flex items-center justify-center shrink-0 shadow-xl group-hover:scale-110 transition-transform">
-                      <item.icon className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <h4 className="font-black text-[#0B1F3A] uppercase text-sm tracking-tight">{item.label}</h4>
-                      <p className="text-sm text-slate-400 font-medium">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="lg:col-span-7">
-               <div className="relative glass-panel p-8 rounded-[4rem] bg-slate-900 border-none shadow-2xl overflow-hidden aspect-video">
-                  {/* Court Visualization Mockup */}
-                  <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:30px_30px]" />
-                  <div className="relative h-full w-full border-2 border-white/20 rounded-xl flex items-center justify-center">
-                     <div className="absolute inset-y-0 left-1/2 w-0.5 bg-white/20" />
-                     <div className="absolute inset-x-0 top-1/2 h-0.5 bg-white/10" />
-                     
-                     {/* Pulse Points */}
-                     <motion.div 
-                      animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0.2, 0.5] }}
-                      transition={{ repeat: Infinity, duration: 2 }}
-                      className="h-20 w-20 bg-sky-500/20 blur-xl rounded-full absolute top-1/4 left-1/4" 
-                     />
-                     <div className="h-4 w-4 bg-sky-400 rounded-full shadow-[0_0_20px_rgba(14,165,233,1)] absolute top-1/4 left-1/4" />
-                     
-                     <div className="absolute bottom-8 right-8 flex items-center gap-4 bg-black/60 backdrop-blur-md p-4 rounded-2xl border border-white/10">
-                        <BarChart3 className="h-5 w-5 text-sky-500" />
-                        <div>
-                          <p className="text-[10px] font-black text-white/40 uppercase">Smash Speed</p>
-                          <p className="text-xl font-black text-white italic">412 <span className="text-[10px]">KM/H</span></p>
-                        </div>
-                     </div>
-
-                     <div className="absolute top-8 left-8">
-                        <div className="flex items-center gap-2 bg-red-500 text-white px-4 py-1.5 rounded-full font-black text-[10px] uppercase">
-                          <Radio className="h-3 w-3 animate-pulse" /> Live Analysis
-                        </div>
-                     </div>
-                  </div>
-               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. PLATFORM CORE MODULES */}
-      <section className="py-32 bg-[#F8FAFC]">
         <div className="container px-6 space-y-20">
           <div className="text-center space-y-4 max-w-2xl mx-auto">
             <h2 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic">The Studio Engine</h2>
@@ -233,8 +161,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* 4. FINAL CTA SECTION */}
-      <section className="py-20 bg-white">
+      {/* 3. FINAL CTA SECTION */}
+      <section className="py-20 bg-slate-50">
         <div className="container px-6">
           <div className="bg-[#0B1F3A] rounded-[4rem] p-16 flex flex-col md:flex-row items-center justify-between gap-12 relative overflow-hidden shadow-2xl">
             <div className="absolute -right-20 -bottom-20 opacity-10 pointer-events-none">
