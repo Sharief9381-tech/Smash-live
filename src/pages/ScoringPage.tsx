@@ -5,17 +5,19 @@ import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { 
   Zap, RotateCcw, Target, RefreshCw, 
-  StopCircle, AlertCircle, X, ChevronLeft
+  StopCircle, AlertCircle, X, ChevronLeft, Loader2
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { showSuccess, showError } from '@/utils/toast';
+import { supabase } from '@/lib/supabase';
 
 const ScoringPage = () => {
   const { matchId } = useParams();
   const navigate = useNavigate();
   const [matchData, setMatchData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   
   const [score, setScore] = useState<[number, number]>([0, 0]);
   const [setsWon, setSetsWon] = useState<[number, number]>([0, 0]);
@@ -24,44 +26,49 @@ const ScoringPage = () => {
   const [pointHistory, setPointHistory] = useState<any[]>([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem(matchId || "");
-    if (saved) {
-      const data = JSON.parse(saved);
-      setMatchData(data);
-      // Initialize score if it exists in data
-      if (data.currentScore) setScore(data.currentScore);
-      if (data.setsWon) setSetsWon(data.setsWon);
-      if (data.serving) setServing(data.serving);
-    } else {
-      navigate('/broadcast/center');
-    }
+    const fetchMatch = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('matches')
+          .select('*')
+          .eq('id', matchId)
+          .single();
+
+        if (error) throw error;
+        
+        setMatchData(data);
+        if (data.current_score) setScore(data.current_score);
+        if (data.sets_won) setSetsWon(data.sets_won);
+        if (data.serving) setServing(data.serving as 1 | 2);
+      } catch (err) {
+        showError("Failed to fetch match session.");
+        navigate('/broadcast/center');
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (matchId) fetchMatch();
   }, [matchId, navigate]);
 
-  // Sync state to localStorage for "Live Viewers"
-  useEffect(() => {
-    if (matchData && matchId) {
-      const updatedMatch = {
-        ...matchData,
-        currentScore: score,
-        setsWon: setsWon,
-        serving: serving,
-        lastUpdate: Date.now()
-      };
-      localStorage.setItem(matchId, JSON.stringify(updatedMatch));
-      
-      // Update global active matches list
-      const activeMatches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
-      const matchIndex = activeMatches.findIndex((m: any) => m.id === matchId);
-      if (matchIndex >= 0) {
-        activeMatches[matchIndex] = updatedMatch;
-      } else {
-        activeMatches.push(updatedMatch);
-      }
-      localStorage.setItem('active_studio_matches', JSON.stringify(activeMatches));
-    }
-  }, [score, setsWon, serving, matchData, matchId]);
+  const updateMatchOnCloud = async (newScore: [number, number], newSets: [number, number], newServing: number) => {
+    try {
+      const { error } = await supabase
+        .from('matches')
+        .update({
+          current_score: newScore,
+          sets_won: newSets,
+          serving: newServing,
+          last_update: new Date().toISOString()
+        })
+        .eq('id', matchId);
 
-  const handlePoint = (side: 1 | 2, type: string) => {
+      if (error) throw error;
+    } catch (err) {
+      console.error("Cloud sync failed:", err);
+    }
+  };
+
+  const handlePoint = async (side: 1 | 2, type: string) => {
     const newScore = [...score] as [number, number];
     newScore[side - 1] += 1;
     
@@ -70,31 +77,57 @@ const ScoringPage = () => {
     setServing(side);
     setActiveOverlay(null);
 
-    // Check set win
+    let finalSets = [...setsWon] as [number, number];
+    let finalScore = newScore;
+
+    // Check set win (standard 21 point rule)
     if (newScore[side - 1] >= 21 && Math.abs(newScore[0] - newScore[1]) >= 2) {
-      const newSets = [...setsWon] as [number, number];
-      newSets[side - 1]++;
-      setSetsWon(newSets);
-      showSuccess(`Set Won by ${side === 1 ? (matchData.players.p1?.name || 'Player 1') : (matchData.players.p2?.name || 'Player 2')}`);
-      setScore([0, 0]);
+      finalSets[side - 1]++;
+      setSetsWon(finalSets);
+      showSuccess(`Set Won by Side ${side === 1 ? 'A' : 'B'}`);
+      finalScore = [0, 0];
+      setScore(finalScore);
     }
+
+    await updateMatchOnCloud(finalScore, finalSets, side);
   };
 
-  const undo = () => {
+  const undo = async () => {
     if (pointHistory.length === 0) return;
     const last = pointHistory[pointHistory.length - 1];
     setScore(last.score);
     setServing(last.side);
     setPointHistory(prev => prev.slice(0, -1));
+    await updateMatchOnCloud(last.score, setsWon, last.side);
   };
 
-  const reset = () => {
-    setScore([0, 0]);
-    setSetsWon([0, 0]);
+  const reset = async () => {
+    if (!confirm("Are you sure you want to reset the match?")) return;
+    const s: [number, number] = [0, 0];
+    const sw: [number, number] = [0, 0];
+    setScore(s);
+    setSetsWon(sw);
     setPointHistory([]);
+    await updateMatchOnCloud(s, sw, 1);
     showSuccess("Match Reset");
   };
 
+  const finalizeMatch = async () => {
+    try {
+      const { error } = await supabase
+        .from('matches')
+        .update({ status: 'completed' })
+        .eq('id', matchId);
+      
+      if (error) throw error;
+      showSuccess("Match intelligence finalized.");
+      navigate('/court');
+    } catch (err) {
+      showError("Failed to finalize match.");
+    }
+  };
+
+  if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-sky-500" /></div>;
   if (!matchData) return null;
 
   return (
@@ -103,7 +136,6 @@ const ScoringPage = () => {
 
       <main className="flex-1 container max-w-4xl flex flex-col p-6 gap-6 justify-center">
         
-        {/* Header with back navigation */}
         <div className="flex items-center justify-between mb-4">
           <Button 
             onClick={() => navigate('/broadcast/center')}
@@ -118,10 +150,12 @@ const ScoringPage = () => {
           </div>
         </div>
 
-        {/* SCOREBOARD SECTION */}
         <div className="grid grid-cols-2 gap-6 relative">
           {[1, 2].map((side) => {
-            const player = side === 1 ? matchData.players.p1 : matchData.players.p2;
+            const playerName = side === 1 
+              ? (matchData.players?.p1?.name || matchData.players?.tA1?.name || "SIDE A")
+              : (matchData.players?.p2?.name || matchData.players?.tB1?.name || "SIDE B");
+              
             return (
               <div 
                 key={side}
@@ -132,20 +166,15 @@ const ScoringPage = () => {
                     : "bg-white/40 border-slate-100 opacity-60"
                 )}
               >
-                {serving === side && (
-                  <div className="absolute top-0 right-0 p-6 opacity-5">
-                    <Zap className="h-32 w-32" />
-                  </div>
-                )}
                 <div className="flex flex-col items-center gap-3 mb-4 relative z-10">
                   <div className={cn(
-                    "h-16 w-16 rounded-full border-4 border-white shadow-lg overflow-hidden flex items-center justify-center font-black",
+                    "h-16 w-16 rounded-full border-4 border-white shadow-lg flex items-center justify-center font-black",
                     side === 1 ? "bg-sky-500 text-white" : "bg-[#0B1F3A] text-sky-400"
                   )}>
-                    {player?.img || (side === 1 ? "P1" : "P2")}
+                    {playerName[0]}
                   </div>
                   <h2 className="text-2xl font-black uppercase italic tracking-tighter text-center">
-                    {player?.name || (side === 1 ? "Player 1" : "Player 2")}
+                    {playerName}
                   </h2>
                 </div>
                 
@@ -177,10 +206,8 @@ const ScoringPage = () => {
               </div>
             );
           })}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-px h-[60%] bg-slate-200/50 hidden lg:block" />
         </div>
 
-        {/* SCORING CONTROLS */}
         <div className="grid grid-cols-2 gap-6">
           {[1, 2].map((side) => (
             <div key={side} className="relative h-28">
@@ -211,21 +238,21 @@ const ScoringPage = () => {
                     <div className="grid grid-cols-3 gap-3 flex-1">
                       <Button 
                         onClick={() => handlePoint(side as 1 | 2, 'Smash')} 
-                        className="h-full bg-white/5 hover:bg-sky-500 border border-white/10 rounded-2xl flex flex-col gap-2 group"
+                        className="h-full bg-white/5 hover:bg-sky-500 border border-white/10 rounded-2xl flex flex-col gap-2"
                       >
                         <Zap className="h-6 w-6 text-sky-400 group-hover:text-white fill-current" />
                         <span className="text-[10px] font-black uppercase tracking-widest">Smash</span>
                       </Button>
                       <Button 
                         onClick={() => handlePoint(side as 1 | 2, 'Net')} 
-                        className="h-full bg-white/5 hover:bg-sky-500 border border-white/10 rounded-2xl flex flex-col gap-2 group"
+                        className="h-full bg-white/5 hover:bg-sky-500 border border-white/10 rounded-2xl flex flex-col gap-2"
                       >
                         <Target className="h-6 w-6 text-sky-400 group-hover:text-white" />
                         <span className="text-[10px] font-black uppercase tracking-widest">Net Kill</span>
                       </Button>
                       <Button 
                         onClick={() => handlePoint(side as 1 | 2, 'Error')} 
-                        className="h-full bg-white/5 hover:bg-red-500 border border-white/10 rounded-2xl flex flex-col gap-2 group"
+                        className="h-full bg-white/5 hover:bg-red-500 border border-white/10 rounded-2xl flex flex-col gap-2"
                       >
                         <AlertCircle className="h-6 w-6 text-red-400 group-hover:text-white" />
                         <span className="text-[10px] font-black uppercase tracking-widest text-center">Opp. Error</span>
@@ -238,7 +265,6 @@ const ScoringPage = () => {
           ))}
         </div>
 
-        {/* BOTTOM UTILITY */}
         <div className="grid grid-cols-3 gap-6 h-16">
           <Button onClick={undo} variant="outline" className="h-full rounded-[1.5rem] border-slate-200 bg-white font-black text-xs uppercase tracking-widest gap-3 shadow-sm hover:border-sky-500 group">
             <RotateCcw className="h-4 w-4 text-sky-500 group-hover:rotate-[-45deg] transition-transform" /> Undo Entry
@@ -247,13 +273,7 @@ const ScoringPage = () => {
             <RefreshCw className="h-4 w-4" /> Hard Reset
           </Button>
           <Button 
-            onClick={() => {
-              // Remove from active matches list
-              const activeMatches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
-              const remaining = activeMatches.filter((m: any) => m.id !== matchId);
-              localStorage.setItem('active_studio_matches', JSON.stringify(remaining));
-              navigate('/court');
-            }} 
+            onClick={finalizeMatch} 
             variant="outline" 
             className="h-full rounded-[1.5rem] border-slate-200 bg-white font-black text-xs uppercase tracking-widest gap-3 shadow-sm hover:border-[#0B1F3A] group"
           >

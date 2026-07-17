@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, ShieldCheck, Globe, Trophy, Loader2, Lock, ArrowLeft, ArrowRight, RefreshCw, Trash2 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Zap, ShieldCheck, Loader2, ArrowLeft, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/select";
 import { showError, showSuccess } from '@/utils/toast';
 import { cn } from '@/lib/utils';
+import { AuthService } from '@/services/auth.service';
+import { supabase } from '@/lib/supabase';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -44,46 +46,52 @@ const Login = () => {
   }, [step, timer]);
 
   const handleResetData = () => {
-    if (confirm("This will clear all local login sessions and registered athlete data. Continue?")) {
+    if (confirm("This will clear your local session. Database data must be reset in the Supabase Dashboard. Continue?")) {
       localStorage.clear();
-      showSuccess("All local data cleared. System reset.");
+      showSuccess("Local session cleared.");
       window.location.reload();
     }
   };
 
-  const handleSendOtp = () => {
+  const handleSendOtp = async () => {
     if (phone.length < 10) {
       showError("Please enter a valid 10-digit mobile number");
       return;
     }
 
-    const fullPhone = `+91${phone}`;
-    const users = JSON.parse(localStorage.getItem('registered_users') || '[]');
-    const existingUser = users.find((u: any) => u.phone === fullPhone);
-
-    if (activeTab === 'login' && !existingUser) {
-      showError("Account not found. Please register as an athlete first.");
-      return;
-    }
-
-    if (activeTab === 'register') {
-      if (!regData.name || !regData.gender) {
-        showError("Please provide athlete name and gender to register");
-        return;
-      }
-      if (existingUser) {
-        showError("This number is already registered. Please login instead.");
-        return;
-      }
-    }
-
+    const email = `${phone}@smashlive.com`;
     setIsLoading(true);
-    setTimeout(() => {
+
+    try {
+      const { data: existingUser } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('email', email)
+        .single();
+
+      if (activeTab === 'login' && !existingUser) {
+        throw new Error("Athlete account not found. Please register first.");
+      }
+
+      if (activeTab === 'register') {
+        if (!regData.name || !regData.gender) {
+          throw new Error("Please provide athlete name and gender to register");
+        }
+        if (existingUser) {
+          throw new Error("This number is already registered. Please login instead.");
+        }
+      }
+
+      setTimeout(() => {
+        setIsLoading(false);
+        setStep('otp');
+        setTimer(30);
+        showSuccess(`OTP sent to +91 ${phone}. Code: 123456`);
+      }, 800);
+    } catch (err: any) {
+      showError(err.message);
       setIsLoading(false);
-      setStep('otp');
-      setTimer(30);
-      showSuccess(`OTP sent to +91 ${phone}. Code: 123456`);
-    }, 800);
+    }
   };
 
   const handleOtpChange = (index: number, value: string) => {
@@ -98,7 +106,7 @@ const Login = () => {
     if (e.key === 'Backspace' && !otp[index] && index > 0) otpRefs.current[index - 1]?.focus();
   };
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     const enteredOtp = otp.join("");
     if (enteredOtp.length !== 6) {
       showError("Please enter the 6-digit code");
@@ -106,35 +114,33 @@ const Login = () => {
     }
 
     setIsLoading(true);
-    setTimeout(() => {
+    try {
       if (enteredOtp === "123456") {
-        const fullPhone = `+91${phone}`;
-        const users = JSON.parse(localStorage.getItem('registered_users') || '[]');
-        const existingUser = users.find((u: any) => u.phone === fullPhone);
+        const email = `${phone}@smashlive.com`;
+        const profile = await AuthService.login(email);
 
-        if (activeTab === 'login') {
-          localStorage.setItem('isLoggedIn', 'true');
-          localStorage.setItem('userProfile', JSON.stringify(existingUser));
-          showSuccess("Welcome back to the Court!");
-          navigate('/court');
-        } else {
-          const newAthlete = {
-            phone: fullPhone,
+        if (activeTab === 'register') {
+          // Update the initial profile with the registration data
+          const updated = await AuthService.updateProfile(profile.id, {
             name: regData.name,
-            gender: regData.gender,
-            onboardingComplete: false
-          };
-          
-          localStorage.setItem('isLoggedIn', 'true');
-          localStorage.setItem('userProfile', JSON.stringify(newAthlete));
+            gender: regData.gender
+          });
+          AuthService.setLocalSession(updated);
           showSuccess("Identity verified. Complete your dossier.");
           navigate('/onboarding');
+        } else {
+          AuthService.setLocalSession(profile);
+          showSuccess("Welcome back to the Court!");
+          navigate('/court');
         }
       } else {
-        showError("Invalid OTP. Please try 123456");
-        setIsLoading(false);
+        throw new Error("Invalid OTP. Please try 123456");
       }
-    }, 800);
+    } catch (err: any) {
+      showError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
