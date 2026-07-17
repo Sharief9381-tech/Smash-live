@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, ShieldCheck, Loader2, ArrowLeft, Trophy, Activity, ArrowRight } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
@@ -37,7 +37,13 @@ const Login = () => {
   };
 
   const handleVerify = async () => {
-    if (otp.join("") !== "123456") {
+    const code = otp.join("");
+    if (code.length < 6) {
+      showError("Please enter the full 6-digit code");
+      return;
+    }
+    
+    if (code !== "123456") {
       showError("Invalid code. Use 123456 for testing.");
       return;
     }
@@ -48,7 +54,6 @@ const Login = () => {
         localStorage.setItem('temp_reg', JSON.stringify({ ...regData, mobile: phone }));
         navigate('/onboarding');
       } else {
-        // This now auto-creates a profile if missing in local mode
         const profile = await AuthService.getProfileByMobile(phone);
         AuthService.setLocalSession(profile);
         showSuccess("Identity Verified. Welcome!");
@@ -64,15 +69,36 @@ const Login = () => {
   };
 
   const handleOtpChange = (index: number, value: string) => {
+    if (isNaN(Number(value))) return;
     const newOtp = [...otp];
     newOtp[index] = value.slice(-1);
     setOtp(newOtp);
-    if (value && index < 5) otpRefs.current[index + 1]?.focus();
+    
+    // Move focus forward
+    if (value && index < 5) {
+      otpRefs.current[index + 1]?.focus();
+    }
   };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace') {
+      if (!otp[index] && index > 0) {
+        otpRefs.current[index - 1]?.focus();
+      }
+    } else if (e.key === 'Enter') {
+      handleVerify();
+    }
+  };
+
+  // Focus first OTP input on step change
+  useEffect(() => {
+    if (step === 'otp') {
+      setTimeout(() => otpRefs.current[0]?.focus(), 100);
+    }
+  }, [step]);
 
   return (
     <div className="min-h-screen bg-[#0B1F3A] flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      {/* Background glow */}
       <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-sky-500/20 blur-[120px] rounded-full" />
       <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-sky-600/10 blur-[100px] rounded-full" />
 
@@ -125,13 +151,13 @@ const Login = () => {
                       value={regData.name} 
                       onChange={e => setRegData({...regData, name: e.target.value})} 
                       placeholder="Full Athlete Name" 
-                      className="h-14 rounded-2xl bg-slate-50 font-bold" 
+                      className="h-14 rounded-2xl bg-slate-50 font-bold border-slate-100 focus:border-sky-500 transition-all" 
                     />
                     <Select value={regData.gender} onValueChange={v => setRegData({...regData, gender: v})}>
-                      <SelectTrigger className="h-14 rounded-2xl bg-slate-50 font-bold">
+                      <SelectTrigger className="h-14 rounded-2xl bg-slate-50 font-bold border-slate-100 focus:ring-sky-500">
                         <SelectValue placeholder="Select Gender" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="rounded-xl">
                         <SelectItem value="male">Male</SelectItem>
                         <SelectItem value="female">Female</SelectItem>
                       </SelectContent>
@@ -140,20 +166,20 @@ const Login = () => {
                 )}
 
                 <div className="flex gap-2">
-                  <div className="h-14 flex items-center px-5 border rounded-2xl bg-slate-50 font-black text-[#0B1F3A]">+91</div>
+                  <div className="h-14 flex items-center px-5 border border-slate-100 rounded-2xl bg-slate-50 font-black text-[#0B1F3A]">+91</div>
                   <Input 
                     maxLength={10} 
                     value={phone} 
                     onChange={e => setPhone(e.target.value.replace(/\D/g, ""))} 
                     placeholder="Mobile Number" 
-                    className="h-14 rounded-2xl bg-slate-50 flex-1 font-black text-lg focus:ring-sky-500" 
+                    className="h-14 rounded-2xl bg-slate-50 flex-1 font-black text-lg border-slate-100 focus:border-sky-500 transition-all" 
                   />
                 </div>
 
                 <Button 
                   onClick={handleSendOtp} 
                   disabled={isLoading} 
-                  className="w-full h-16 rounded-[1.5rem] bg-[#0B1F3A] text-white font-black uppercase tracking-widest hover:bg-sky-500 transition-all shadow-xl"
+                  className="w-full h-16 rounded-[1.5rem] bg-[#0B1F3A] text-white font-black uppercase tracking-widest hover:bg-sky-500 transition-all shadow-xl active:scale-95"
                 >
                   {isLoading ? <Loader2 className="animate-spin" /> : "Request Access"}
                 </Button>
@@ -168,14 +194,27 @@ const Login = () => {
                       type="text" 
                       maxLength={1} 
                       value={d} 
+                      onKeyDown={(e) => handleKeyDown(i, e)}
                       onChange={e => handleOtpChange(i, e.target.value)} 
-                      className="w-full h-14 border-2 border-slate-100 bg-slate-50 rounded-xl text-center font-black text-xl text-[#0B1F3A] focus:border-sky-500 outline-none" 
+                      className="w-full h-14 border-2 border-slate-100 bg-slate-50 rounded-xl text-center font-black text-xl text-[#0B1F3A] focus:border-sky-500 focus:bg-white outline-none transition-all" 
                     />
                   ))}
                 </div>
-                <Button onClick={handleVerify} disabled={isLoading} className="w-full h-16 rounded-[1.5rem] bg-sky-500 text-white font-black uppercase tracking-widest shadow-xl">
-                  {isLoading ? <Loader2 className="animate-spin" /> : "Verify Identity"}
-                </Button>
+                <div className="space-y-4">
+                  <Button 
+                    onClick={handleVerify} 
+                    disabled={isLoading} 
+                    className="w-full h-16 rounded-[1.5rem] bg-sky-500 text-white font-black uppercase tracking-widest shadow-xl hover:bg-sky-600 transition-all active:scale-95"
+                  >
+                    {isLoading ? <Loader2 className="animate-spin" /> : "Verify Identity"}
+                  </Button>
+                  <button 
+                    onClick={() => setStep('details')}
+                    className="w-full text-center text-[9px] font-black text-slate-400 uppercase tracking-widest hover:text-[#0B1F3A] transition-colors flex items-center justify-center gap-2"
+                  >
+                    <ArrowLeft className="h-3 w-3" /> Change Number
+                  </button>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
