@@ -58,8 +58,12 @@ const Login = () => {
         AuthService.setLocalSession(profile);
         showSuccess("Identity Verified. Welcome!");
         
-        if (profile.onboardingComplete) navigate('/court');
-        else navigate('/onboarding');
+        // Redirection logic: Priority to Dashboard if onboarding is done
+        if (profile.onboardingComplete) {
+          navigate('/dashboard', { replace: true });
+        } else {
+          navigate('/onboarding', { replace: true });
+        }
       }
     } catch (err) {
       showError("Synchronization issue. Please try again.");
@@ -74,7 +78,6 @@ const Login = () => {
     newOtp[index] = value.slice(-1);
     setOtp(newOtp);
     
-    // Move focus forward
     if (value && index < 5) {
       otpRefs.current[index + 1]?.focus();
     }
@@ -90,7 +93,6 @@ const Login = () => {
     }
   };
 
-  // Focus first OTP input on step change
   useEffect(() => {
     if (step === 'otp') {
       setTimeout(() => otpRefs.current[0]?.focus(), 100);

@@ -36,7 +36,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   if (!isLoggedIn) return <Navigate to="/login" replace />;
   
-  // If user hasn't finished onboarding, force them there (unless they are already on the onboarding page)
+  // Explicitly check for onboarding status to prevent redirection loops
   if (!userProfile.onboardingComplete && window.location.pathname !== '/onboarding') {
     return <Navigate to="/onboarding" replace />;
   }
@@ -55,7 +55,10 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><Court /></ProtectedRoute>} />
+          
+          {/* Legacy route fallback */}
           <Route path="/court" element={<Navigate to="/dashboard" replace />} />
+          
           <Route path="/smashed" element={<ProtectedRoute><Smashed /></ProtectedRoute>} />
           <Route path="/live-match/active" element={<LiveMatch />} />
           <Route path="/live-match/create" element={<ProtectedRoute><CreateIndividualMatch /></ProtectedRoute>} />
