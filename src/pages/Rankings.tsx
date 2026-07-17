@@ -2,9 +2,9 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import { Search, Globe, Flag, MapPin, Target, Minus, Loader2 } from 'lucide-react';
+import { Search, Globe, Flag, MapPin, Loader2, Minus } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { supabase } from '@/lib/supabase';
+import { supabase, isCloudConfigured } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
 const Rankings = () => {
@@ -15,6 +15,14 @@ const Rankings = () => {
 
   useEffect(() => {
     const fetchAthletes = async () => {
+      // Instant fail-fast if no cloud
+      if (!isCloudConfigured) {
+        const local = JSON.parse(localStorage.getItem('registered_users') || '[]');
+        setAthletes(local);
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const { data, error } = await supabase
           .from('profiles')
@@ -24,7 +32,8 @@ const Rankings = () => {
         if (error) throw error;
         setAthletes(data || []);
       } catch (err) {
-        console.warn("Ladder sync restricted. Ensure cloud database is linked.");
+        const local = JSON.parse(localStorage.getItem('registered_users') || '[]');
+        setAthletes(local);
       } finally {
         setIsLoading(false);
       }
@@ -86,7 +95,7 @@ const Rankings = () => {
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <Loader2 className="h-8 w-8 text-sky-500 animate-spin" />
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Querying Cloud Registry...</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Querying Registry...</p>
               </div>
             ) : (
               <Table>
@@ -113,7 +122,7 @@ const Rankings = () => {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-center font-black text-sky-500 uppercase">{row.smash_id || "OFFLINE"}</TableCell>
+                      <TableCell className="text-center font-black text-sky-500 uppercase">{row.smash_id || row.smashId || "STUDIO_NODE"}</TableCell>
                       <TableCell className="text-right pr-12">
                          <Minus className="h-4 w-4 text-slate-200 ml-auto" />
                       </TableCell>
@@ -121,7 +130,7 @@ const Rankings = () => {
                   )) : (
                     <TableRow>
                       <TableCell colSpan={4} className="h-40 text-center text-slate-300 font-black uppercase text-xs italic">
-                        No athletes synchronized in this scope
+                        No athletes found
                       </TableCell>
                     </TableRow>
                   )}

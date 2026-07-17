@@ -1,18 +1,13 @@
 "use client";
 
-import { supabase } from '@/lib/supabase';
-
-// Improved check to avoid hanging on placeholder URLs
-const isConfigured = !!import.meta.env.VITE_SUPABASE_URL && 
-                   import.meta.env.VITE_SUPABASE_URL.startsWith('https://') &&
-                   import.meta.env.VITE_SUPABASE_URL !== 'https://placeholder.supabase.co';
+import { supabase, isCloudConfigured } from '@/lib/supabase';
 
 export const AuthService = {
   async getProfileByMobile(mobile: string) {
     let profile = null;
 
-    // 1. Instant Cloud Check (only if actually configured)
-    if (isConfigured) {
+    // 1. Instant Cloud Check - ONLY if configured
+    if (isCloudConfigured) {
       try {
         const { data, error } = await supabase
           .from('profiles')
@@ -22,7 +17,7 @@ export const AuthService = {
         
         if (!error && data) profile = data;
       } catch (err) {
-        // Silently fail to local fallback immediately
+        // Fail fast to local fallback
       }
     }
 
@@ -51,7 +46,7 @@ export const AuthService = {
   async registerAthlete(profileData: { name: string; gender: string; state: string; mobile: string }) {
     let savedProfile = null;
 
-    if (isConfigured) {
+    if (isCloudConfigured) {
       try {
         const { data, error } = await supabase
           .from('profiles')
