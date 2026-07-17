@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Activity, Play, Search, Zap, Radio, Trophy, MapPin, Loader2 } from 'lucide-react';
+import { Activity, Play, Search, Zap, Radio, Trophy, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
-import { cn, safeJsonParse } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
 
@@ -24,29 +24,20 @@ const LiveMatch = () => {
   useEffect(() => {
     const fetchLiveData = async () => {
       try {
-        // 1. Fetch Live Matches
-        const { data: matches, error: mError } = await supabase
-          .from('matches')
-          .select('*')
-          .eq('status', 'live');
-        
-        // 2. Fetch Ongoing Tournaments
-        const { data: tourneys, error: tError } = await supabase
-          .from('tournaments')
-          .select('*')
-          .neq('status', 'Completed');
+        const { data: matches } = await supabase.from('matches').select('*').eq('status', 'live');
+        const { data: tourneys } = await supabase.from('tournaments').select('*').neq('status', 'Completed');
 
         if (matches) setLiveMatches(matches);
         if (tourneys) setLiveTournaments(tourneys);
       } catch (err) {
-        console.error("Sync error:", err);
+        console.warn("Sync error:", err);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchLiveData();
-    const interval = setInterval(fetchLiveData, 5000); // Sync every 5s
+    const interval = setInterval(fetchLiveData, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -55,8 +46,8 @@ const LiveMatch = () => {
       id: m.id,
       type: 'match',
       title: m.name,
-      p1: m.players?.p1?.name || (m.players?.tA1?.name ? `${m.players.tA1.name}/${m.players.tA2.name}` : "Athlete A"),
-      p2: m.players?.p2?.name || (m.players?.tB1?.name ? `${m.players.tB1.name}/${m.players.tB2.name}` : "Athlete B"),
+      p1: m.players?.p1?.name || "Athlete A",
+      p2: m.players?.p2?.name || "Athlete B",
       score: m.current_score ? `${m.current_score[0]}-${m.current_score[1]}` : "0-0",
       category: "Match",
       path: `/broadcast/${m.id}`
@@ -87,7 +78,6 @@ const LiveMatch = () => {
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
-      
       <main className="container px-6 py-12 space-y-12">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
           <div className="space-y-2">
@@ -101,7 +91,7 @@ const LiveMatch = () => {
           <div className="relative w-full md:w-96">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
             <Input 
-              placeholder="Search Live Intel..." 
+              placeholder="Search Name or Event..." 
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="h-14 pl-12 bg-white border-slate-200 rounded-[2rem] font-bold focus:border-sky-500 transition-all shadow-sm"
@@ -124,11 +114,10 @@ const LiveMatch = () => {
           ))}
         </div>
 
-        <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 border-slate-200 shadow-xl bg-white/50">
+        <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 border-slate-200 shadow-xl bg-white/50 min-h-[400px]">
           {isLoading ? (
              <div className="py-32 flex flex-col items-center justify-center gap-4">
                 <Loader2 className="h-10 w-10 text-sky-500 animate-spin" />
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Syncing global nodes...</p>
              </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-8">
@@ -147,19 +136,12 @@ const LiveMatch = () => {
                       )}>
                         {item.category}
                       </Badge>
-                      <div className="flex items-center gap-2">
-                        <Radio className="h-3 w-3 text-red-500 animate-pulse" />
-                        <span className="text-[10px] font-black text-slate-400 uppercase">Live Feed</span>
-                      </div>
+                      <Radio className="h-3 w-3 text-red-500 animate-pulse" />
                     </div>
 
                     <div className="flex items-center justify-between gap-4">
                       <div className="space-y-2 flex-1">
-                        <p className="text-[10px] font-black text-sky-600 uppercase tracking-widest flex items-center gap-2">
-                          {item.type === 'match' ? <Activity className="h-3 w-3" /> : <Trophy className="h-3 w-3" />}
-                          {item.type === 'match' ? item.title : item.loc}
-                        </p>
-                        
+                        <p className="text-[10px] font-black text-sky-600 uppercase tracking-widest">{item.title}</p>
                         {item.type === 'match' ? (
                           <div className="font-black text-2xl text-[#0B1F3A] tracking-tighter uppercase italic leading-none">
                             {item.p1} <br />
@@ -172,19 +154,9 @@ const LiveMatch = () => {
                           </div>
                         )}
                       </div>
-                      
                       <div className="flex flex-col items-end gap-6">
-                         {item.type === 'match' ? (
-                            <span className="text-5xl font-black font-mono tracking-tighter tabular-nums text-sky-600">
-                               {item.score}
-                            </span>
-                         ) : (
-                            <div className="text-right">
-                              <p className="text-[10px] font-black text-slate-400 uppercase">Athletes</p>
-                              <p className="text-3xl font-black text-sky-600">{item.athletes}</p>
-                            </div>
-                         )}
-                         <Button className="h-14 w-14 rounded-2xl bg-[#0B1F3A] text-white shadow-xl border-none group-hover:bg-sky-500 transition-colors">
+                         {item.type === 'match' && <span className="text-5xl font-black font-mono text-sky-600">{item.score}</span>}
+                         <Button className="h-14 w-14 rounded-2xl bg-[#0B1F3A] text-white shadow-xl border-none">
                             <Play className="h-6 w-6 fill-current ml-1" />
                          </Button>
                       </div>
@@ -193,7 +165,7 @@ const LiveMatch = () => {
                 )) : (
                   <div className="col-span-2 py-32 text-center bg-slate-50 rounded-[4rem] border-2 border-dashed border-slate-200">
                     <Activity className="h-12 w-12 text-slate-200 mx-auto mb-4" />
-                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest italic">No Active Intelligence Found</p>
+                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest italic">No Intel Found</p>
                   </div>
                 )}
               </AnimatePresence>
