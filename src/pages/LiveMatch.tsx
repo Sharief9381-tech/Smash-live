@@ -4,63 +4,85 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Activity, Play, Search, Zap, Radio, Loader2 } from 'lucide-react';
+import { Activity, Play, Search, Zap, Radio, Trophy, MapPin, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { cn, safeJsonParse } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/lib/supabase';
 
 const LiveMatch = () => {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
-  const [studioMatches, setStudioMatches] = useState<any[]>([]);
-  const lastUpdateRef = useRef<string>("");
+  const [liveMatches, setLiveMatches] = useState<any[]>([]);
+  const [liveTournaments, setLiveTournaments] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
-  const categories = ["All", "Singles", "Doubles"];
+  const categories = ["All", "Matches", "Tournaments"];
 
   useEffect(() => {
-    const loadStudioMatches = () => {
-      const raw = localStorage.getItem('active_studio_matches');
-      
-      // Only update if the raw string changed to prevent re-render flicker
-      if (raw === lastUpdateRef.current) return;
-      lastUpdateRef.current = raw || "";
+    const fetchLiveData = async () => {
+      try {
+        // 1. Fetch Live Matches
+        const { data: matches, error: mError } = await supabase
+          .from('matches')
+          .select('*')
+          .eq('status', 'live');
+        
+        // 2. Fetch Ongoing Tournaments
+        const { data: tourneys, error: tError } = await supabase
+          .from('tournaments')
+          .select('*')
+          .neq('status', 'Completed');
 
-      const active = safeJsonParse(raw, []);
-      const formatted = active.map((m: any) => ({
-        id: m.id,
-        p1: m.players?.p1?.name || (m.players?.tA1?.name ? `${m.players.tA1.name} / ${m.players.tA2.name}` : "Player 1"),
-        p2: m.players?.p2?.name || (m.players?.tB1?.name ? `${m.players.tB1.name} / ${m.players.tB2.name}` : "Player 2"),
-        score: m.currentScore ? `${m.currentScore[0]}-${m.currentScore[1]}` : "0-0",
-        tournament: m.name,
-        viewers: "LIVE",
-        status: m.status || "Live",
-        category: m.matchType === 'singles' ? "Singles" : "Doubles",
-        smashId: `STUDIO_${m.id.toString().slice(-4)}`
-      }));
-      setStudioMatches(formatted);
+        if (matches) setLiveMatches(matches);
+        if (tourneys) setLiveTournaments(tourneys);
+      } catch (err) {
+        console.error("Sync error:", err);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    loadStudioMatches();
-    const interval = setInterval(loadStudioMatches, 1500);
-    window.addEventListener('storage', loadStudioMatches);
-    
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('storage', loadStudioMatches);
-    };
+    fetchLiveData();
+    const interval = setInterval(fetchLiveData, 5000); // Sync every 5s
+    return () => clearInterval(interval);
   }, []);
 
-  const filtered = useMemo(() => {
-    return studioMatches.filter(m => {
-      const matchesSearch = m.p1.toLowerCase().includes(query.toLowerCase()) || 
-                           m.p2.toLowerCase().includes(query.toLowerCase()) ||
-                           m.tournament.toLowerCase().includes(query.toLowerCase());
-      const matchesCategory = activeCategory === "All" || m.category === activeCategory;
+  const filteredItems = useMemo(() => {
+    const matches = liveMatches.map(m => ({
+      id: m.id,
+      type: 'match',
+      title: m.name,
+      p1: m.players?.p1?.name || (m.players?.tA1?.name ? `${m.players.tA1.name}/${m.players.tA2.name}` : "Athlete A"),
+      p2: m.players?.p2?.name || (m.players?.tB1?.name ? `${m.players.tB1.name}/${m.players.tB2.name}` : "Athlete B"),
+      score: m.current_score ? `${m.current_score[0]}-${m.current_score[1]}` : "0-0",
+      category: "Match",
+      path: `/broadcast/${m.id}`
+    }));
+
+    const tourneys = liveTournaments.map(t => ({
+      id: t.id,
+      type: 'tournament',
+      title: t.name,
+      loc: t.city,
+      athletes: t.participants?.length || 0,
+      category: "Tournament",
+      path: `/tournament/${t.id}`
+    }));
+
+    const all = [...matches, ...tourneys];
+
+    return all.filter(item => {
+      const matchesSearch = item.title.toLowerCase().includes(query.toLowerCase()) || 
+                           (item.p1 && item.p1.toLowerCase().includes(query.toLowerCase())) ||
+                           (item.p2 && item.p2.toLowerCase().includes(query.toLowerCase()));
+      
+      const matchesCategory = activeCategory === "All" || item.category + "s" === activeCategory;
       return matchesSearch && matchesCategory;
     });
-  }, [query, activeCategory, studioMatches]);
+  }, [query, activeCategory, liveMatches, liveTournaments]);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -71,15 +93,15 @@ const LiveMatch = () => {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Zap className="h-4 w-4 text-sky-500 fill-current" />
-              <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.4em]">Live Intelligence Network</span>
+              <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.4em]">Operational Broadcast Network</span>
             </div>
-            <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-none">Match Feed</h1>
+            <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-none">Global Live Feed</h1>
           </div>
           
           <div className="relative w-full md:w-96">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
             <Input 
-              placeholder="Search Live Intelligence..." 
+              placeholder="Search Live Intel..." 
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="h-14 pl-12 bg-white border-slate-200 rounded-[2rem] font-bold focus:border-sky-500 transition-all shadow-sm"
@@ -103,50 +125,80 @@ const LiveMatch = () => {
         </div>
 
         <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 border-slate-200 shadow-xl bg-white/50">
-          <div className="grid md:grid-cols-2 gap-8">
-            <AnimatePresence mode="popLayout">
-              {filtered.length > 0 ? filtered.map((match) => (
-                <motion.div 
-                  layout
-                  key={match.id}
-                  onClick={() => navigate(`/broadcast/${match.id}`)}
-                  className="flex flex-col items-stretch p-8 rounded-[3rem] border border-slate-100 bg-white transition-all group cursor-pointer hover:border-sky-500/40 hover:shadow-2xl"
-                >
-                  <div className="flex justify-between items-start mb-6">
-                    <Badge className="bg-[#0B1F3A] text-white border-none text-[9px] font-black uppercase px-4 h-6">{match.category}</Badge>
-                    <div className="flex items-center gap-2">
-                       <Radio className="h-3 w-3 text-red-500 animate-pulse" />
-                       <span className="text-[10px] font-black text-slate-400 uppercase">Live Broadcast</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="space-y-2 flex-1">
-                      <p className="text-[10px] font-black text-sky-600 uppercase tracking-widest">{match.tournament}</p>
-                      <div className="font-black text-2xl text-[#0B1F3A] tracking-tighter uppercase italic leading-none">
-                        {match.p1} <br />
-                        <span className="text-sky-500 opacity-20 text-sm">VS</span> <br />
-                        {match.p2}
+          {isLoading ? (
+             <div className="py-32 flex flex-col items-center justify-center gap-4">
+                <Loader2 className="h-10 w-10 text-sky-500 animate-spin" />
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Syncing global nodes...</p>
+             </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-8">
+              <AnimatePresence mode="popLayout">
+                {filteredItems.length > 0 ? filteredItems.map((item) => (
+                  <motion.div 
+                    layout
+                    key={item.id}
+                    onClick={() => navigate(item.path)}
+                    className="flex flex-col items-stretch p-8 rounded-[3rem] border border-slate-100 bg-white transition-all group cursor-pointer hover:border-sky-500/40 hover:shadow-2xl"
+                  >
+                    <div className="flex justify-between items-start mb-6">
+                      <Badge className={cn(
+                        "text-white border-none text-[9px] font-black uppercase px-4 h-6",
+                        item.type === 'match' ? "bg-[#0B1F3A]" : "bg-sky-500"
+                      )}>
+                        {item.category}
+                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Radio className="h-3 w-3 text-red-500 animate-pulse" />
+                        <span className="text-[10px] font-black text-slate-400 uppercase">Live Feed</span>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-6">
-                       <span className="text-5xl font-black font-mono tracking-tighter tabular-nums text-sky-600">
-                          {match.score}
-                       </span>
-                       <Button className="h-14 w-14 rounded-2xl bg-[#0B1F3A] text-white shadow-xl border-none group-hover:bg-sky-500 transition-colors">
-                          <Play className="h-6 w-6 fill-current ml-1" />
-                       </Button>
+
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="space-y-2 flex-1">
+                        <p className="text-[10px] font-black text-sky-600 uppercase tracking-widest flex items-center gap-2">
+                          {item.type === 'match' ? <Activity className="h-3 w-3" /> : <Trophy className="h-3 w-3" />}
+                          {item.type === 'match' ? item.title : item.loc}
+                        </p>
+                        
+                        {item.type === 'match' ? (
+                          <div className="font-black text-2xl text-[#0B1F3A] tracking-tighter uppercase italic leading-none">
+                            {item.p1} <br />
+                            <span className="text-sky-500 opacity-20 text-sm">VS</span> <br />
+                            {item.p2}
+                          </div>
+                        ) : (
+                          <div className="font-black text-3xl text-[#0B1F3A] tracking-tighter uppercase italic leading-none">
+                            {item.title}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex flex-col items-end gap-6">
+                         {item.type === 'match' ? (
+                            <span className="text-5xl font-black font-mono tracking-tighter tabular-nums text-sky-600">
+                               {item.score}
+                            </span>
+                         ) : (
+                            <div className="text-right">
+                              <p className="text-[10px] font-black text-slate-400 uppercase">Athletes</p>
+                              <p className="text-3xl font-black text-sky-600">{item.athletes}</p>
+                            </div>
+                         )}
+                         <Button className="h-14 w-14 rounded-2xl bg-[#0B1F3A] text-white shadow-xl border-none group-hover:bg-sky-500 transition-colors">
+                            <Play className="h-6 w-6 fill-current ml-1" />
+                         </Button>
+                      </div>
                     </div>
+                  </motion.div>
+                )) : (
+                  <div className="col-span-2 py-32 text-center bg-slate-50 rounded-[4rem] border-2 border-dashed border-slate-200">
+                    <Activity className="h-12 w-12 text-slate-200 mx-auto mb-4" />
+                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest italic">No Active Intelligence Found</p>
                   </div>
-                </motion.div>
-              )) : (
-                <div className="col-span-2 py-32 text-center bg-slate-50 rounded-[4rem] border-2 border-dashed border-slate-200">
-                  <Activity className="h-12 w-12 text-slate-200 mx-auto mb-4" />
-                  <p className="text-sm font-black text-slate-400 uppercase tracking-widest italic">No Active Studio Matches Found</p>
-                </div>
-              )}
-            </AnimatePresence>
-          </div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
         </div>
       </main>
     </div>
