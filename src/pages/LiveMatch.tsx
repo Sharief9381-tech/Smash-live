@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Activity, Play, Search, Zap, Radio } from 'lucide-react';
+import { Activity, Play, Search, Zap, Radio, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import { cn, safeJsonParse } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const LiveMatch = () => {
@@ -15,12 +15,19 @@ const LiveMatch = () => {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [studioMatches, setStudioMatches] = useState<any[]>([]);
+  const lastUpdateRef = useRef<string>("");
   
   const categories = ["All", "Singles", "Doubles"];
 
   useEffect(() => {
     const loadStudioMatches = () => {
-      const active = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
+      const raw = localStorage.getItem('active_studio_matches');
+      
+      // Only update if the raw string changed to prevent re-render flicker
+      if (raw === lastUpdateRef.current) return;
+      lastUpdateRef.current = raw || "";
+
+      const active = safeJsonParse(raw, []);
       const formatted = active.map((m: any) => ({
         id: m.id,
         p1: m.players?.p1?.name || (m.players?.tA1?.name ? `${m.players.tA1.name} / ${m.players.tA2.name}` : "Player 1"),
@@ -36,8 +43,13 @@ const LiveMatch = () => {
     };
 
     loadStudioMatches();
-    const interval = setInterval(loadStudioMatches, 1000);
-    return () => clearInterval(interval);
+    const interval = setInterval(loadStudioMatches, 1500);
+    window.addEventListener('storage', loadStudioMatches);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', loadStudioMatches);
+    };
   }, []);
 
   const filtered = useMemo(() => {

@@ -5,6 +5,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { safeJsonParse } from "@/lib/utils";
 import Index from "./pages/Index";
 import LiveMatch from "./pages/LiveMatch";
 import Tournaments from "./pages/Tournaments";
@@ -31,7 +32,7 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+  const userProfile = safeJsonParse(localStorage.getItem('userProfile'), { onboardingComplete: false });
   
   if (!isLoggedIn) return <Navigate to="/login" replace />;
   
