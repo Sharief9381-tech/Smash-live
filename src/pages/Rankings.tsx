@@ -24,7 +24,7 @@ const Rankings = () => {
         if (error) throw error;
         setAthletes(data || []);
       } catch (err) {
-        console.error("Fetch error:", err);
+        console.warn("Ladder sync restricted. Ensure cloud database is linked.");
       } finally {
         setIsLoading(false);
       }
@@ -52,8 +52,8 @@ const Rankings = () => {
       <main className="container px-6 py-16 space-y-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="space-y-4">
-            <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter italic">LADDER</h1>
-            <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest">Live Database Intelligence</p>
+            <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter italic uppercase">Ladder</h1>
+            <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest">Global Athlete Intelligence</p>
           </div>
           <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl">
             {scopes.map((s) => (
@@ -94,9 +94,8 @@ const Rankings = () => {
                   <TableRow className="border-slate-100">
                     <TableHead className="w-24 text-center font-black text-[10px] uppercase py-6">Rank</TableHead>
                     <TableHead className="font-black text-[10px] uppercase">Athlete</TableHead>
-                    <TableHead className="text-center font-black text-[10px] uppercase">Country</TableHead>
                     <TableHead className="text-center font-black text-[10px] uppercase">Smash ID</TableHead>
-                    <TableHead className="text-right font-black text-[10px] uppercase pr-12">Action</TableHead>
+                    <TableHead className="text-right font-black text-[10px] uppercase pr-12">Trend</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -110,19 +109,18 @@ const Rankings = () => {
                           </div>
                           <div>
                             <p className="font-black text-[#0B1F3A] uppercase italic text-sm">{row.name}</p>
-                            <p className="text-[9px] font-bold text-slate-400 uppercase">{row.email}</p>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase">{row.state}</p>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-center font-black text-[#0B1F3A]">{row.country || "IN"}</TableCell>
-                      <TableCell className="text-center font-black text-sky-500 uppercase">{row.smash_id || "PENDING"}</TableCell>
+                      <TableCell className="text-center font-black text-sky-500 uppercase">{row.smash_id || "OFFLINE"}</TableCell>
                       <TableCell className="text-right pr-12">
                          <Minus className="h-4 w-4 text-slate-200 ml-auto" />
                       </TableCell>
                     </TableRow>
                   )) : (
                     <TableRow>
-                      <TableCell colSpan={5} className="h-40 text-center text-slate-300 font-black uppercase text-xs italic">
+                      <TableCell colSpan={4} className="h-40 text-center text-slate-300 font-black uppercase text-xs italic">
                         No athletes synchronized in this scope
                       </TableCell>
                     </TableRow>

@@ -27,7 +27,7 @@ const Analytics = () => {
           participants: participantsCount || 0
         });
       } catch (err) {
-        console.error("Stats fetch error:", err);
+        console.warn("Cloud stats restricted.");
       } finally {
         setLoading(false);
       }
@@ -44,10 +44,10 @@ const Analytics = () => {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-sky-500" />
-            <span className="text-xs font-black text-sky-600 uppercase tracking-[0.3em]">Cloud Operational Intel</span>
+            <span className="text-xs font-black text-sky-600 uppercase tracking-[0.3em]">Operational Intel</span>
           </div>
           <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter">Circuit Pulse</h1>
-          <p className="text-slate-500 font-medium">Live synchronization status of the SmashLive global database.</p>
+          <p className="text-slate-500 font-medium">Real-time synchronization status of the global registry.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -59,7 +59,7 @@ const Analytics = () => {
             <>
               {[
                 { label: "Active Athletes", val: stats.athletes, icon: Activity },
-                { label: "Total Registrations", val: stats.participants, icon: Zap },
+                { label: "Circuit Registrations", val: stats.participants, icon: Zap },
                 { label: "Live Circuits", val: stats.tourneys, icon: ShieldCheck },
               ].map((kpi, i) => (
                 <motion.div 
@@ -83,7 +83,7 @@ const Analytics = () => {
         <div className="py-40 text-center bg-slate-50 rounded-[4rem] border-2 border-dashed border-slate-200">
           <Activity className="h-12 w-12 text-slate-200 mx-auto mb-6" />
           <h3 className="text-xl font-black text-[#0B1F3A] uppercase italic">System Ready</h3>
-          <p className="text-sm font-black text-slate-400 uppercase tracking-widest mt-2 italic">Database synchronization successful. Awaiting biomechanical match data.</p>
+          <p className="text-sm font-black text-slate-400 uppercase tracking-widest mt-2 italic">Awaiting biomechanical data from active sessions.</p>
         </div>
       </main>
     </div>

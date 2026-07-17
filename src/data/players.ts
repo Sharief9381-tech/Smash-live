@@ -7,7 +7,7 @@ export interface Player {
   country: string;
   state: string;
   points?: number;
-  change?: 'up' | 'down' | 'none';
+  change?: 'up' | 'none';
   diff?: number;
   matches?: number;
   winRate?: string;
