@@ -106,14 +106,14 @@ const CreateIndividualMatch = () => {
   const [isInitializing, setIsInitializing] = useState(false);
   const [matchType, setMatchType] = useState<'singles' | 'doubles' | 'mixed'>('singles');
   const [searchQueries, setSearchQueries] = useState<Record<string, string>>({
-    p1: "", p2: "", tA1: "", tA2: "", tB1: "", tB2: ""
+    p1: "", p2: ""
   });
   const [selectedPlayers, setSelectedPlayers] = useState<Record<string, Player | null>>({
-    p1: null, p2: null, tA1: null, tA2: null, tB1: null, tB2: null
+    p1: null, p2: null
   });
   
   const [formData, setFormData] = useState({
-    name: "Smash Exhibition",
+    name: "Friendly Match",
     round: "Friendly",
     court: "01",
     date: new Date().toISOString().split('T')[0],
@@ -134,8 +134,8 @@ const CreateIndividualMatch = () => {
     if (!formData.court) newErrors.court = "Court number is required";
 
     if (matchType === 'singles') {
-      if (!selectedPlayers.p1) newErrors.p1 = "Player 1 required";
-      if (!selectedPlayers.p2) newErrors.p2 = "Player 2 required";
+      if (!selectedPlayers.p1) newErrors.p1 = "Side A Athlete required";
+      if (!selectedPlayers.p2) newErrors.p2 = "Side B Athlete required";
     }
 
     setErrors(newErrors);
@@ -165,6 +165,7 @@ const CreateIndividualMatch = () => {
           status: 'live',
           current_score: [0, 0],
           sets_won: [0, 0],
+          total_sets: parseInt(formData.sets),
           serving: 1
         }])
         .select()
@@ -172,12 +173,18 @@ const CreateIndividualMatch = () => {
 
       if (error) throw error;
       
-      showSuccess("Match started successfully");
+      showSuccess("Match intelligence initialized");
       navigate(`/scoring/${data.id}`);
     } catch (err: any) {
-      // Fallback for demo if DB write fails
+      // Fallback for demo
       const matchId = `live_${Date.now()}`;
-      localStorage.setItem(matchId, JSON.stringify({ ...formData, players: selectedPlayers, id: matchId }));
+      const payload = { ...formData, players: selectedPlayers, id: matchId, total_sets: parseInt(formData.sets) };
+      localStorage.setItem(matchId, JSON.stringify(payload));
+      
+      const active = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
+      active.push(payload);
+      localStorage.setItem('active_studio_matches', JSON.stringify(active));
+      
       showSuccess("Match started (Local Node)");
       navigate(`/scoring/${matchId}`);
     } finally {
@@ -213,7 +220,7 @@ const CreateIndividualMatch = () => {
                 <div className="h-12 w-12 rounded-2xl bg-[#0B1F3A] text-white flex items-center justify-center shadow-lg">
                   <Trophy className="h-6 w-6" />
                 </div>
-                <h3 className="text-xl font-black text-[#0B1F3A] uppercase italic">Match Setup</h3>
+                <h3 className="text-xl font-black text-[#0B1F3A] uppercase italic">Protocol</h3>
               </div>
               
               <div className="space-y-6 relative z-10">
@@ -238,12 +245,38 @@ const CreateIndividualMatch = () => {
                     </Select>
                   </div>
                   <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Match Type</Label>
+                    <Select value={formData.round} onValueChange={(v) => setFormData({...formData, round: v})}>
+                      <SelectTrigger className="h-14 bg-slate-50 border-slate-100 rounded-2xl font-bold"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Friendly">Friendly</SelectItem>
+                        <SelectItem value="Exhibition">Exhibition</SelectItem>
+                        <SelectItem value="Challenge">Challenge</SelectItem>
+                        <SelectItem value="Practice">Practice</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Court #</Label>
                     <Input 
                       value={formData.court} 
                       onChange={e => setFormData({...formData, court: e.target.value})} 
                       className={cn("h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold", errors.court && "border-red-500")}
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Sets Protocol</Label>
+                    <Select value={formData.sets} onValueChange={(v: any) => setFormData({...formData, sets: v})}>
+                      <SelectTrigger className="h-14 bg-slate-50 border-slate-100 rounded-2xl font-bold"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1 Set (Quick)</SelectItem>
+                        <SelectItem value="3">3 Sets (Standard)</SelectItem>
+                        <SelectItem value="5">5 Sets (Championship)</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
@@ -257,7 +290,7 @@ const CreateIndividualMatch = () => {
                   <div className="h-12 w-12 rounded-2xl bg-sky-500 text-white flex items-center justify-center shadow-lg">
                     <Users className="h-6 w-6" />
                   </div>
-                  <h3 className="text-xl font-black text-[#0B1F3A] uppercase italic">Player Selection</h3>
+                  <h3 className="text-xl font-black text-[#0B1F3A] uppercase italic">Athlete Selection</h3>
                 </div>
               </div>
 
@@ -298,7 +331,7 @@ const CreateIndividualMatch = () => {
                 disabled={isInitializing}
                 className="w-full h-24 bg-[#0B1F3A] text-white font-black text-3xl rounded-[2.5rem] shadow-[0_25px_50px_rgba(11,31,58,0.2)] hover:bg-sky-500 transition-all group flex items-center justify-center gap-6"
               >
-                {isInitializing ? <Loader2 className="h-8 w-8 animate-spin" /> : "START MATCH"}
+                {isInitializing ? <Loader2 className="h-8 w-8 animate-spin" /> : "INITIALIZE MATCH"}
               </Button>
             </div>
           </div>

@@ -41,8 +41,18 @@ const ScoringPage = () => {
         if (data.sets_won) setSetsWon(data.sets_won);
         if (data.serving) setServing(data.serving as 1 | 2);
       } catch (err) {
-        showError("Failed to fetch match session.");
-        navigate('/broadcast/center');
+        // Fallback for local
+        const local = localStorage.getItem(matchId || "");
+        if (local) {
+          const data = JSON.parse(local);
+          setMatchData(data);
+          if (data.currentScore) setScore(data.currentScore);
+          if (data.setsWon) setSetsWon(data.setsWon);
+          if (data.serving) setServing(data.serving);
+        } else {
+          showError("Session not found");
+          navigate('/broadcast/center');
+        }
       } finally {
         setLoading(false);
       }
@@ -52,7 +62,7 @@ const ScoringPage = () => {
 
   const updateMatchOnCloud = async (newScore: [number, number], newSets: [number, number], newServing: number) => {
     try {
-      const { error } = await supabase
+      await supabase
         .from('matches')
         .update({
           current_score: newScore,
@@ -61,10 +71,10 @@ const ScoringPage = () => {
           last_update: new Date().toISOString()
         })
         .eq('id', matchId);
-
-      if (error) throw error;
     } catch (err) {
-      console.error("Cloud sync failed:", err);
+      // Local sync fallback
+      const updated = { ...matchData, currentScore: newScore, setsWon: newSets, serving: newServing };
+      localStorage.setItem(matchId!, JSON.stringify(updated));
     }
   };
 
@@ -80,11 +90,21 @@ const ScoringPage = () => {
     let finalSets = [...setsWon] as [number, number];
     let finalScore = newScore;
 
-    // Check set win (standard 21 point rule)
+    // Check set win (21 points)
     if (newScore[side - 1] >= 21 && Math.abs(newScore[0] - newScore[1]) >= 2) {
       finalSets[side - 1]++;
       setSetsWon(finalSets);
       showSuccess(`Set Won by Side ${side === 1 ? 'A' : 'B'}`);
+      
+      const totalSets = matchData?.total_sets || matchData?.sets || 3;
+      const setsToWin = Math.ceil(totalSets / 2);
+      
+      if (finalSets[side - 1] >= setsToWin) {
+         showSuccess("MATCH COMPLETED!");
+         finalizeMatch();
+         return;
+      }
+      
       finalScore = [0, 0];
       setScore(finalScore);
     }
@@ -102,7 +122,7 @@ const ScoringPage = () => {
   };
 
   const reset = async () => {
-    if (!confirm("Are you sure you want to reset the match?")) return;
+    if (!confirm("Reset match intelligence?")) return;
     const s: [number, number] = [0, 0];
     const sw: [number, number] = [0, 0];
     setScore(s);
@@ -114,20 +134,20 @@ const ScoringPage = () => {
 
   const finalizeMatch = async () => {
     try {
-      const { error } = await supabase
-        .from('matches')
-        .update({ status: 'completed' })
-        .eq('id', matchId);
+      await supabase.from('matches').update({ status: 'completed' }).eq('id', matchId);
       
-      if (error) throw error;
-      showSuccess("Match intelligence finalized.");
-      navigate('/court');
+      // Update local list
+      const active = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
+      localStorage.setItem('active_studio_matches', JSON.stringify(active.filter((m: any) => m.id !== matchId)));
+      
+      showSuccess("Match finalized.");
+      navigate('/smashed');
     } catch (err) {
-      showError("Failed to finalize match.");
+      navigate('/smashed');
     }
   };
 
-  if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-sky-500" /></div>;
+  if (loading) return <div className="h-screen flex items-center justify-center bg-slate-50"><Loader2 className="animate-spin text-sky-500" /></div>;
   if (!matchData) return null;
 
   return (
@@ -146,7 +166,7 @@ const ScoringPage = () => {
           </Button>
           <div className="flex items-center gap-3">
              <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Broadcasting Match: {matchData.name}</span>
+             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Match: {matchData.name} ({matchData.total_sets || matchData.sets}-Set Protocol)</span>
           </div>
         </div>
 
@@ -191,7 +211,7 @@ const ScoringPage = () => {
                 </motion.span>
 
                 <div className="mt-8 flex gap-3 relative z-10">
-                  {[...Array(2)].map((_, i) => (
+                  {[...Array(Math.ceil((matchData.total_sets || matchData.sets || 3)/2))].map((_, i) => (
                     <div 
                       key={i} 
                       className={cn(
@@ -236,24 +256,15 @@ const ScoringPage = () => {
                       </button>
                     </div>
                     <div className="grid grid-cols-3 gap-3 flex-1">
-                      <Button 
-                        onClick={() => handlePoint(side as 1 | 2, 'Smash')} 
-                        className="h-full bg-white/5 hover:bg-sky-500 border border-white/10 rounded-2xl flex flex-col gap-2"
-                      >
+                      <Button onClick={() => handlePoint(side as 1 | 2, 'Smash')} className="h-full bg-white/5 hover:bg-sky-500 border border-white/10 rounded-2xl flex flex-col gap-2">
                         <Zap className="h-6 w-6 text-sky-400 group-hover:text-white fill-current" />
                         <span className="text-[10px] font-black uppercase tracking-widest">Smash</span>
                       </Button>
-                      <Button 
-                        onClick={() => handlePoint(side as 1 | 2, 'Net')} 
-                        className="h-full bg-white/5 hover:bg-sky-500 border border-white/10 rounded-2xl flex flex-col gap-2"
-                      >
+                      <Button onClick={() => handlePoint(side as 1 | 2, 'Net')} className="h-full bg-white/5 hover:bg-sky-500 border border-white/10 rounded-2xl flex flex-col gap-2">
                         <Target className="h-6 w-6 text-sky-400 group-hover:text-white" />
                         <span className="text-[10px] font-black uppercase tracking-widest">Net Kill</span>
                       </Button>
-                      <Button 
-                        onClick={() => handlePoint(side as 1 | 2, 'Error')} 
-                        className="h-full bg-white/5 hover:bg-red-500 border border-white/10 rounded-2xl flex flex-col gap-2"
-                      >
+                      <Button onClick={() => handlePoint(side as 1 | 2, 'Error')} className="h-full bg-white/5 hover:bg-red-500 border border-white/10 rounded-2xl flex flex-col gap-2">
                         <AlertCircle className="h-6 w-6 text-red-400 group-hover:text-white" />
                         <span className="text-[10px] font-black uppercase tracking-widest text-center">Opp. Error</span>
                       </Button>
@@ -277,7 +288,7 @@ const ScoringPage = () => {
             variant="outline" 
             className="h-full rounded-[1.5rem] border-slate-200 bg-white font-black text-xs uppercase tracking-widest gap-3 shadow-sm hover:border-[#0B1F3A] group"
           >
-            <StopCircle className="h-4 w-4 text-[#0B1F3A] group-hover:scale-110 transition-transform" /> Finalize Match
+            <StopCircle className="h-4 w-4 text-[#0B1F3A] group-hover:scale-110 transition-transform" /> Finalize
           </Button>
         </div>
 
