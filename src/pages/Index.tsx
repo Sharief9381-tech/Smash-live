@@ -6,7 +6,9 @@ import Footer from '@/components/layout/Footer';
 import { motion } from 'framer-motion';
 import { 
   ArrowRight, Activity, Trophy, Users, 
-  Zap, TrendingUp, ChevronRight
+  Zap, TrendingUp, ChevronRight, Monitor,
+  ShieldCheck, Database, Globe, BarChart3, 
+  CheckCircle2, Play
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,165 +24,226 @@ const Index = () => {
     if (tourneys.length > 0) setStats(s => ({ ...s, tourneys: tourneys.length }));
   }, []);
 
-  const modules = [
-    { title: "Live Scoring", icon: Activity, features: ["Millisecond precision", "Dynamic court tracking"] },
-    { title: "AI Commentary", icon: Zap, features: ["Real-time event analysis", "Highlight generation"] },
-    { title: "Circuit Hub", icon: Trophy, features: ["Automated brackets", "Player seeding logic"] },
-    { title: "Athlete Dossier", icon: Users, features: ["Global performance ID", "Historical tracking"] },
+  const featureGroups = [
+    {
+      category: "Match Intelligence",
+      icon: Activity,
+      color: "text-sky-500",
+      bg: "bg-sky-50",
+      features: [
+        "Live Millisecond Scoring",
+        "Dynamic Point Attribution",
+        "Server-Side Synchronization",
+        "Match Momentum Analysis"
+      ]
+    },
+    {
+      category: "Broadcast Studio",
+      icon: Monitor,
+      color: "text-indigo-500",
+      bg: "bg-indigo-50",
+      features: [
+        "Ultra-Low Latency Feed",
+        "Interactive Score Overlays",
+        "AI-Generated Commentary",
+        "Global Viewer Analytics"
+      ]
+    },
+    {
+      category: "Circuit Engine",
+      icon: Trophy,
+      color: "text-amber-500",
+      bg: "bg-amber-50",
+      features: [
+        "Auto-Bracket Generation",
+        "Automated Athlete Seeding",
+        "Tournament Entry Portals",
+        "Prize Pool Distribution"
+      ]
+    },
+    {
+      category: "Athlete Dossier",
+      icon: Users,
+      color: "text-emerald-500",
+      bg: "bg-emerald-50",
+      features: [
+        "Universal Smash ID",
+        "Historical Career Tracking",
+        "National & State Rankings",
+        "Biomechanical Stat Mapping"
+      ]
+    }
   ];
 
   return (
     <div className="min-h-screen bg-white selection:bg-sky-500/30">
       <Navbar />
       
-      {/* 1. IMPACT HERO */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden py-20 bg-[#F8FAFC]">
-        <div className="absolute top-0 right-0 w-[60%] h-[60%] bg-sky-500/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/4" />
-        <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-[#0B1F3A]/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/4" />
-
-        <div className="container px-6 grid lg:grid-cols-2 gap-16 items-center relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            className="space-y-10"
-          >
-            <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white border border-slate-200 shadow-sm">
-              <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#0B1F3A]">Network Operational • 12M Active Sessions</span>
+      {/* Tightened Hero Section */}
+      <section className="relative flex items-center overflow-hidden py-10 bg-[#F8FAFC] border-b border-slate-100">
+        <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-sky-500/10 blur-[100px] rounded-full -translate-y-1/4" />
+        
+        <div className="container px-6 grid lg:grid-cols-2 gap-8 items-center relative z-10">
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm">
+              <span className="flex h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-[9px] font-black uppercase tracking-widest text-[#0B1F3A]">Operational Node active • 12M Active Sessions</span>
             </div>
 
-            <div className="space-y-2">
-              <motion.h1 
-                className="text-7xl md:text-9xl font-black text-[#0B1F3A] leading-[0.85] tracking-tighter uppercase italic"
-                initial={{ scale: 0.95 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 1 }}
-              >
+            <div className="space-y-1">
+              <h1 className="text-6xl md:text-8xl font-black text-[#0B1F3A] leading-[0.9] tracking-tighter uppercase italic">
                 SMASH <br />
-                <span className="text-sky-500 drop-shadow-[0_0_30px_rgba(14,165,233,0.3)]">LIVE</span>
-              </motion.h1>
-              <div className="h-2 w-32 bg-sky-500 rounded-full" />
+                <span className="text-sky-500">LIVE</span>
+              </h1>
+              <div className="h-1.5 w-24 bg-sky-500 rounded-full" />
             </div>
 
-            <p className="text-2xl text-slate-500 font-medium max-w-lg leading-relaxed tracking-tight">
-              The professional ecosystem for <span className="text-[#0B1F3A] font-black underline decoration-sky-500 decoration-4">real-time match intelligence</span> and global tournament synchronization.
+            <p className="text-xl text-slate-500 font-medium max-w-lg leading-snug tracking-tight">
+              A comprehensive ecosystem for <span className="text-[#0B1F3A] font-black">real-time match intelligence</span> and global tournament synchronization.
             </p>
 
-            <div className="flex flex-wrap gap-4 pt-6">
+            <div className="flex flex-wrap gap-3 pt-2">
               <Link to="/login">
-                <Button size="lg" className="bg-sky-500 text-white rounded-[1.5rem] px-8 font-black text-lg h-16 hover:bg-sky-600 transition-all hover:translate-y-[-4px] shadow-2xl border-none group">
-                  ENTER THE INDOOR <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-2 transition-transform" />
+                <Button size="lg" className="bg-[#0B1F3A] text-white rounded-2xl px-8 font-black h-14 hover:bg-sky-600 transition-all shadow-xl group border-none">
+                  ENTER THE COURT <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1" />
                 </Button>
               </Link>
               <Link to="/tournaments">
-                <Button size="lg" variant="outline" className="border-slate-200 text-[#0B1F3A] rounded-[1.5rem] px-8 font-black text-lg h-16 hover:bg-white hover:border-sky-500 transition-all">
+                <Button size="lg" variant="outline" className="border-slate-200 text-[#0B1F3A] rounded-2xl px-8 font-black h-14 hover:bg-white hover:border-sky-500 transition-all">
                   EXPLORE CIRCUITS
                 </Button>
               </Link>
             </div>
           </motion.div>
 
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 1 }}
-            className="relative hidden lg:block"
-          >
-            <div className="glass-panel p-10 rounded-[4rem] border-sky-500/20 shadow-[0_40px_80px_rgba(0,0,0,0.08)] space-y-10 bg-white/80 backdrop-blur-2xl">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-8">
-                <div className="flex items-center gap-4">
-                  <div className="h-16 w-16 rounded-3xl bg-[#0B1F3A] text-white flex items-center justify-center shadow-lg">
-                    <TrendingUp className="h-8 w-8 text-sky-400" />
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative hidden lg:block">
+            <div className="glass-panel p-8 rounded-[3rem] border-sky-500/10 shadow-2xl bg-white space-y-8">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-2xl bg-sky-500 text-white flex items-center justify-center shadow-lg">
+                    <TrendingUp className="h-6 w-6" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-black text-[#0B1F3A] uppercase tracking-[0.2em]">Operational Pulse</h4>
-                    <p className="text-[10px] font-bold text-slate-400">SESSION: ACTIVE_LIVE_001</p>
+                    <h4 className="text-xs font-black text-[#0B1F3A] uppercase tracking-widest">Network Pulse</h4>
+                    <p className="text-[9px] font-bold text-slate-400">SESSION: ID_ACTIVE_X</p>
                   </div>
                 </div>
-                <Badge className="bg-red-500 text-white animate-pulse border-none h-8 px-5 text-xs font-black rounded-full">LIVE FEED</Badge>
+                <Badge className="bg-red-500 text-white animate-pulse border-none h-7 px-4 text-[9px] font-black rounded-full uppercase">Live Feed</Badge>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
-                <div className="bg-slate-50 p-8 rounded-[2.5rem] space-y-4 border border-slate-100">
-                  <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    <Users className="h-4 w-4" /> Registered
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-50 p-6 rounded-[2rem] space-y-2 border border-slate-100">
+                  <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                    <Users className="h-3 w-3" /> Registered
                   </div>
-                  <p className="text-4xl font-black text-[#0B1F3A]">{stats.athletes}</p>
+                  <p className="text-3xl font-black text-[#0B1F3A]">{stats.athletes}</p>
                 </div>
-                <div className="bg-slate-50 p-8 rounded-[2.5rem] space-y-4 border border-slate-100">
-                  <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    <Zap className="h-4 w-4 text-sky-500 fill-sky-500" /> Active Circuits
+                <div className="bg-slate-50 p-6 rounded-[2rem] space-y-2 border border-slate-100">
+                  <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                    <Zap className="h-3 w-3 text-sky-500 fill-current" /> Circuits
                   </div>
-                  <p className="text-4xl font-black text-[#0B1F3A]">{stats.tourneys}</p>
+                  <p className="text-3xl font-black text-[#0B1F3A]">{stats.tourneys}</p>
                 </div>
               </div>
 
-              <div className="bg-[#0B1F3A] p-6 rounded-[2rem] flex items-center justify-between">
-                 <div className="flex items-center gap-3">
-                   <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                   <span className="text-[10px] font-black text-sky-400 uppercase tracking-widest">Database Sync Success</span>
+              <div className="p-4 bg-sky-500 rounded-2xl flex items-center justify-between text-white">
+                 <div className="flex items-center gap-2">
+                   <div className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                   <span className="text-[10px] font-black uppercase tracking-widest">Registry Sync Complete</span>
                  </div>
-                 <ChevronRight className="h-4 w-4 text-white/20" />
+                 <ChevronRight className="h-4 w-4 opacity-50" />
               </div>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* 2. PLATFORM CORE MODULES */}
-      <section className="py-32 bg-white">
-        <div className="container px-6 space-y-20">
-          <div className="text-center space-y-4 max-w-2xl mx-auto">
-            <h2 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic">The Studio Engine</h2>
-            <p className="text-slate-500 font-medium text-lg">Four integrated modules working in harmony to power the global circuit.</p>
-            <div className="h-1.5 w-24 bg-sky-500 mx-auto rounded-full" />
+      {/* Expanded Feature Intelligence - Reduced spacing */}
+      <section className="py-16 bg-white">
+        <div className="container px-6 space-y-12">
+          <div className="text-center space-y-2 max-w-2xl mx-auto">
+            <h2 className="text-4xl font-black text-[#0B1F3A] tracking-tighter uppercase italic">Platform Intelligence</h2>
+            <p className="text-slate-500 font-medium text-base">Integrated modules engineered for professional speed and tactical accuracy.</p>
+            <div className="h-1 w-20 bg-sky-500 mx-auto rounded-full mt-4" />
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {modules.map((m, i) => (
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featureGroups.map((group, i) => (
               <motion.div 
                 key={i}
-                whileHover={{ y: -12 }}
-                className="glass-panel p-10 rounded-[3rem] hover:border-sky-500/40 transition-all group relative overflow-hidden bg-white border-slate-200"
+                whileHover={{ y: -5 }}
+                className="glass-panel p-8 rounded-[2.5rem] bg-white border-slate-100 shadow-lg hover:border-sky-200 transition-all flex flex-col justify-between"
               >
-                <div className="h-16 w-16 rounded-3xl bg-[#0B1F3A]/5 text-[#0B1F3A] flex items-center justify-center mb-8 group-hover:bg-[#0B1F3A] group-hover:text-white transition-all duration-500">
-                  <m.icon className="h-8 w-8" />
+                <div className="space-y-6">
+                  <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center shadow-inner", group.bg, group.color)}>
+                    <group.icon className="h-7 w-7" />
+                  </div>
+                  <h3 className="text-xl font-black text-[#0B1F3A] uppercase italic leading-none">{group.category}</h3>
+                  <ul className="space-y-2.5">
+                    {group.features.map((f, j) => (
+                      <li key={j} className="text-[10px] font-bold text-slate-500 flex items-center gap-2 uppercase tracking-tight">
+                        <CheckCircle2 className={cn("h-3 w-3", group.color)} /> {f}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <h3 className="text-2xl font-black text-[#0B1F3A] mb-6 tracking-tight uppercase italic">{m.title}</h3>
-                <ul className="space-y-3">
-                  {m.features.map((f, j) => (
-                    <li key={j} className="text-[11px] font-bold text-slate-400 flex items-center gap-3">
-                      <div className="h-1.5 w-1.5 rounded-full bg-sky-500" /> {f}
-                    </li>
-                  ))}
-                </ul>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 3. FINAL CTA SECTION */}
-      <section className="py-20 bg-slate-50">
+      {/* Capabilities Section - Added to fill content */}
+      <section className="py-12 bg-slate-50">
+        <div className="container px-6 grid lg:grid-cols-3 gap-8">
+           <div className="lg:col-span-1 space-y-4">
+              <Badge className="bg-sky-500 text-white font-black px-4 py-1 border-none text-[9px] uppercase">Core Tech</Badge>
+              <h2 className="text-3xl font-black text-[#0B1F3A] uppercase italic leading-tight">Advanced Connectivity</h2>
+              <p className="text-sm text-slate-500 font-medium leading-relaxed">Our backbone uses distributed edge nodes to ensure every smash is logged and synced with sub-50ms latency across the global network.</p>
+           </div>
+           
+           <div className="lg:col-span-2 grid md:grid-cols-2 gap-4">
+              {[
+                { title: "Real-time Scoring", desc: "Digital scoreboard with instant cloud sync.", icon: Database },
+                { title: "Global Registry", desc: "Centralized database of athlete performance.", icon: Globe },
+                { title: "AI Commentary", desc: "Automated event logs and highlights.", icon: Zap },
+                { title: "Data Analytics", desc: "Deep dive into win rates and accuracies.", icon: BarChart3 },
+              ].map((item, i) => (
+                <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 flex items-start gap-4 hover:shadow-md transition-shadow">
+                   <div className="h-10 w-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+                      <item.icon className="h-5 w-5" />
+                   </div>
+                   <div>
+                      <h4 className="font-black text-[#0B1F3A] uppercase text-xs tracking-tight">{item.title}</h4>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mt-1">{item.desc}</p>
+                   </div>
+                </div>
+              ))}
+           </div>
+        </div>
+      </section>
+
+      {/* Colorful CTA - Darkness Removed */}
+      <section className="py-12 bg-white">
         <div className="container px-6">
-          <div className="bg-[#0B1F3A] rounded-[4rem] p-16 flex flex-col md:flex-row items-center justify-between gap-12 relative overflow-hidden shadow-2xl">
-            <div className="absolute -right-20 -bottom-20 opacity-10 pointer-events-none">
-              <Zap className="h-[400px] w-[400px] text-sky-400" />
+          <div className="relative bg-gradient-to-br from-sky-400 to-indigo-600 rounded-[3.5rem] p-12 flex flex-col md:flex-row items-center justify-between gap-10 overflow-hidden shadow-[0_30px_60px_-12px_rgba(14,165,233,0.3)]">
+            <div className="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
+              <Trophy className="h-[300px] w-[300px] text-white" />
             </div>
-            <div className="space-y-8 relative z-10 max-w-xl">
-              <div className="space-y-2">
-                <h2 className="text-5xl font-black text-white tracking-tighter uppercase italic leading-tight">Elevate Your <br /> Circuit Intelligence</h2>
-                <p className="text-white/50 font-medium text-lg leading-relaxed">Join thousands of athletes and organizers defining the future of professional badminton.</p>
+            
+            <div className="space-y-6 relative z-10 max-w-xl text-white">
+              <div className="space-y-1">
+                <h2 className="text-5xl font-black tracking-tighter uppercase italic leading-[0.9]">Elevate Your Circuit Intelligence</h2>
+                <p className="text-white/80 font-bold uppercase text-xs tracking-widest mt-2">Professional Grade Ecosystem for Athletes & Organizers</p>
               </div>
-              <div className="flex gap-4">
+              <div className="flex flex-wrap gap-4 pt-2">
                 <Link to="/tournaments/create">
-                  <Button className="bg-sky-500 text-white font-black px-10 h-16 rounded-[1.5rem] shadow-xl hover:bg-sky-400 transition-all">
+                  <Button className="bg-white text-sky-600 font-black px-10 h-14 rounded-2xl shadow-xl hover:bg-sky-50 transition-all border-none">
                     START A CIRCUIT
                   </Button>
                 </Link>
                 <Link to="/login">
-                  <Button variant="outline" className="border-white/20 text-white font-black px-10 h-16 rounded-[1.5rem] hover:bg-white/5 transition-all">
+                  <Button variant="outline" className="border-white/40 text-white font-black px-10 h-14 rounded-2xl hover:bg-white/10 transition-all">
                     JOIN AS ATHLETE
                   </Button>
                 </Link>
@@ -188,15 +251,14 @@ const Index = () => {
             </div>
             
             <div className="grid grid-cols-2 gap-4 relative z-10 w-full md:w-auto">
-               {[
-                 { label: "Global Nodes", val: "24" },
-                 { label: "Est. Viewers", val: "1.2M" }
-               ].map((stat, i) => (
-                 <div key={i} className="bg-white/5 border border-white/10 p-8 rounded-[2.5rem] text-center min-w-[160px]">
-                    <p className="text-4xl font-black text-white">{stat.val}</p>
-                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-2">{stat.label}</p>
-                 </div>
-               ))}
+               <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-[2rem] text-center min-w-[150px]">
+                  <p className="text-4xl font-black text-white">24</p>
+                  <p className="text-[9px] font-bold text-white/60 uppercase tracking-widest mt-1">Global Nodes</p>
+               </div>
+               <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-[2rem] text-center min-w-[150px]">
+                  <p className="text-4xl font-black text-white">1.2M</p>
+                  <p className="text-[9px] font-bold text-white/60 uppercase tracking-widest mt-1">Live Scopes</p>
+               </div>
             </div>
           </div>
         </div>
