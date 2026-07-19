@@ -1,13 +1,13 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { motion } from 'framer-motion';
 import { 
   ArrowRight, Activity, Trophy, Users, 
   Target, Globe, Radio, Zap, Bell, Flame,
-  TrendingUp, ShieldCheck
+  TrendingUp, ShieldCheck, ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -156,7 +156,7 @@ const Index = () => {
               <motion.div 
                 key={i}
                 whileHover={{ y: -12 }}
-                className="glass-panel p-10 rounded-[3rem] hover:border-sky-500/40 transition-all group relative overflow-hidden"
+                className="glass-panel p-10 rounded-[3.5rem] hover:border-sky-500/40 transition-all group relative overflow-hidden"
               >
                 <div className="h-16 w-16 rounded-3xl bg-[#0B1F3A]/5 text-[#0B1F3A] flex items-center justify-center mb-8 group-hover:bg-[#0B1F3A] group-hover:text-white transition-all duration-500">
                   <m.icon className="h-8 w-8" />

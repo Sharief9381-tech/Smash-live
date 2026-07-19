@@ -260,7 +260,7 @@ const Index = () => {
                     <p className="text-[10px] font-black text-sky-400 uppercase tracking-widest">Sync Uptime</p>
                  </div>
                  <div className="space-y-1">
-                    <p className="text-3xl font-black text-white"><50ms</p>
+                    <p className="text-3xl font-black text-white">{"<"}50ms</p>
                     <p className="text-[10px] font-black text-sky-400 uppercase tracking-widest">Latency</p>
                  </div>
               </div>
