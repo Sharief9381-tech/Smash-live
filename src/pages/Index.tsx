@@ -8,7 +8,7 @@ import {
   ArrowRight, Activity, Trophy, Users, 
   Zap, TrendingUp, ChevronRight, Monitor,
   ShieldCheck, Database, Globe, BarChart3, 
-  CheckCircle2, Play
+  CheckCircle2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -60,7 +60,7 @@ const Index = () => {
     <div className="min-h-screen bg-white selection:bg-sky-500/30 overflow-x-hidden">
       <Navbar />
       
-      {/* Dynamic Hero Section */}
+      {/* Hero Section */}
       <section className="relative min-h-[85vh] flex items-center bg-[#F8FAFC] border-b border-slate-100 py-20 md:py-0">
         <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-sky-500/10 blur-[120px] rounded-full -translate-y-1/4 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[30%] h-[30%] bg-indigo-500/5 blur-[100px] rounded-full translate-y-1/4 pointer-events-none" />
@@ -149,7 +149,7 @@ const Index = () => {
       </section>
 
       {/* Intelligence Grid */}
-      <section className="py-40 bg-white">
+      <section className="py-48 bg-white">
         <div className="container px-6 space-y-24">
           <div className="text-center space-y-4 max-w-2xl mx-auto">
             <h2 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic">Platform Intelligence</h2>
@@ -184,7 +184,7 @@ const Index = () => {
       </section>
 
       {/* Connectivity Section */}
-      <section className="py-40 bg-slate-50">
+      <section className="py-48 bg-slate-50">
         <div className="container px-6">
           <div className="grid lg:grid-cols-12 gap-20 items-center">
             <div className="lg:col-span-5 space-y-8">
@@ -217,51 +217,53 @@ const Index = () => {
       </section>
 
       {/* Heroic CTA Section - REFINED LIGHT VERSION */}
-      <section className="py-40 bg-white">
+      <section className="py-48 bg-white">
         <div className="container px-6">
-          <div className="relative bg-sky-50 border border-sky-100 rounded-[4rem] p-12 md:p-16 overflow-hidden shadow-sm">
+          <div className="relative bg-sky-50 border border-sky-100 rounded-[3.5rem] p-10 md:p-12 overflow-hidden shadow-sm max-w-5xl mx-auto">
             {/* Background Accents */}
             <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-white/40 to-transparent pointer-events-none" />
-            <div className="absolute -right-20 -bottom-20 opacity-5 pointer-events-none">
-              <Trophy className="h-[400px] w-[400px] text-[#0B1F3A]" />
+            <div className="absolute -right-16 -bottom-16 opacity-5 pointer-events-none">
+              <Trophy className="h-[300px] w-[300px] text-[#0B1F3A]" />
             </div>
             
-            <div className="relative z-10 max-w-3xl space-y-8">
-              <div className="space-y-4">
-                <Badge className="bg-[#0B1F3A] text-white font-black px-6 py-2 border-none text-[10px] uppercase tracking-widest rounded-full">Ecosystem Access</Badge>
-                <h2 className="text-5xl md:text-6xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-[0.9]">Elevate Your <br /> Intelligence</h2>
-                <p className="text-lg text-[#0B1F3A]/60 font-bold uppercase tracking-widest max-w-md">Professional Grade Ecosystem for Elite Athletes & Global Organizers</p>
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-10">
+              <div className="space-y-6 max-w-lg">
+                <div className="space-y-2">
+                  <Badge className="bg-[#0B1F3A] text-white font-black px-4 py-1.5 border-none text-[9px] uppercase tracking-widest rounded-full">Ecosystem Access</Badge>
+                  <h2 className="text-4xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-none">Elevate Your <br /> Intelligence</h2>
+                </div>
+                <p className="text-sm text-[#0B1F3A]/60 font-bold uppercase tracking-widest">Professional Grade Ecosystem for Elite Athletes & Global Organizers</p>
+                
+                <div className="flex flex-wrap gap-4">
+                  <Link to="/tournaments/create">
+                    <Button className="bg-[#0B1F3A] text-white font-black px-8 h-14 rounded-xl text-xs tracking-widest shadow-md hover:bg-sky-600 transition-all border-none">
+                      START A CIRCUIT
+                    </Button>
+                  </Link>
+                  <Link to="/login">
+                    <Button variant="outline" className="border-slate-200 text-[#0B1F3A] font-black px-8 h-14 rounded-xl text-xs tracking-widest hover:bg-white transition-all bg-white/50 backdrop-blur-md">
+                      JOIN AS ATHLETE
+                    </Button>
+                  </Link>
+                </div>
               </div>
 
-              <div className="flex flex-wrap gap-4 pt-2">
-                <Link to="/tournaments/create">
-                  <Button className="bg-[#0B1F3A] text-white font-black px-10 h-16 rounded-[1.5rem] text-lg shadow-lg hover:bg-sky-600 transition-all border-none">
-                    START A CIRCUIT
-                  </Button>
-                </Link>
-                <Link to="/login">
-                  <Button variant="outline" className="border-slate-200 text-[#0B1F3A] font-black px-10 h-16 rounded-[1.5rem] text-lg hover:bg-white transition-all bg-white/50 backdrop-blur-md">
-                    JOIN AS ATHLETE
-                  </Button>
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8 border-t border-[#0B1F3A]/5">
+              <div className="grid grid-cols-2 gap-6 md:border-l border-[#0B1F3A]/10 md:pl-10">
                  <div className="space-y-1">
-                    <p className="text-2xl font-black text-[#0B1F3A]">24</p>
-                    <p className="text-[9px] font-black text-[#0B1F3A]/40 uppercase tracking-widest">Global Nodes</p>
+                    <p className="text-xl font-black text-[#0B1F3A]">24</p>
+                    <p className="text-[8px] font-black text-[#0B1F3A]/40 uppercase tracking-widest">Nodes</p>
                  </div>
                  <div className="space-y-1">
-                    <p className="text-2xl font-black text-[#0B1F3A]">1.2M</p>
-                    <p className="text-[9px] font-black text-[#0B1F3A]/40 uppercase tracking-widest">Live Scopes</p>
+                    <p className="text-xl font-black text-[#0B1F3A]">1.2M</p>
+                    <p className="text-[8px] font-black text-[#0B1F3A]/40 uppercase tracking-widest">Scopes</p>
                  </div>
                  <div className="space-y-1">
-                    <p className="text-2xl font-black text-[#0B1F3A]">99.9%</p>
-                    <p className="text-[9px] font-black text-[#0B1F3A]/40 uppercase tracking-widest">Sync Uptime</p>
+                    <p className="text-xl font-black text-[#0B1F3A]">99.9%</p>
+                    <p className="text-[8px] font-black text-[#0B1F3A]/40 uppercase tracking-widest">Uptime</p>
                  </div>
                  <div className="space-y-1">
-                    <p className="text-2xl font-black text-[#0B1F3A]"><50ms</p>
-                    <p className="text-[9px] font-black text-[#0B1F3A]/40 uppercase tracking-widest">Latency</p>
+                    <p className="text-xl font-black text-[#0B1F3A]"><50ms</p>
+                    <p className="text-[8px] font-black text-[#0B1F3A]/40 uppercase tracking-widest">Latency</p>
                  </div>
               </div>
             </div>
