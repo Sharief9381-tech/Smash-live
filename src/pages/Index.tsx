@@ -31,159 +31,148 @@ const Index = () => {
       icon: Activity,
       color: "text-sky-500",
       bg: "bg-sky-50",
-      features: [
-        "Live Millisecond Scoring",
-        "Dynamic Point Attribution",
-        "Server-Side Synchronization",
-        "Match Momentum Analysis"
-      ]
+      features: ["Live Millisecond Scoring", "Dynamic Point Attribution", "Server-Side Sync", "Momentum Analysis"]
     },
     {
       category: "Broadcast Studio",
       icon: Monitor,
       color: "text-indigo-500",
       bg: "bg-indigo-50",
-      features: [
-        "Ultra-Low Latency Feed",
-        "Interactive Score Overlays",
-        "AI-Generated Commentary",
-        "Global Viewer Analytics"
-      ]
+      features: ["Ultra-Low Latency Feed", "Interactive Overlays", "AI Commentary", "Viewer Analytics"]
     },
     {
       category: "Circuit Engine",
       icon: Trophy,
       color: "text-amber-500",
       bg: "bg-amber-50",
-      features: [
-        "Auto-Bracket Generation",
-        "Automated Athlete Seeding",
-        "Tournament Entry Portals",
-        "Prize Pool Distribution"
-      ]
+      features: ["Auto-Bracket Generation", "Automated Seeding", "Entry Portals", "Prize Distribution"]
     },
     {
       category: "Athlete Dossier",
       icon: Users,
       color: "text-emerald-500",
       bg: "bg-emerald-50",
-      features: [
-        "Universal Smash ID",
-        "Historical Career Tracking",
-        "National & State Rankings",
-        "Biomechanical Stat Mapping"
-      ]
+      features: ["Universal Smash ID", "Career Tracking", "State Rankings", "Stat Mapping"]
     }
   ];
 
   return (
-    <div className="min-h-screen bg-white selection:bg-sky-500/30">
+    <div className="min-h-screen bg-white selection:bg-sky-500/30 overflow-x-hidden">
       <Navbar />
       
-      {/* Tightened Hero Section */}
-      <section className="relative flex items-center overflow-hidden py-10 bg-[#F8FAFC] border-b border-slate-100">
-        <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-sky-500/10 blur-[100px] rounded-full -translate-y-1/4" />
+      {/* Dynamic Hero Section */}
+      <section className="relative min-h-[85vh] flex items-center bg-[#F8FAFC] border-b border-slate-100 py-12 md:py-0">
+        <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-sky-500/10 blur-[120px] rounded-full -translate-y-1/4 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[30%] h-[30%] bg-indigo-500/5 blur-[100px] rounded-full translate-y-1/4 pointer-events-none" />
         
-        <div className="container px-6 grid lg:grid-cols-2 gap-8 items-center relative z-10">
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm">
-              <span className="flex h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-[9px] font-black uppercase tracking-widest text-[#0B1F3A]">Operational Node active • 12M Active Sessions</span>
+        <div className="container px-6 grid lg:grid-cols-12 gap-12 items-center relative z-10">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }} 
+            animate={{ opacity: 1, x: 0 }} 
+            className="lg:col-span-7 space-y-8"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">
+              <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#0B1F3A]">Operational Node Active • 12M Sessions</span>
             </div>
 
-            <div className="space-y-1">
-              <h1 className="text-6xl md:text-8xl font-black text-[#0B1F3A] leading-[0.9] tracking-tighter uppercase italic">
+            <div className="space-y-4">
+              <h1 className="text-7xl md:text-9xl font-black text-[#0B1F3A] leading-[0.85] tracking-tighter uppercase italic">
                 SMASH <br />
-                <span className="text-sky-500">LIVE</span>
+                <span className="text-sky-500 drop-shadow-[0_10px_20px_rgba(14,165,233,0.2)]">LIVE</span>
               </h1>
-              <div className="h-1.5 w-24 bg-sky-500 rounded-full" />
+              <div className="h-2 w-32 bg-sky-500 rounded-full" />
             </div>
 
-            <p className="text-xl text-slate-500 font-medium max-w-lg leading-snug tracking-tight">
+            <p className="text-2xl text-slate-500 font-medium max-w-xl leading-relaxed tracking-tight">
               A comprehensive ecosystem for <span className="text-[#0B1F3A] font-black">real-time match intelligence</span> and global tournament synchronization.
             </p>
 
-            <div className="flex flex-wrap gap-3 pt-2">
+            <div className="flex flex-wrap gap-4">
               <Link to="/login">
-                <Button size="lg" className="bg-[#0B1F3A] text-white rounded-2xl px-8 font-black h-14 hover:bg-sky-600 transition-all shadow-xl group border-none">
-                  ENTER THE COURT <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1" />
+                <Button size="lg" className="bg-[#0B1F3A] text-white rounded-2xl px-10 h-16 font-black text-lg hover:bg-sky-600 transition-all shadow-xl group border-none">
+                  ENTER COURT <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-2 transition-transform" />
                 </Button>
               </Link>
               <Link to="/tournaments">
-                <Button size="lg" variant="outline" className="border-slate-200 text-[#0B1F3A] rounded-2xl px-8 font-black h-14 hover:bg-white hover:border-sky-500 transition-all">
+                <Button size="lg" variant="outline" className="border-slate-200 text-[#0B1F3A] bg-white/50 backdrop-blur-sm rounded-2xl px-10 h-16 font-black text-lg hover:bg-white hover:border-sky-500 transition-all">
                   EXPLORE CIRCUITS
                 </Button>
               </Link>
             </div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative hidden lg:block">
-            <div className="glass-panel p-8 rounded-[3rem] border-sky-500/10 shadow-2xl bg-white space-y-8">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }} 
+            animate={{ opacity: 1, scale: 1 }} 
+            className="lg:col-span-5 relative"
+          >
+            <div className="glass-panel p-10 rounded-[4rem] border-sky-500/10 shadow-[0_40px_80px_rgba(0,0,0,0.08)] bg-white/80 backdrop-blur-2xl space-y-8">
               <div className="flex items-center justify-between border-b border-slate-100 pb-6">
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-2xl bg-sky-500 text-white flex items-center justify-center shadow-lg">
-                    <TrendingUp className="h-6 w-6" />
+                <div className="flex items-center gap-4">
+                  <div className="h-14 w-14 rounded-2xl bg-[#0B1F3A] text-sky-400 flex items-center justify-center shadow-lg">
+                    <TrendingUp className="h-7 w-7" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-black text-[#0B1F3A] uppercase tracking-widest">Network Pulse</h4>
-                    <p className="text-[9px] font-bold text-slate-400">SESSION: ID_ACTIVE_X</p>
+                    <h4 className="text-sm font-black text-[#0B1F3A] uppercase tracking-widest">Network Pulse</h4>
+                    <p className="text-[10px] font-bold text-slate-400">SESSION: ID_ACTIVE_X</p>
                   </div>
                 </div>
-                <Badge className="bg-red-500 text-white animate-pulse border-none h-7 px-4 text-[9px] font-black rounded-full uppercase">Live Feed</Badge>
+                <Badge className="bg-red-500 text-white animate-pulse border-none h-8 px-5 text-xs font-black rounded-full uppercase">Live</Badge>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-slate-50 p-6 rounded-[2rem] space-y-2 border border-slate-100">
-                  <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                    <Users className="h-3 w-3" /> Registered
+              <div className="grid grid-cols-2 gap-6">
+                <div className="bg-slate-50/50 p-8 rounded-[3rem] space-y-3 border border-slate-100 group hover:border-sky-500/30 transition-all">
+                  <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <Users className="h-4 w-4" /> Registered
                   </div>
-                  <p className="text-3xl font-black text-[#0B1F3A]">{stats.athletes}</p>
+                  <p className="text-4xl font-black text-[#0B1F3A]">{stats.athletes}</p>
                 </div>
-                <div className="bg-slate-50 p-6 rounded-[2rem] space-y-2 border border-slate-100">
-                  <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                    <Zap className="h-3 w-3 text-sky-500 fill-current" /> Circuits
+                <div className="bg-slate-50/50 p-8 rounded-[3rem] space-y-3 border border-slate-100 group hover:border-sky-500/30 transition-all">
+                  <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <Zap className="h-4 w-4 text-sky-500 fill-current" /> Circuits
                   </div>
-                  <p className="text-3xl font-black text-[#0B1F3A]">{stats.tourneys}</p>
+                  <p className="text-4xl font-black text-[#0B1F3A]">{stats.tourneys}</p>
                 </div>
               </div>
 
-              <div className="p-4 bg-sky-500 rounded-2xl flex items-center justify-between text-white">
-                 <div className="flex items-center gap-2">
-                   <div className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
-                   <span className="text-[10px] font-black uppercase tracking-widest">Registry Sync Complete</span>
+              <div className="p-6 bg-sky-500 rounded-[2rem] flex items-center justify-between text-white shadow-xl shadow-sky-500/20">
+                 <div className="flex items-center gap-3">
+                   <div className="h-2 w-2 rounded-full bg-white animate-pulse" />
+                   <span className="text-[11px] font-black uppercase tracking-widest">Registry Sync Complete</span>
                  </div>
-                 <ChevronRight className="h-4 w-4 opacity-50" />
+                 <ChevronRight className="h-5 w-5 opacity-50" />
               </div>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Expanded Feature Intelligence - Reduced spacing */}
-      <section className="py-16 bg-white">
-        <div className="container px-6 space-y-12">
-          <div className="text-center space-y-2 max-w-2xl mx-auto">
-            <h2 className="text-4xl font-black text-[#0B1F3A] tracking-tighter uppercase italic">Platform Intelligence</h2>
-            <p className="text-slate-500 font-medium text-base">Integrated modules engineered for professional speed and tactical accuracy.</p>
-            <div className="h-1 w-20 bg-sky-500 mx-auto rounded-full mt-4" />
+      {/* Intelligence Grid */}
+      <section className="py-24 bg-white">
+        <div className="container px-6 space-y-16">
+          <div className="text-center space-y-4 max-w-2xl mx-auto">
+            <h2 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic">Platform Intelligence</h2>
+            <p className="text-slate-500 font-medium text-lg leading-relaxed">Integrated modules engineered for professional speed and tactical accuracy.</p>
+            <div className="h-1.5 w-24 bg-sky-500 mx-auto rounded-full mt-6" />
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {featureGroups.map((group, i) => (
               <motion.div 
                 key={i}
-                whileHover={{ y: -5 }}
-                className="glass-panel p-8 rounded-[2.5rem] bg-white border-slate-100 shadow-lg hover:border-sky-200 transition-all flex flex-col justify-between"
+                whileHover={{ y: -10 }}
+                className="glass-panel p-10 rounded-[3.5rem] bg-white border-slate-100 shadow-xl shadow-slate-200/20 hover:border-sky-200 transition-all flex flex-col justify-between group"
               >
-                <div className="space-y-6">
-                  <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center shadow-inner", group.bg, group.color)}>
-                    <group.icon className="h-7 w-7" />
+                <div className="space-y-8">
+                  <div className={cn("h-16 w-16 rounded-[1.5rem] flex items-center justify-center shadow-lg transition-transform group-hover:scale-110", group.bg, group.color)}>
+                    <group.icon className="h-8 w-8" />
                   </div>
-                  <h3 className="text-xl font-black text-[#0B1F3A] uppercase italic leading-none">{group.category}</h3>
-                  <ul className="space-y-2.5">
+                  <h3 className="text-2xl font-black text-[#0B1F3A] uppercase italic leading-none">{group.category}</h3>
+                  <ul className="space-y-4">
                     {group.features.map((f, j) => (
-                      <li key={j} className="text-[10px] font-bold text-slate-500 flex items-center gap-2 uppercase tracking-tight">
-                        <CheckCircle2 className={cn("h-3 w-3", group.color)} /> {f}
+                      <li key={j} className="text-xs font-bold text-slate-500 flex items-center gap-3 uppercase tracking-tight">
+                        <CheckCircle2 className={cn("h-4 w-4", group.color)} /> {f}
                       </li>
                     ))}
                   </ul>
@@ -194,72 +183,87 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Capabilities Section - Added to fill content */}
-      <section className="py-12 bg-slate-50">
-        <div className="container px-6 grid lg:grid-cols-3 gap-8">
-           <div className="lg:col-span-1 space-y-4">
-              <Badge className="bg-sky-500 text-white font-black px-4 py-1 border-none text-[9px] uppercase">Core Tech</Badge>
-              <h2 className="text-3xl font-black text-[#0B1F3A] uppercase italic leading-tight">Advanced Connectivity</h2>
-              <p className="text-sm text-slate-500 font-medium leading-relaxed">Our backbone uses distributed edge nodes to ensure every smash is logged and synced with sub-50ms latency across the global network.</p>
-           </div>
-           
-           <div className="lg:col-span-2 grid md:grid-cols-2 gap-4">
+      {/* Connectivity Section */}
+      <section className="py-24 bg-slate-50">
+        <div className="container px-6">
+          <div className="grid lg:grid-cols-12 gap-16 items-center">
+            <div className="lg:col-span-5 space-y-8">
+              <Badge className="bg-sky-500 text-white font-black px-6 py-2 border-none text-[10px] uppercase tracking-widest rounded-full">Core Technology</Badge>
+              <h2 className="text-5xl font-black text-[#0B1F3A] uppercase italic leading-[0.95] tracking-tighter">Advanced Connectivity</h2>
+              <p className="text-lg text-slate-500 font-medium leading-relaxed">Our backbone uses distributed edge nodes to ensure every smash is logged and synced with <span className="text-sky-600 font-bold">sub-50ms latency</span> across the global network.</p>
+              <Button variant="outline" className="h-14 px-10 rounded-2xl border-[#0B1F3A] text-[#0B1F3A] font-black uppercase tracking-widest text-xs hover:bg-[#0B1F3A] hover:text-white transition-all">View Architecture</Button>
+            </div>
+            
+            <div className="lg:col-span-7 grid md:grid-cols-2 gap-6">
               {[
-                { title: "Real-time Scoring", desc: "Digital scoreboard with instant cloud sync.", icon: Database },
-                { title: "Global Registry", desc: "Centralized database of athlete performance.", icon: Globe },
-                { title: "AI Commentary", desc: "Automated event logs and highlights.", icon: Zap },
-                { title: "Data Analytics", desc: "Deep dive into win rates and accuracies.", icon: BarChart3 },
+                { title: "Real-time Scoring", desc: "Digital scoreboard with instant cloud synchronization.", icon: Database },
+                { title: "Global Registry", desc: "Centralized database of certified athlete performance.", icon: Globe },
+                { title: "AI Commentary", desc: "Automated event logs and contextual highlights.", icon: Zap },
+                { title: "Data Analytics", desc: "Deep dive into win rates and accuracy metrics.", icon: BarChart3 },
               ].map((item, i) => (
-                <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 flex items-start gap-4 hover:shadow-md transition-shadow">
-                   <div className="h-10 w-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
-                      <item.icon className="h-5 w-5" />
+                <div key={i} className="bg-white p-10 rounded-[3.5rem] border border-slate-100 flex flex-col gap-6 hover:shadow-2xl transition-all hover:border-sky-200 group">
+                   <div className="h-14 w-14 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                      <item.icon className="h-7 w-7" />
                    </div>
-                   <div>
-                      <h4 className="font-black text-[#0B1F3A] uppercase text-xs tracking-tight">{item.title}</h4>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mt-1">{item.desc}</p>
+                   <div className="space-y-2">
+                      <h4 className="font-black text-[#0B1F3A] uppercase text-lg tracking-tight italic">{item.title}</h4>
+                      <p className="text-sm text-slate-400 font-bold uppercase tracking-tight leading-relaxed">{item.desc}</p>
                    </div>
                 </div>
               ))}
-           </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Colorful CTA - Darkness Removed */}
-      <section className="py-12 bg-white">
+      {/* Heroic CTA Section */}
+      <section className="py-24 bg-white">
         <div className="container px-6">
-          <div className="relative bg-gradient-to-br from-sky-400 to-indigo-600 rounded-[3.5rem] p-12 flex flex-col md:flex-row items-center justify-between gap-10 overflow-hidden shadow-[0_30px_60px_-12px_rgba(14,165,233,0.3)]">
-            <div className="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
-              <Trophy className="h-[300px] w-[300px] text-white" />
+          <div className="relative bg-[#0B1F3A] rounded-[5rem] p-16 md:p-24 overflow-hidden shadow-2xl">
+            {/* Background Accents */}
+            <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-sky-500/20 to-transparent pointer-events-none" />
+            <div className="absolute -right-20 -bottom-20 opacity-5 pointer-events-none">
+              <Trophy className="h-[500px] w-[500px] text-white" />
             </div>
             
-            <div className="space-y-6 relative z-10 max-w-xl text-white">
-              <div className="space-y-1">
-                <h2 className="text-5xl font-black tracking-tighter uppercase italic leading-[0.9]">Elevate Your Circuit Intelligence</h2>
-                <p className="text-white/80 font-bold uppercase text-xs tracking-widest mt-2">Professional Grade Ecosystem for Athletes & Organizers</p>
+            <div className="relative z-10 max-w-3xl space-y-10">
+              <div className="space-y-4">
+                <Badge className="bg-sky-500 text-white font-black px-6 py-2 border-none text-[10px] uppercase tracking-widest rounded-full">Ecosystem Access</Badge>
+                <h2 className="text-6xl md:text-8xl font-black text-white tracking-tighter uppercase italic leading-[0.85]">Elevate Your <br /> Intelligence</h2>
+                <p className="text-xl text-sky-200/60 font-bold uppercase tracking-widest max-w-xl">Professional Grade Ecosystem for Elite Athletes & Global Organizers</p>
               </div>
-              <div className="flex flex-wrap gap-4 pt-2">
+
+              <div className="flex flex-wrap gap-6 pt-4">
                 <Link to="/tournaments/create">
-                  <Button className="bg-white text-sky-600 font-black px-10 h-14 rounded-2xl shadow-xl hover:bg-sky-50 transition-all border-none">
+                  <Button className="bg-sky-500 text-white font-black px-12 h-20 rounded-[2rem] text-xl shadow-xl hover:bg-sky-400 transition-all border-none">
                     START A CIRCUIT
                   </Button>
                 </Link>
                 <Link to="/login">
-                  <Button variant="outline" className="border-white/40 text-white font-black px-10 h-14 rounded-2xl hover:bg-white/10 transition-all">
+                  <Button variant="outline" className="border-white/20 text-white font-black px-12 h-20 rounded-[2rem] text-xl hover:bg-white/10 transition-all backdrop-blur-md">
                     JOIN AS ATHLETE
                   </Button>
                 </Link>
               </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4 relative z-10 w-full md:w-auto">
-               <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-[2rem] text-center min-w-[150px]">
-                  <p className="text-4xl font-black text-white">24</p>
-                  <p className="text-[9px] font-bold text-white/60 uppercase tracking-widest mt-1">Global Nodes</p>
-               </div>
-               <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-[2rem] text-center min-w-[150px]">
-                  <p className="text-4xl font-black text-white">1.2M</p>
-                  <p className="text-[9px] font-bold text-white/60 uppercase tracking-widest mt-1">Live Scopes</p>
-               </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-10 border-t border-white/10">
+                 <div className="space-y-1">
+                    <p className="text-3xl font-black text-white">24</p>
+                    <p className="text-[10px] font-black text-sky-400 uppercase tracking-widest">Global Nodes</p>
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-3xl font-black text-white">1.2M</p>
+                    <p className="text-[10px] font-black text-sky-400 uppercase tracking-widest">Live Scopes</p>
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-3xl font-black text-white">99.9%</p>
+                    <p className="text-[10px] font-black text-sky-400 uppercase tracking-widest">Sync Uptime</p>
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-3xl font-black text-white"><50ms</p>
+                    <p className="text-[10px] font-black text-sky-400 uppercase tracking-widest">Latency</p>
+                 </div>
+              </div>
             </div>
           </div>
         </div>
