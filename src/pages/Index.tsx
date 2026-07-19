@@ -61,7 +61,7 @@ const Index = () => {
       <Navbar />
       
       {/* Dynamic Hero Section */}
-      <section className="relative min-h-[85vh] flex items-center bg-[#F8FAFC] border-b border-slate-100 py-12 md:py-0">
+      <section className="relative min-h-[85vh] flex items-center bg-[#F8FAFC] border-b border-slate-100 py-20 md:py-0">
         <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-sky-500/10 blur-[120px] rounded-full -translate-y-1/4 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[30%] h-[30%] bg-indigo-500/5 blur-[100px] rounded-full translate-y-1/4 pointer-events-none" />
         
@@ -149,15 +149,15 @@ const Index = () => {
       </section>
 
       {/* Intelligence Grid */}
-      <section className="py-24 bg-white">
-        <div className="container px-6 space-y-16">
+      <section className="py-40 bg-white">
+        <div className="container px-6 space-y-24">
           <div className="text-center space-y-4 max-w-2xl mx-auto">
             <h2 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic">Platform Intelligence</h2>
             <p className="text-slate-500 font-medium text-lg leading-relaxed">Integrated modules engineered for professional speed and tactical accuracy.</p>
             <div className="h-1.5 w-24 bg-sky-500 mx-auto rounded-full mt-6" />
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
             {featureGroups.map((group, i) => (
               <motion.div 
                 key={i}
@@ -184,9 +184,9 @@ const Index = () => {
       </section>
 
       {/* Connectivity Section */}
-      <section className="py-24 bg-slate-50">
+      <section className="py-40 bg-slate-50">
         <div className="container px-6">
-          <div className="grid lg:grid-cols-12 gap-16 items-center">
+          <div className="grid lg:grid-cols-12 gap-20 items-center">
             <div className="lg:col-span-5 space-y-8">
               <Badge className="bg-sky-500 text-white font-black px-6 py-2 border-none text-[10px] uppercase tracking-widest rounded-full">Core Technology</Badge>
               <h2 className="text-5xl font-black text-[#0B1F3A] uppercase italic leading-[0.95] tracking-tighter">Advanced Connectivity</h2>
@@ -194,7 +194,7 @@ const Index = () => {
               <Button variant="outline" className="h-14 px-10 rounded-2xl border-[#0B1F3A] text-[#0B1F3A] font-black uppercase tracking-widest text-xs hover:bg-[#0B1F3A] hover:text-white transition-all">View Architecture</Button>
             </div>
             
-            <div className="lg:col-span-7 grid md:grid-cols-2 gap-6">
+            <div className="lg:col-span-7 grid md:grid-cols-2 gap-8">
               {[
                 { title: "Real-time Scoring", desc: "Digital scoreboard with instant cloud synchronization.", icon: Database },
                 { title: "Global Registry", desc: "Centralized database of certified athlete performance.", icon: Globe },
@@ -216,52 +216,52 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Heroic CTA Section */}
-      <section className="py-24 bg-white">
+      {/* Heroic CTA Section - REFINED LIGHT VERSION */}
+      <section className="py-40 bg-white">
         <div className="container px-6">
-          <div className="relative bg-[#0B1F3A] rounded-[5rem] p-16 md:p-24 overflow-hidden shadow-2xl">
+          <div className="relative bg-sky-50 border border-sky-100 rounded-[4rem] p-12 md:p-16 overflow-hidden shadow-sm">
             {/* Background Accents */}
-            <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-sky-500/20 to-transparent pointer-events-none" />
+            <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-white/40 to-transparent pointer-events-none" />
             <div className="absolute -right-20 -bottom-20 opacity-5 pointer-events-none">
-              <Trophy className="h-[500px] w-[500px] text-white" />
+              <Trophy className="h-[400px] w-[400px] text-[#0B1F3A]" />
             </div>
             
-            <div className="relative z-10 max-w-3xl space-y-10">
+            <div className="relative z-10 max-w-3xl space-y-8">
               <div className="space-y-4">
-                <Badge className="bg-sky-500 text-white font-black px-6 py-2 border-none text-[10px] uppercase tracking-widest rounded-full">Ecosystem Access</Badge>
-                <h2 className="text-6xl md:text-8xl font-black text-white tracking-tighter uppercase italic leading-[0.85]">Elevate Your <br /> Intelligence</h2>
-                <p className="text-xl text-sky-200/60 font-bold uppercase tracking-widest max-w-xl">Professional Grade Ecosystem for Elite Athletes & Global Organizers</p>
+                <Badge className="bg-[#0B1F3A] text-white font-black px-6 py-2 border-none text-[10px] uppercase tracking-widest rounded-full">Ecosystem Access</Badge>
+                <h2 className="text-5xl md:text-6xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-[0.9]">Elevate Your <br /> Intelligence</h2>
+                <p className="text-lg text-[#0B1F3A]/60 font-bold uppercase tracking-widest max-w-md">Professional Grade Ecosystem for Elite Athletes & Global Organizers</p>
               </div>
 
-              <div className="flex flex-wrap gap-6 pt-4">
+              <div className="flex flex-wrap gap-4 pt-2">
                 <Link to="/tournaments/create">
-                  <Button className="bg-sky-500 text-white font-black px-12 h-20 rounded-[2rem] text-xl shadow-xl hover:bg-sky-400 transition-all border-none">
+                  <Button className="bg-[#0B1F3A] text-white font-black px-10 h-16 rounded-[1.5rem] text-lg shadow-lg hover:bg-sky-600 transition-all border-none">
                     START A CIRCUIT
                   </Button>
                 </Link>
                 <Link to="/login">
-                  <Button variant="outline" className="border-white/20 text-white font-black px-12 h-20 rounded-[2rem] text-xl hover:bg-white/10 transition-all backdrop-blur-md">
+                  <Button variant="outline" className="border-slate-200 text-[#0B1F3A] font-black px-10 h-16 rounded-[1.5rem] text-lg hover:bg-white transition-all bg-white/50 backdrop-blur-md">
                     JOIN AS ATHLETE
                   </Button>
                 </Link>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-10 border-t border-white/10">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8 border-t border-[#0B1F3A]/5">
                  <div className="space-y-1">
-                    <p className="text-3xl font-black text-white">24</p>
-                    <p className="text-[10px] font-black text-sky-400 uppercase tracking-widest">Global Nodes</p>
+                    <p className="text-2xl font-black text-[#0B1F3A]">24</p>
+                    <p className="text-[9px] font-black text-[#0B1F3A]/40 uppercase tracking-widest">Global Nodes</p>
                  </div>
                  <div className="space-y-1">
-                    <p className="text-3xl font-black text-white">1.2M</p>
-                    <p className="text-[10px] font-black text-sky-400 uppercase tracking-widest">Live Scopes</p>
+                    <p className="text-2xl font-black text-[#0B1F3A]">1.2M</p>
+                    <p className="text-[9px] font-black text-[#0B1F3A]/40 uppercase tracking-widest">Live Scopes</p>
                  </div>
                  <div className="space-y-1">
-                    <p className="text-3xl font-black text-white">99.9%</p>
-                    <p className="text-[10px] font-black text-sky-400 uppercase tracking-widest">Sync Uptime</p>
+                    <p className="text-2xl font-black text-[#0B1F3A]">99.9%</p>
+                    <p className="text-[9px] font-black text-[#0B1F3A]/40 uppercase tracking-widest">Sync Uptime</p>
                  </div>
                  <div className="space-y-1">
-                    <p className="text-3xl font-black text-white">{"<"}50ms</p>
-                    <p className="text-[10px] font-black text-sky-400 uppercase tracking-widest">Latency</p>
+                    <p className="text-2xl font-black text-[#0B1F3A]"><50ms</p>
+                    <p className="text-[9px] font-black text-[#0B1F3A]/40 uppercase tracking-widest">Latency</p>
                  </div>
               </div>
             </div>
