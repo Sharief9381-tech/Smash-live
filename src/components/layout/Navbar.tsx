@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, Bell, Menu, X, Zap } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Bell, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,12 +14,9 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("Athlete");
   const [userImage, setUserImage] = useState("");
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [searchVal, setSearchVal] = useState("");
   
   const location = useLocation();
-  const navigate = useNavigate();
 
   const checkAuth = () => {
     const authStatus = localStorage.getItem('isLoggedIn') === 'true';
@@ -51,16 +48,6 @@ const Navbar = () => {
       window.removeEventListener('auth-change' as any, checkAuth);
     };
   }, [location.pathname]);
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchVal.trim()) {
-      // Redirect to Dashboard (The Court) with the search query
-      navigate(`/dashboard?q=${encodeURIComponent(searchVal)}`);
-      setIsSearchExpanded(false);
-      setSearchVal("");
-    }
-  };
 
   const navItems = [
     { name: isLoggedIn ? 'DASHBOARD' : 'Home', path: isLoggedIn ? '/dashboard' : '/' },
@@ -116,43 +103,11 @@ const Navbar = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4">
-          <div className="flex items-center relative">
-            <AnimatePresence>
-              {isSearchExpanded ? (
-                <motion.form
-                  onSubmit={handleSearchSubmit}
-                  initial={{ width: 40, opacity: 0 }}
-                  animate={{ width: 200, opacity: 1 }}
-                  exit={{ width: 40, opacity: 0 }}
-                  className="relative flex items-center"
-                >
-                  <Search className="absolute left-4 h-4 w-4 text-slate-400 pointer-events-none" />
-                  <input 
-                    autoFocus
-                    placeholder="Search Intel..."
-                    className="w-full h-11 bg-slate-50 border border-slate-200 rounded-full pl-11 pr-10 text-xs font-bold focus:border-sky-500 outline-none shadow-sm"
-                    value={searchVal}
-                    onChange={(e) => setSearchVal(e.target.value)}
-                  />
-                  <button 
-                    type="button"
-                    onClick={() => setIsSearchExpanded(false)}
-                    className="absolute right-3 p-1 hover:bg-slate-200 rounded-full transition-colors"
-                  >
-                    <X className="h-4 w-4 text-slate-400" />
-                  </button>
-                </motion.form>
-              ) : (
-                <button 
-                  onClick={() => setIsSearchExpanded(true)}
-                  className="p-2.5 text-[#0B1F3A]/60 hover:text-sky-500 hover:bg-sky-50 rounded-full transition-all"
-                >
-                  <Search className="h-5 w-5" />
-                </button>
-              )}
-            </AnimatePresence>
-          </div>
+        <div className="flex items-center gap-4">
+          <button className="relative p-2.5 text-[#0B1F3A]/60 hover:text-sky-500 hover:bg-sky-50 rounded-full transition-all">
+            <Bell className="h-5 w-5" />
+            <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full border-2 border-white" />
+          </button>
 
           {isLoggedIn ? (
             <Link to="/player/me" className="flex items-center group">
