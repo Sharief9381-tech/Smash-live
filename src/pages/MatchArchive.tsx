@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 import { History, Search, Play, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -91,6 +92,8 @@ const MatchArchive = () => {
           </Table>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };

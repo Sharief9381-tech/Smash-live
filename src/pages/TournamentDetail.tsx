@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -68,6 +69,7 @@ const TournamentDetail = () => {
            </div>
            <Button onClick={() => navigate('/tournaments')} className="bg-[#0B1F3A] text-white px-10 h-14 rounded-2xl font-black uppercase tracking-widest text-[10px]">Return to Circuit</Button>
         </main>
+        <Footer />
       </div>
     );
   }
@@ -184,6 +186,8 @@ const TournamentDetail = () => {
             </div>
          </div>
       </main>
+
+      <Footer />
     </div>
   );
 };

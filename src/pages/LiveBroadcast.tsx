@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 import PremiumScoreboard from '@/components/broadcast/PremiumScoreboard';
 import CommentaryFeed from '@/components/broadcast/CommentaryFeed';
 import MatchStatGrid from '@/components/broadcast/MatchStatGrid';
@@ -159,6 +160,8 @@ const LiveBroadcast = () => {
           <MatchStatGrid />
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };

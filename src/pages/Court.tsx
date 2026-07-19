@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 import { motion } from 'framer-motion';
 import { 
   Activity, Trophy, Zap, 
@@ -157,6 +158,8 @@ const Court = () => {
           </div>
         )}
       </main>
+
+      <Footer />
     </div>
   );
 };

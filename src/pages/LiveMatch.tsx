@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Activity, Play, Search, Zap, Radio, Loader2 } from 'lucide-react';
@@ -90,7 +91,7 @@ const LiveMatch = () => {
               <Zap className="h-4 w-4 text-sky-500 fill-current" />
               <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.4em]">Operational Broadcast Network</span>
             </div>
-            <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-none">Global Live Feed</h1>
+            <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-none">Global Live Scopes</h1>
           </div>
           
           <div className="relative w-full md:w-96">
@@ -178,6 +179,8 @@ const LiveMatch = () => {
           )}
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };

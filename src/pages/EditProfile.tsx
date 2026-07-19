@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -105,7 +106,7 @@ const EditProfile = () => {
 
           <div className="grid lg:grid-cols-12 gap-12">
             <div className="lg:col-span-4 space-y-6">
-              <section className="glass-panel p-8 rounded-[3rem] border-slate-200 text-center space-y-6">
+              <section className="glass-panel p-8 rounded-[3rem] border-slate-200 text-center space-y-6 bg-white">
                 <div className="relative mx-auto h-48 w-48 group">
                   <div className="h-full w-full rounded-full bg-slate-100 border-4 border-white overflow-hidden shadow-xl">
                     <img src={formData.image} className="w-full h-full object-cover" alt="Profile preview" />
@@ -139,7 +140,7 @@ const EditProfile = () => {
             </div>
 
             <div className="lg:col-span-8 space-y-10">
-              <section className="glass-panel p-10 rounded-[3rem] space-y-8 border-slate-200">
+              <section className="glass-panel p-10 rounded-[3rem] space-y-8 border-slate-200 bg-white">
                 <h3 className="text-xl font-black flex items-center gap-3 italic">
                   <User className="h-5 w-5 text-sky-500" /> Identity Intelligence
                 </h3>
@@ -192,6 +193,8 @@ const EditProfile = () => {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };

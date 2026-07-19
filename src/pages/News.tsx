@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 import { motion } from 'framer-motion';
 import { Newspaper, Zap, Clock, ArrowRight, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -46,6 +47,8 @@ const News = () => {
           </div>
         </section>
       </main>
+
+      <Footer />
     </div>
   );
 };

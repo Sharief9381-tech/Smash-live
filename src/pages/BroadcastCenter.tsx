@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 import BroadcastActionCard from '@/components/broadcast/BroadcastActionCard';
 import PlayerBroadcastStats from '@/components/broadcast/PlayerBroadcastStats';
 import { 
@@ -68,6 +69,8 @@ const BroadcastCenter = () => {
           <PlayerBroadcastStats />
         </section>
       </main>
+
+      <Footer />
     </div>
   );
 };

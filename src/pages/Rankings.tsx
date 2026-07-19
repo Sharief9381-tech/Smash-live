@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 import { Search, Globe, Flag, MapPin, Loader2, Minus } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase, isCloudConfigured } from '@/lib/supabase';
@@ -139,6 +140,8 @@ const Rankings = () => {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };
