@@ -219,54 +219,54 @@ const Index = () => {
       {/* Heroic CTA Section */}
       <section className="py-20 bg-white">
         <div className="container px-6">
-          <div className="relative bg-sky-50 border border-sky-100 rounded-[4rem] p-12 md:p-16 overflow-hidden shadow-2xl max-w-6xl mx-auto">
+          <div className="relative bg-[#F0F7FF] border border-sky-100 rounded-[3rem] p-10 md:p-14 overflow-hidden shadow-xl">
             {/* Background Decoration */}
-            <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none translate-x-1/4 translate-y-1/4 scale-150">
+            <div className="absolute right-0 bottom-0 opacity-5 pointer-events-none translate-x-1/4 translate-y-1/4 scale-150">
               <Trophy className="h-96 w-96 text-[#0B1F3A]" />
             </div>
             
-            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-16">
-              <div className="space-y-10 max-w-xl">
+            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-12">
+              <div className="space-y-8 flex-1">
                 <div className="space-y-4">
-                  <Badge className="bg-[#0B1F3A] text-white font-black px-6 py-2 border-none text-[10px] uppercase tracking-widest rounded-full">Ecosystem Access</Badge>
-                  <h2 className="text-6xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-[0.9] drop-shadow-sm">Elevate Your <br /> Intelligence</h2>
+                  <Badge className="bg-[#0B1F3A] text-white font-black px-5 py-1.5 border-none text-[9px] uppercase tracking-widest rounded-full">Ecosystem Access</Badge>
+                  <h2 className="text-4xl md:text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-[1.1]">Elevate Your <br /> Intelligence</h2>
                 </div>
                 
-                <p className="text-sm text-[#0B1F3A]/60 font-black uppercase tracking-[0.2em] leading-relaxed">
+                <p className="text-[11px] text-[#0B1F3A]/60 font-black uppercase tracking-[0.25em] leading-relaxed">
                   Professional grade ecosystem for elite <br className="hidden md:block" /> athletes & global organizers
                 </p>
                 
-                <div className="flex flex-wrap gap-4 pt-4">
+                <div className="flex flex-wrap gap-4 pt-2">
                   <Link to="/tournaments/create">
-                    <Button className="bg-[#0B1F3A] text-white font-black px-10 h-16 rounded-[1.25rem] text-sm tracking-widest shadow-xl hover:bg-sky-600 transition-all border-none active:scale-95">
+                    <Button className="bg-[#0B1F3A] text-white font-black px-8 h-14 rounded-xl text-xs tracking-widest shadow-lg hover:bg-sky-600 transition-all border-none">
                       START A CIRCUIT
                     </Button>
                   </Link>
                   <Link to="/login">
-                    <Button variant="outline" className="border-slate-200 text-[#0B1F3A] font-black px-10 h-16 rounded-[1.25rem] text-sm tracking-widest hover:bg-white transition-all bg-white/50 backdrop-blur-md active:scale-95 shadow-sm">
+                    <Button variant="outline" className="border-slate-200 text-[#0B1F3A] font-black px-8 h-14 rounded-xl text-xs tracking-widest hover:bg-white transition-all bg-white/50 backdrop-blur-md">
                       JOIN AS ATHLETE
                     </Button>
                   </Link>
                 </div>
               </div>
 
-              <div className="flex items-center gap-12 lg:border-l border-[#0B1F3A]/10 lg:pl-16">
-                <div className="grid grid-cols-2 gap-x-12 gap-y-10">
-                  <div className="space-y-1">
-                    <p className="text-4xl font-black text-[#0B1F3A] tracking-tighter">24</p>
-                    <p className="text-[10px] font-black text-[#0B1F3A]/40 uppercase tracking-[0.2em]">Nodes</p>
+              <div className="flex items-center gap-10 lg:border-l border-[#0B1F3A]/10 lg:pl-12">
+                <div className="grid grid-cols-2 gap-x-10 gap-y-8">
+                  <div className="space-y-0.5">
+                    <p className="text-3xl font-black text-[#0B1F3A] tracking-tighter">24</p>
+                    <p className="text-[9px] font-black text-[#0B1F3A]/40 uppercase tracking-[0.2em]">Nodes</p>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-4xl font-black text-[#0B1F3A] tracking-tighter">1.2M</p>
-                    <p className="text-[10px] font-black text-[#0B1F3A]/40 uppercase tracking-[0.2em]">Scopes</p>
+                  <div className="space-y-0.5">
+                    <p className="text-3xl font-black text-[#0B1F3A] tracking-tighter">1.2M</p>
+                    <p className="text-[9px] font-black text-[#0B1F3A]/40 uppercase tracking-[0.2em]">Scopes</p>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-4xl font-black text-[#0B1F3A] tracking-tighter">99.9%</p>
-                    <p className="text-[10px] font-black text-[#0B1F3A]/40 uppercase tracking-[0.2em]">Uptime</p>
+                  <div className="space-y-0.5">
+                    <p className="text-3xl font-black text-[#0B1F3A] tracking-tighter">99.9%</p>
+                    <p className="text-[9px] font-black text-[#0B1F3A]/40 uppercase tracking-[0.2em]">Uptime</p>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-4xl font-black text-[#0B1F3A] tracking-tighter">{"<50ms"}</p>
-                    <p className="text-[10px] font-black text-[#0B1F3A]/40 uppercase tracking-[0.2em]">Latency</p>
+                  <div className="space-y-0.5">
+                    <p className="text-3xl font-black text-[#0B1F3A] tracking-tighter">{"<50ms"}</p>
+                    <p className="text-[9px] font-black text-[#0B1F3A]/40 uppercase tracking-[0.2em]">Latency</p>
                   </div>
                 </div>
               </div>
