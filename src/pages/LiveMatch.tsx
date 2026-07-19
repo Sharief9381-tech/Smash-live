@@ -4,12 +4,12 @@ import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Activity, Play, Search, Zap, Radio, Trophy, Loader2 } from 'lucide-react';
+import { Activity, Play, Search, Zap, Radio, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '@/lib/supabase';
+import { supabase, isCloudConfigured } from '@/lib/supabase';
 
 const LiveMatch = () => {
   const navigate = useNavigate();
@@ -23,6 +23,11 @@ const LiveMatch = () => {
 
   useEffect(() => {
     const fetchLiveData = async () => {
+      if (!isCloudConfigured) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const { data: matches } = await supabase.from('matches').select('*').eq('status', 'live');
         const { data: tourneys } = await supabase.from('tournaments').select('*').neq('status', 'Completed');
@@ -37,7 +42,7 @@ const LiveMatch = () => {
     };
 
     fetchLiveData();
-    const interval = setInterval(fetchLiveData, 5000);
+    const interval = setInterval(fetchLiveData, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -66,7 +71,7 @@ const LiveMatch = () => {
     const all = [...matches, ...tourneys];
 
     return all.filter(item => {
-      const matchesSearch = item.title.toLowerCase().includes(query.toLowerCase()) || 
+      const matchesSearch = item.title?.toLowerCase().includes(query.toLowerCase()) || 
                            (item.p1 && item.p1.toLowerCase().includes(query.toLowerCase())) ||
                            (item.p2 && item.p2.toLowerCase().includes(query.toLowerCase()));
       

@@ -15,7 +15,6 @@ const Rankings = () => {
 
   useEffect(() => {
     const fetchAthletes = async () => {
-      // Instant fail-fast if no cloud
       if (!isCloudConfigured) {
         const local = JSON.parse(localStorage.getItem('registered_users') || '[]');
         setAthletes(local);
@@ -109,7 +108,7 @@ const Rankings = () => {
                 </TableHeader>
                 <TableBody>
                   {filtered.length > 0 ? filtered.map((row, idx) => (
-                    <TableRow key={row.id} className="border-slate-100 h-20">
+                    <TableRow key={row.id || idx} className="border-slate-100 h-20">
                       <TableCell className="text-center font-black text-slate-400">#{idx + 1}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-4">

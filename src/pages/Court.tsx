@@ -5,15 +5,14 @@ import Navbar from '@/components/layout/Navbar';
 import { motion } from 'framer-motion';
 import { 
   Activity, Trophy, Zap, 
-  Target, Search as SearchIcon, MapPin, TrendingUp,
-  Globe, Radio, ShieldCheck, Loader2
+  Search as SearchIcon, MapPin, Radio, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/lib/supabase';
+import { supabase, isCloudConfigured } from '@/lib/supabase';
 
 const Court = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,6 +22,11 @@ const Court = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!isCloudConfigured) {
+        setLoading(false);
+        return;
+      }
+
       try {
         const { data: activeMatches } = await supabase.from('matches').select('*').eq('status', 'live');
         const { data: activeTourneys } = await supabase.from('tournaments').select('*').neq('status', 'Completed');
@@ -40,11 +44,11 @@ const Court = () => {
   }, []);
 
   const filteredMatches = useMemo(() => {
-    return matches.filter(m => m.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matches.filter(m => m.name?.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [searchQuery, matches]);
 
   const filteredTournaments = useMemo(() => {
-    return tournaments.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    return tournaments.filter(t => t.name?.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [searchQuery, tournaments]);
 
   return (
