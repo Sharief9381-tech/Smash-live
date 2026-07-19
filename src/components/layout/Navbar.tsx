@@ -8,7 +8,6 @@ import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion, AnimatePresence } from 'framer-motion';
 import Logo from './Logo';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -43,9 +42,7 @@ const Navbar = () => {
     
     checkAuth();
     
-    // Listen for storage events (cross-tab and manual dispatch)
     window.addEventListener('storage', checkAuth);
-    // Custom event for same-tab immediate updates
     window.addEventListener('auth-change' as any, checkAuth);
     
     return () => {
@@ -58,7 +55,8 @@ const Navbar = () => {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchVal.trim()) {
-      navigate(`/rankings?q=${encodeURIComponent(searchVal)}`);
+      // Redirect to Dashboard (The Court) with the search query
+      navigate(`/dashboard?q=${encodeURIComponent(searchVal)}`);
       setIsSearchExpanded(false);
       setSearchVal("");
     }
