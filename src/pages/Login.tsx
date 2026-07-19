@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, ShieldCheck, Loader2, ArrowLeft, Trophy, Activity, ArrowRight } from 'lucide-react';
+import { Zap, ShieldCheck, Loader2, ArrowLeft, Trophy, Activity, ArrowRight, ChevronLeft } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -98,6 +98,17 @@ const Login = () => {
     <div className="min-h-screen bg-[#0B1F3A] flex flex-col items-center justify-center p-6 relative overflow-hidden">
       <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-sky-500/20 blur-[120px] rounded-full" />
       <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-sky-600/10 blur-[100px] rounded-full" />
+
+      {/* Persistent Back Button */}
+      <div className="absolute top-8 left-8 z-20">
+        <Button 
+          onClick={() => navigate('/')}
+          variant="ghost" 
+          className="text-white hover:bg-white/10 rounded-2xl px-6 h-12 font-black uppercase tracking-widest text-[10px] gap-2 transition-all border border-white/10 backdrop-blur-md"
+        >
+          <ChevronLeft className="h-4 w-4" /> Back to Home
+        </Button>
+      </div>
 
       <div className="w-full max-w-[460px] space-y-8 relative z-10">
         <div className="text-center space-y-6">
