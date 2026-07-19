@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, ShieldCheck, Loader2, ArrowLeft, ArrowRight, ChevronLeft, FastForward } from 'lucide-react';
+import { Zap, ShieldCheck, Loader2, ArrowLeft, ArrowRight, ChevronLeft, MapPin } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { showError, showSuccess } from '@/utils/toast';
 import { cn } from '@/lib/utils';
 import { AuthService } from '@/services/auth.service';
+import { INDIAN_STATES, STATE_DISTRICTS } from '@/data/locations';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -21,9 +22,21 @@ const Login = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   
-  const [regData, setRegData] = useState({ name: "", gender: "" });
+  const [regData, setRegData] = useState({ 
+    name: "", 
+    gender: "",
+    state: "",
+    district: ""
+  });
 
   const handleSendOtp = async () => {
+    if (activeTab === 'register') {
+      if (!regData.name || !regData.gender || !regData.state || !regData.district) {
+        showError("Please complete all registration fields");
+        return;
+      }
+    }
+    
     if (phone.length < 10) {
       showError("Please enter a valid 10-digit mobile number");
       return;
@@ -47,13 +60,21 @@ const Login = () => {
     setIsLoading(true);
     try {
       if (activeTab === 'register') {
-        localStorage.setItem('temp_reg', JSON.stringify({ ...regData, mobile: phone }));
-        navigate('/onboarding');
+        const profile = await AuthService.registerAthlete({
+          name: regData.name,
+          gender: regData.gender,
+          state: regData.state,
+          district: regData.district,
+          mobile: phone
+        });
+        AuthService.setLocalSession(profile);
+        showSuccess("Athlete Dossier Synchronized!");
+        navigate('/dashboard', { replace: true });
       } else {
         const profile = await AuthService.getProfileByMobile(phone);
         AuthService.setLocalSession(profile);
         
-        if (profile.onboardingComplete) {
+        if (profile.onboardingComplete || profile.onboarding_complete) {
           navigate('/dashboard', { replace: true });
         } else {
           navigate('/onboarding', { replace: true });
@@ -64,22 +85,6 @@ const Login = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleBypass = async () => {
-    setIsLoading(true);
-    const mockProfile = {
-      name: "Demo Athlete",
-      mobile: "9999999999",
-      country: "India",
-      state: "Maharashtra",
-      gender: "male",
-      smashId: "SMASH#DEMO",
-      onboardingComplete: true
-    };
-    AuthService.setLocalSession(mockProfile);
-    showSuccess("Bypassing to Dashboard...");
-    setTimeout(() => navigate('/dashboard'), 500);
   };
 
   const handleOtpChange = (index: number, value: string) => {
@@ -109,6 +114,8 @@ const Login = () => {
     }
   }, [step]);
 
+  const districts = regData.state ? STATE_DISTRICTS[regData.state] || [] : [];
+
   return (
     <div className="min-h-screen bg-[#0B1F3A] flex flex-col items-center justify-center p-6 relative overflow-hidden">
       <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-sky-500/20 blur-[120px] rounded-full" />
@@ -124,8 +131,8 @@ const Login = () => {
         </Button>
       </div>
 
-      <div className="w-full max-w-[460px] space-y-8 relative z-10">
-        <div className="text-center space-y-6">
+      <div className={cn("w-full transition-all duration-500 relative z-10", activeTab === 'register' ? "max-w-[560px]" : "max-w-[460px]")}>
+        <div className="text-center space-y-6 mb-8">
           <Link to="/" className="inline-flex items-center gap-4 group">
             <div className="bg-white p-4 rounded-[1.5rem] shadow-2xl group-hover:scale-110 transition-transform">
               <Zap className="h-8 w-8 text-[#0EA5E9] fill-current" />
@@ -168,52 +175,78 @@ const Login = () => {
                 </div>
 
                 {activeTab === 'register' && (
-                  <div className="space-y-4">
-                    <Input 
-                      value={regData.name} 
-                      onChange={e => setRegData({...regData, name: e.target.value})} 
-                      placeholder="Full Athlete Name" 
-                      className="h-14 rounded-2xl bg-slate-50 font-bold border-slate-100 focus:border-sky-500 transition-all" 
-                    />
-                    <Select value={regData.gender} onValueChange={v => setRegData({...regData, gender: v})}>
-                      <SelectTrigger className="h-14 rounded-2xl bg-slate-50 font-bold border-slate-100 focus:ring-sky-500">
-                        <SelectValue placeholder="Select Gender" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl">
-                        <SelectItem value="male">Male</SelectItem>
-                        <SelectItem value="female">Female</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="md:col-span-2 space-y-2">
+                      <Label className="text-[10px] font-black uppercase text-slate-400 ml-2">Athlete Name</Label>
+                      <Input 
+                        value={regData.name} 
+                        onChange={e => setRegData({...regData, name: e.target.value})} 
+                        placeholder="Full Legal Name" 
+                        className="h-14 rounded-2xl bg-slate-50 font-bold border-slate-100 focus:border-sky-500" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase text-slate-400 ml-2">Gender</Label>
+                      <Select value={regData.gender} onValueChange={v => setRegData({...regData, gender: v})}>
+                        <SelectTrigger className="h-14 rounded-2xl bg-slate-50 font-bold border-slate-100">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase text-slate-400 ml-2">State</Label>
+                      <Select value={regData.state} onValueChange={v => setRegData({...regData, state: v, district: ""})}>
+                        <SelectTrigger className="h-14 rounded-2xl bg-slate-50 font-bold border-slate-100">
+                          <SelectValue placeholder="Select State" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl max-h-[300px]">
+                          {INDIAN_STATES.map(state => (
+                            <SelectItem key={state} value={state}>{state}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="md:col-span-2 space-y-2">
+                      <Label className="text-[10px] font-black uppercase text-slate-400 ml-2">District</Label>
+                      <Select value={regData.district} onValueChange={v => setRegData({...regData, district: v})} disabled={!regData.state}>
+                        <SelectTrigger className="h-14 rounded-2xl bg-slate-50 font-bold border-slate-100">
+                          <SelectValue placeholder={regData.state ? "Select District" : "Select state first"} />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl max-h-[300px]">
+                          {districts.map(dist => (
+                            <SelectItem key={dist} value={dist}>{dist}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 )}
 
-                <div className="flex gap-2">
-                  <div className="h-14 flex items-center px-5 border border-slate-100 rounded-2xl bg-slate-50 font-black text-[#0B1F3A]">+91</div>
-                  <Input 
-                    maxLength={10} 
-                    value={phone} 
-                    onChange={e => setPhone(e.target.value.replace(/\D/g, ""))} 
-                    placeholder="Mobile Number" 
-                    className="h-14 rounded-2xl bg-slate-50 flex-1 font-black text-lg border-slate-100 focus:border-sky-500 transition-all" 
-                  />
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-slate-400 ml-2">Mobile Connection</Label>
+                  <div className="flex gap-2">
+                    <div className="h-14 flex items-center px-5 border border-slate-100 rounded-2xl bg-slate-50 font-black text-[#0B1F3A]">+91</div>
+                    <Input 
+                      maxLength={10} 
+                      value={phone} 
+                      onChange={e => setPhone(e.target.value.replace(/\D/g, ""))} 
+                      placeholder="Number" 
+                      className="h-14 rounded-2xl bg-slate-50 flex-1 font-black text-lg border-slate-100 focus:border-sky-500 transition-all" 
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-4 pt-2">
-                  <Button 
-                    onClick={handleSendOtp} 
-                    disabled={isLoading} 
-                    className="w-full h-16 rounded-[1.5rem] bg-[#0B1F3A] text-white font-black uppercase tracking-widest hover:bg-sky-500 transition-all shadow-xl active:scale-95"
-                  >
-                    {isLoading ? <Loader2 className="animate-spin" /> : "Request Access"}
-                  </Button>
-                  
-                  <button 
-                    onClick={handleBypass}
-                    className="w-full h-14 rounded-2xl border-2 border-dashed border-slate-100 text-slate-300 hover:border-sky-500 hover:text-sky-500 transition-all flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest group"
-                  >
-                    <FastForward className="h-4 w-4 group-hover:translate-x-1 transition-transform" /> Skip to Dashboard
-                  </button>
-                </div>
+                <Button 
+                  onClick={handleSendOtp} 
+                  disabled={isLoading} 
+                  className="w-full h-16 rounded-[1.5rem] bg-[#0B1F3A] text-white font-black uppercase tracking-widest hover:bg-sky-500 transition-all shadow-xl active:scale-95"
+                >
+                  {isLoading ? <Loader2 className="animate-spin" /> : "Request Access"}
+                </Button>
               </motion.div>
             ) : (
               <motion.div key="otp" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
@@ -243,7 +276,7 @@ const Login = () => {
                     onClick={() => setStep('details')}
                     className="w-full text-center text-[9px] font-black text-slate-400 uppercase tracking-widest hover:text-[#0B1F3A] transition-colors flex items-center justify-center gap-2"
                   >
-                    <ArrowLeft className="h-3 w-3" /> Change Number
+                    <ArrowLeft className="h-3 w-3" /> Change Details
                   </button>
                 </div>
               </motion.div>

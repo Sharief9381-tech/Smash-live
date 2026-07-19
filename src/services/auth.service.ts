@@ -34,6 +34,7 @@ export const AuthService = {
         mobile: mobile,
         country: "India",
         state: "Maharashtra",
+        district: "Mumbai",
         gender: "male",
         smashId: 'SMASH#' + Math.floor(1000 + Math.random() * 9000),
         onboardingComplete: false 
@@ -43,7 +44,7 @@ export const AuthService = {
     return profile;
   },
 
-  async registerAthlete(profileData: { name: string; gender: string; state: string; mobile: string }) {
+  async registerAthlete(profileData: { name: string; gender: string; state: string; district: string; mobile: string }) {
     let savedProfile = null;
 
     if (isCloudConfigured) {
