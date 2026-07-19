@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, ShieldCheck, Loader2, ArrowLeft, Trophy, Activity, ArrowRight, ChevronLeft } from 'lucide-react';
+import { Zap, ShieldCheck, Loader2, ArrowLeft, ArrowRight, ChevronLeft, FastForward } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,7 +28,6 @@ const Login = () => {
       showError("Please enter a valid 10-digit mobile number");
       return;
     }
-    // Artificial delay removed for speed
     setStep('otp');
     showSuccess("Security code [123456] sent successfully.");
   };
@@ -67,6 +66,22 @@ const Login = () => {
     }
   };
 
+  const handleBypass = async () => {
+    setIsLoading(true);
+    const mockProfile = {
+      name: "Demo Athlete",
+      mobile: "9999999999",
+      country: "India",
+      state: "Maharashtra",
+      gender: "male",
+      smashId: "SMASH#DEMO",
+      onboardingComplete: true
+    };
+    AuthService.setLocalSession(mockProfile);
+    showSuccess("Bypassing to Dashboard...");
+    setTimeout(() => navigate('/dashboard'), 500);
+  };
+
   const handleOtpChange = (index: number, value: string) => {
     if (isNaN(Number(value))) return;
     const newOtp = [...otp];
@@ -99,7 +114,6 @@ const Login = () => {
       <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-sky-500/20 blur-[120px] rounded-full" />
       <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-sky-600/10 blur-[100px] rounded-full" />
 
-      {/* Persistent Back Button */}
       <div className="absolute top-8 left-8 z-20">
         <Button 
           onClick={() => navigate('/')}
@@ -184,13 +198,22 @@ const Login = () => {
                   />
                 </div>
 
-                <Button 
-                  onClick={handleSendOtp} 
-                  disabled={isLoading} 
-                  className="w-full h-16 rounded-[1.5rem] bg-[#0B1F3A] text-white font-black uppercase tracking-widest hover:bg-sky-500 transition-all shadow-xl active:scale-95"
-                >
-                  {isLoading ? <Loader2 className="animate-spin" /> : "Request Access"}
-                </Button>
+                <div className="space-y-4 pt-2">
+                  <Button 
+                    onClick={handleSendOtp} 
+                    disabled={isLoading} 
+                    className="w-full h-16 rounded-[1.5rem] bg-[#0B1F3A] text-white font-black uppercase tracking-widest hover:bg-sky-500 transition-all shadow-xl active:scale-95"
+                  >
+                    {isLoading ? <Loader2 className="animate-spin" /> : "Request Access"}
+                  </Button>
+                  
+                  <button 
+                    onClick={handleBypass}
+                    className="w-full h-14 rounded-2xl border-2 border-dashed border-slate-100 text-slate-300 hover:border-sky-500 hover:text-sky-500 transition-all flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest group"
+                  >
+                    <FastForward className="h-4 w-4 group-hover:translate-x-1 transition-transform" /> Skip to Dashboard
+                  </button>
+                </div>
               </motion.div>
             ) : (
               <motion.div key="otp" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">

@@ -84,12 +84,15 @@ export const AuthService = {
     if (!profile) return;
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('userProfile', JSON.stringify(profile));
+    // Trigger a custom event that Navbar and other components can listen to in the same tab
     window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new CustomEvent('auth-change', { detail: { isLoggedIn: true } }));
   },
 
   logout() {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('userProfile');
     window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new CustomEvent('auth-change', { detail: { isLoggedIn: false } }));
   }
 };

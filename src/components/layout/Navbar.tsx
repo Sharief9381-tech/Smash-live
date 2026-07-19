@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState("V. Axelsen");
+  const [userName, setUserName] = useState("Athlete");
   const [userImage, setUserImage] = useState("");
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -22,33 +22,36 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const notifications = [
-    { id: 1, text: "System Pulse: New circuit active in Mumbai", time: "2m ago", unread: true },
-    { id: 2, text: "Athlete entry verified for Open Circuit", time: "15m ago", unread: true },
-  ];
+  const checkAuth = () => {
+    const authStatus = localStorage.getItem('isLoggedIn') === 'true';
+    setIsLoggedIn(authStatus);
+    const saved = localStorage.getItem('userProfile');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setUserName(parsed.name || "Athlete");
+        setUserImage(parsed.image || "");
+      } catch (e) {
+        console.error("Profile parse error");
+      }
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     
-    const checkAuth = () => {
-      const authStatus = localStorage.getItem('isLoggedIn') === 'true';
-      setIsLoggedIn(authStatus);
-      const saved = localStorage.getItem('userProfile');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setUserName(parsed.name || "Athlete");
-        setUserImage(parsed.image || "");
-      }
-    };
-    
     checkAuth();
-    // Listen for storage events to update navbar state (login/logout)
+    
+    // Listen for storage events (cross-tab and manual dispatch)
     window.addEventListener('storage', checkAuth);
+    // Custom event for same-tab immediate updates
+    window.addEventListener('auth-change' as any, checkAuth);
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('storage', checkAuth);
+      window.removeEventListener('auth-change' as any, checkAuth);
     };
   }, [location.pathname]);
 
@@ -105,7 +108,7 @@ const Navbar = () => {
                 key={item.name} 
                 to={item.path}
                 className={cn(
-                  "text-[11px] font-black uppercase tracking-[0.15em] transition-colors hover:text-sky-500",
+                  "text-[11px] font-black uppercase tracking-[0.15em] transition-colors hover:text-sky-50",
                   location.pathname === item.path ? "text-sky-500" : "text-[#0B1F3A]/70"
                 )}
               >
@@ -153,34 +156,6 @@ const Navbar = () => {
             </AnimatePresence>
           </div>
 
-          <Popover>
-            <PopoverTrigger asChild>
-              <button className="relative p-2.5 text-[#0B1F3A]/60 hover:text-sky-500 hover:bg-sky-50 rounded-full transition-all">
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full border-2 border-white" />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-0 rounded-3xl border-slate-200 shadow-2xl mr-4 mt-2">
-              <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase tracking-widest text-[#0B1F3A]">Live Alerts</span>
-                <button className="text-[10px] font-bold text-sky-500 uppercase">Mark All Read</button>
-              </div>
-              <div className="max-h-96 overflow-y-auto">
-                {notifications.map((n, i) => (
-                  <div key={i} className="p-4 flex gap-4 hover:bg-slate-50 transition-colors cursor-pointer">
-                    <div className="h-8 w-8 rounded-full bg-sky-500/10 flex items-center justify-center text-sky-500 shrink-0">
-                      <Zap className="h-4 w-4 fill-current" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs font-bold text-[#0B1F3A] leading-tight">{n.text}</p>
-                      <p className="text-[10px] text-slate-400 font-medium">{n.time}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
-          
           {isLoggedIn ? (
             <Link to="/player/me" className="flex items-center group">
               <Avatar className="h-10 w-10 border-2 border-slate-200 group-hover:border-sky-500 transition-all shadow-sm">
@@ -239,14 +214,6 @@ const Navbar = () => {
                     {item.name}
                   </Link>
                 ))}
-              </div>
-
-              <div className="mt-auto p-6 bg-slate-50 rounded-3xl space-y-4">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Network Status</p>
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-xs font-bold text-[#0B1F3A]">All Nodes Active</span>
-                </div>
               </div>
             </motion.div>
           </>
