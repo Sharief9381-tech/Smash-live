@@ -27,6 +27,7 @@ import ScoringPage from "./pages/ScoringPage";
 import Onboarding from "./pages/Onboarding";
 import RegisterParticipant from "./pages/RegisterParticipant";
 import NotFound from "./pages/NotFound";
+import BottomNav from "./components/layout/BottomNav";
 
 const queryClient = new QueryClient();
 
@@ -35,8 +36,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const userProfile = safeJsonParse(localStorage.getItem('userProfile'), { onboardingComplete: false });
   
   if (!isLoggedIn) return <Navigate to="/login" replace />;
-  
-  // Explicitly check for onboarding status to prevent redirection loops
   if (!userProfile.onboardingComplete && window.location.pathname !== '/onboarding') {
     return <Navigate to="/onboarding" replace />;
   }
@@ -50,33 +49,35 @@ const App = () => (
       <Toaster />
       <Sonner position="top-center" />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-          <Route path="/dashboard" element={<ProtectedRoute><Court /></ProtectedRoute>} />
-          
-          {/* Legacy route fallback */}
-          <Route path="/court" element={<Navigate to="/dashboard" replace />} />
-          
-          <Route path="/smashed" element={<ProtectedRoute><Smashed /></ProtectedRoute>} />
-          <Route path="/live-match/active" element={<LiveMatch />} />
-          <Route path="/live-match/create" element={<ProtectedRoute><CreateIndividualMatch /></ProtectedRoute>} />
-          <Route path="/scoring/:matchId" element={<ProtectedRoute><ScoringPage /></ProtectedRoute>} />
-          <Route path="/tournaments" element={<Tournaments />} />
-          <Route path="/tournaments/create" element={<ProtectedRoute><CreateTournament /></ProtectedRoute>} />
-          <Route path="/tournament/:id" element={<TournamentDetail />} />
-          <Route path="/player/me" element={<ProtectedRoute><PlayerProfile /></ProtectedRoute>} />
-          <Route path="/player/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
-          <Route path="/rankings" element={<Rankings />} />
-          <Route path="/news" element={<News />} />
-          <Route path="/archive" element={<MatchArchive />} />
-          <Route path="/broadcast/create" element={<ProtectedRoute><CreateBroadcast /></ProtectedRoute>} />
-          <Route path="/broadcast/center" element={<ProtectedRoute><BroadcastCenter /></ProtectedRoute>} />
-          <Route path="/broadcast/:id" element={<LiveBroadcast />} />
-          <Route path="/register/:slug" element={<RegisterParticipant />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <div className="flex flex-col min-h-screen">
+          <div className="flex-1">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><Court /></ProtectedRoute>} />
+              <Route path="/court" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/smashed" element={<ProtectedRoute><Smashed /></ProtectedRoute>} />
+              <Route path="/live-match/active" element={<LiveMatch />} />
+              <Route path="/live-match/create" element={<ProtectedRoute><CreateIndividualMatch /></ProtectedRoute>} />
+              <Route path="/scoring/:matchId" element={<ProtectedRoute><ScoringPage /></ProtectedRoute>} />
+              <Route path="/tournaments" element={<Tournaments />} />
+              <Route path="/tournaments/create" element={<ProtectedRoute><CreateTournament /></ProtectedRoute>} />
+              <Route path="/tournament/:id" element={<TournamentDetail />} />
+              <Route path="/player/me" element={<ProtectedRoute><PlayerProfile /></ProtectedRoute>} />
+              <Route path="/player/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+              <Route path="/rankings" element={<Rankings />} />
+              <Route path="/news" element={<News />} />
+              <Route path="/archive" element={<MatchArchive />} />
+              <Route path="/broadcast/create" element={<ProtectedRoute><CreateBroadcast /></ProtectedRoute>} />
+              <Route path="/broadcast/center" element={<ProtectedRoute><BroadcastCenter /></ProtectedRoute>} />
+              <Route path="/broadcast/:id" element={<LiveBroadcast />} />
+              <Route path="/register/:slug" element={<RegisterParticipant />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
+          <BottomNav />
+        </div>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

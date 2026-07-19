@@ -1,254 +1,144 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
+import BottomNav from '@/components/layout/BottomNav';
 import Footer from '@/components/layout/Footer';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
-  Activity, Trophy, Zap, 
-  Search as SearchIcon, MapPin, Radio, Loader2, User, ChevronRight, Globe
+  Zap, Trophy, Radio, Activity, 
+  ArrowRight, Search, Target, User,
+  Calendar, MapPin, ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Link, useSearchParams } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { supabase, isCloudConfigured } from '@/lib/supabase';
+import { Link } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
 
 const Court = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const queryFromUrl = searchParams.get('q') || "";
-  const [searchQuery, setSearchQuery] = useState(queryFromUrl);
-  
+  const [profile, setProfile] = useState<any>(null);
   const [matches, setMatches] = useState<any[]>([]);
-  const [tournaments, setTournaments] = useState<any[]>([]);
-  const [athletes, setAthletes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setSearchQuery(queryFromUrl);
-  }, [queryFromUrl]);
+    const saved = localStorage.getItem('userProfile');
+    if (saved) setProfile(JSON.parse(saved));
 
-  useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
       try {
-        // Fetch Matches
-        const { data: activeMatches } = await supabase.from('matches').select('*').eq('status', 'live');
-        // Fetch Tournaments
-        const { data: activeTourneys } = await supabase.from('tournaments').select('*').neq('status', 'Completed');
-        // Fetch Athletes
-        const { data: allProfiles } = await supabase.from('profiles').select('*');
-        
-        const localMatches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
-        const localTourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
-        const localAthletes = JSON.parse(localStorage.getItem('registered_users') || '[]');
-
-        setMatches([...(activeMatches || []), ...localMatches]);
-        setTournaments([...(activeTourneys || []), ...localTourneys]);
-        setAthletes([...(allProfiles || []), ...localAthletes]);
-      } catch (err) {
-        console.warn("Cloud sync unavailable.");
-      } finally {
-        setLoading(false);
-      }
+        const { data } = await supabase.from('matches').select('*').eq('status', 'live').limit(2);
+        setMatches(data || []);
+      } catch (err) { console.warn("Live fetch limited."); }
+      finally { setLoading(false); }
     };
-
     fetchData();
   }, []);
 
-  const globalResults = useMemo(() => {
-    if (!searchQuery.trim()) return null;
-
-    const lowerQuery = searchQuery.toLowerCase();
-
-    const matchedMatches = matches
-      .filter(m => m.name?.toLowerCase().includes(lowerQuery))
-      .map(m => ({ ...m, resultType: 'Match', path: `/broadcast/${m.id}` }));
-
-    const matchedTourneys = tournaments
-      .filter(t => t.name?.toLowerCase().includes(lowerQuery) || t.city?.toLowerCase().includes(lowerQuery))
-      .map(t => ({ ...t, resultType: 'Tournament', path: `/tournament/${t.id}` }));
-
-    const matchedAthletes = athletes
-      .filter(a => a.name?.toLowerCase().includes(lowerQuery) || a.smash_id?.toLowerCase().includes(lowerQuery) || a.smashId?.toLowerCase().includes(lowerQuery))
-      .map(a => ({ ...a, resultType: 'Player', path: `/player/me` })); // Simplified path for demo
-
-    return [...matchedMatches, ...matchedTourneys, ...matchedAthletes];
-  }, [searchQuery, matches, tournaments, athletes]);
-
-  const handleSearchChange = (val: string) => {
-    setSearchQuery(val);
-    if (!val) {
-       searchParams.delete('q');
-       setSearchParams(searchParams);
-    }
-  };
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearchParams({ q: searchQuery });
-  };
-
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background pb-24">
       <Navbar />
       
-      <main className="container px-6 py-12 space-y-12 min-h-[70vh]">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-sky-500 fill-current" />
-              <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.3em]">Operational Command Center</span>
+      <main className="container max-w-lg mx-auto px-4 py-6 space-y-8">
+        {/* 1. Greeting */}
+        <section className="space-y-1">
+          <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Welcome Back</p>
+          <h1 className="text-3xl font-black tracking-tight text-white uppercase italic">
+            Hi, {profile?.name?.split(' ')[0] || "Athlete"}!
+          </h1>
+        </section>
+
+        {/* 2. Player Card */}
+        <Link to="/player/me" className="block">
+          <div className="sport-card p-6 bg-gradient-to-br from-primary to-orange-600 relative overflow-hidden group">
+            <div className="absolute right-[-20px] top-[-20px] opacity-10 group-hover:rotate-12 transition-transform">
+               <Target className="h-40 w-40" />
             </div>
-            <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-none">THE COURT</h1>
+            <div className="relative z-10 flex items-center gap-4">
+              <div className="h-16 w-16 rounded-full border-4 border-white/20 overflow-hidden bg-white/10 flex items-center justify-center">
+                 <User className="h-8 w-8 text-white" />
+              </div>
+              <div className="space-y-1">
+                 <h2 className="text-xl font-black text-white uppercase italic">{profile?.name || "Anonymous Athlete"}</h2>
+                 <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest">Smash ID: {profile?.smashId || "PENDING"}</p>
+              </div>
+            </div>
+            <div className="mt-6 flex gap-8 relative z-10">
+               <div>
+                  <p className="text-[10px] font-black text-white/60 uppercase">Rank</p>
+                  <p className="text-2xl font-black text-white">#--</p>
+               </div>
+               <div>
+                  <p className="text-[10px] font-black text-white/60 uppercase">Points</p>
+                  <p className="text-2xl font-black text-white">0</p>
+               </div>
+            </div>
+          </div>
+        </Link>
+
+        {/* 3. Quick Actions */}
+        <section className="grid grid-cols-2 gap-4">
+          <Link to="/live-match/create" className="sport-card p-5 flex flex-col gap-3 justify-center items-center text-center hover:border-primary/50">
+             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <Activity className="h-5 w-5" />
+             </div>
+             <span className="text-[11px] font-black uppercase tracking-tight">Quick Match</span>
+          </Link>
+          <Link to="/tournaments" className="sport-card p-5 flex flex-col gap-3 justify-center items-center text-center hover:border-secondary/50">
+             <div className="h-10 w-10 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary">
+                <Trophy className="h-5 w-5" />
+             </div>
+             <span className="text-[11px] font-black uppercase tracking-tight">Join Circuit</span>
+          </Link>
+        </section>
+
+        {/* 4. Live Matches */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between px-1">
+             <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-secondary animate-pulse" /> Live Now
+             </h3>
+             <Link to="/live-match/active" className="text-[10px] font-black text-primary uppercase">View All</Link>
           </div>
           
-          <form onSubmit={handleSearchSubmit} className="relative w-full md:w-96">
-            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-            <Input 
-              placeholder="Search Global Intelligence..." 
-              value={searchQuery}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="h-14 pl-12 bg-white border-slate-200 rounded-[2rem] font-bold focus:border-sky-500 transition-all shadow-sm"
-            />
-          </form>
-        </div>
-
-        {loading ? (
-          <div className="py-40 flex flex-col items-center justify-center gap-4">
-            <Loader2 className="h-10 w-10 text-sky-500 animate-spin" />
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Querying Cloud Circuit...</p>
+          <div className="space-y-3">
+             {matches.length > 0 ? matches.map((m, i) => (
+               <Link to={`/broadcast/${m.id}`} key={i} className="sport-card p-5 flex items-center justify-between bg-slate-900">
+                  <div className="space-y-2">
+                     <p className="text-[9px] font-bold text-muted-foreground uppercase">{m.name}</p>
+                     <div className="font-black text-sm uppercase italic leading-none space-y-1">
+                        <p>{m.players?.p1?.name || "Player 1"}</p>
+                        <p className="text-primary">vs</p>
+                        <p>{m.players?.p2?.name || "Player 2"}</p>
+                     </div>
+                  </div>
+                  <div className="text-3xl font-black font-mono text-secondary tabular-nums">
+                     {m.current_score ? `${m.current_score[0]}-${m.current_score[1]}` : "0-0"}
+                  </div>
+               </Link>
+             )) : (
+               <div className="sport-card p-8 text-center bg-slate-900/50 border-dashed border-white/5">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase italic">No active match node</p>
+               </div>
+             )}
           </div>
-        ) : (
-          <div className="space-y-12">
-            {/* SEARCH RESULTS VIEW */}
-            <AnimatePresence mode="wait">
-              {globalResults !== null ? (
-                <motion.section 
-                  initial={{ opacity: 0, y: 10 }} 
-                  animate={{ opacity: 1, y: 0 }} 
-                  exit={{ opacity: 0 }}
-                  className="space-y-8"
-                >
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-6">
-                    <h2 className="text-2xl font-black text-[#0B1F3A] uppercase italic">Intelligence Results</h2>
-                    <Badge className="bg-[#0B1F3A] text-white px-4 h-7 border-none">{globalResults.length} FOUND</Badge>
-                  </div>
+        </section>
 
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {globalResults.length > 0 ? globalResults.map((item, i) => (
-                      <Link to={item.path} key={i}>
-                        <motion.div 
-                          whileHover={{ y: -5 }}
-                          className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-xl hover:border-sky-500 transition-all group relative overflow-hidden"
-                        >
-                          <div className="flex justify-between items-start mb-4">
-                            <span className="text-[9px] font-black text-sky-500 uppercase tracking-[0.2em]">{item.resultType}:</span>
-                            <ChevronRight className="h-4 w-4 text-slate-200 group-hover:text-sky-500 transition-colors" />
-                          </div>
-                          <h3 className="text-xl font-black text-[#0B1F3A] uppercase italic leading-tight mb-2">{item.name}</h3>
-                          <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                            {item.resultType === 'Player' ? <User className="h-3 w-3" /> : <MapPin className="h-3 w-3" />}
-                            {item.city || item.state || "Active Node"}
-                          </div>
-                          {item.current_score && (
-                             <div className="mt-4 pt-4 border-t border-slate-50 flex items-center gap-2">
-                                <Radio className="h-3 w-3 text-red-500 animate-pulse" />
-                                <span className="font-mono font-black text-sky-600 text-lg">{item.current_score[0]}-{item.current_score[1]}</span>
-                             </div>
-                          )}
-                        </motion.div>
-                      </Link>
-                    )) : (
-                      <div className="col-span-full py-20 text-center bg-slate-50 rounded-[3rem] border-2 border-dashed">
-                        <p className="text-sm font-black text-slate-300 uppercase tracking-widest">No matching intelligence dossiers found</p>
-                      </div>
-                    )}
-                  </div>
-                </motion.section>
-              ) : (
-                /* DEFAULT DASHBOARD VIEW (Only shows when search is empty) */
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid lg:grid-cols-12 gap-8">
-                  <div className="lg:col-span-8 space-y-8">
-                    <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 bg-white border-slate-200 shadow-sm">
-                      <div className="flex items-center justify-between border-b border-slate-50 pb-6">
-                        <h3 className="text-xl font-black text-[#0B1F3A] flex items-center gap-3 italic">
-                          <Activity className="h-5 w-5 text-red-500 animate-pulse" /> Live Feed
-                        </h3>
-                      </div>
-
-                      <div className="grid md:grid-cols-2 gap-6">
-                        {matches.length > 0 ? matches.slice(0, 4).map((match, i) => (
-                          <Link to={`/broadcast/${match.id}`} key={i} className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 hover:border-sky-500/30 transition-all group">
-                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">{match.name}</p>
-                            <div className="flex justify-between items-center">
-                                <span className="font-black text-[#0B1F3A] text-lg uppercase italic">Live Protocol</span>
-                                <span className="text-2xl font-mono font-black text-sky-600">{match.current_score ? `${match.current_score[0]}-${match.current_score[1]}` : "0-0"}</span>
-                            </div>
-                          </Link>
-                        )) : (
-                          <div className="col-span-2 py-12 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-                            <p className="text-xs font-black text-slate-400 uppercase tracking-widest italic">No active match nodes detected</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 bg-white border-slate-200 shadow-sm">
-                      <div className="flex items-center justify-between border-b border-slate-50 pb-6">
-                        <h3 className="text-xl font-black text-[#0B1F3A] flex items-center gap-3 italic">
-                          <Trophy className="h-5 w-5 text-sky-500" /> Active Circuits
-                        </h3>
-                      </div>
-
-                      <div className="space-y-4">
-                        {tournaments.length > 0 ? tournaments.slice(0, 3).map((tourney, i) => (
-                          <Link to={`/tournament/${tourney.id}`} key={i} className="flex items-center justify-between p-8 rounded-[2.5rem] border border-slate-100 bg-white hover:border-sky-500/40 transition-all shadow-sm">
-                            <div className="flex items-center gap-6">
-                              <div className="h-12 w-12 rounded-2xl bg-[#0B1F3A] text-sky-400 flex items-center justify-center">
-                                <Trophy className="h-6 w-6" />
-                              </div>
-                              <div>
-                                <h4 className="font-black text-xl text-[#0B1F3A] uppercase italic">{tourney.name}</h4>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{tourney.city} • {tourney.format}</p>
-                              </div>
-                            </div>
-                            <Badge className="bg-sky-500 text-white font-black px-4">{tourney.status}</Badge>
-                          </Link>
-                        )) : (
-                        <div className="py-12 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 w-full">
-                          <p className="text-xs font-black text-slate-400 uppercase tracking-widest italic">No tournament circuits active</p>
-                        </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="lg:col-span-4 space-y-8">
-                    <div className="bg-[#0B1F3A] p-10 rounded-[3.5rem] text-white space-y-8 relative overflow-hidden group shadow-2xl">
-                      <div className="absolute -right-10 -bottom-10 opacity-10 group-hover:rotate-12 transition-transform duration-700">
-                        <Radio className="h-40 w-40" />
-                      </div>
-                      <div className="space-y-6 relative z-10">
-                        <Badge className="bg-sky-500 text-white border-none font-black px-6 py-1 text-[10px]">STUDIO READY</Badge>
-                        <h3 className="text-3xl font-black tracking-tighter italic uppercase leading-tight">Broadcast <br /> Studio</h3>
-                        <Link to="/broadcast/center" className="block pt-4">
-                          <Button className="w-full h-16 bg-white text-[#0B1F3A] font-black rounded-2xl hover:bg-sky-500 hover:text-white shadow-xl transition-all">
-                            LAUNCH STUDIO
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+        {/* 5. Trending News / Announcements */}
+        <section className="space-y-4">
+          <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground px-1">Latest Pulse</h3>
+          <div className="sport-card overflow-hidden">
+             <img src="https://images.unsplash.com/photo-1626224580175-340ad0e3a242?q=80&w=2070&auto=format&fit=crop" className="h-32 w-full object-cover" alt="News" />
+             <div className="p-4 space-y-2">
+                <Badge className="bg-primary/20 text-primary border-none text-[8px] font-black px-2 uppercase">Championship</Badge>
+                <h4 className="text-sm font-black uppercase italic leading-tight">Inter-University Masters starting next week!</h4>
+                <p className="text-[10px] text-muted-foreground font-bold">Register now to lock your seed in the regional registry.</p>
+             </div>
           </div>
-        )}
+        </section>
       </main>
 
-      <Footer />
+      <BottomNav />
     </div>
   );
 };
