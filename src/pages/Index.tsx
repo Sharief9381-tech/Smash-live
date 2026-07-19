@@ -61,7 +61,7 @@ const Index = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative min-h-[85vh] flex items-center bg-[#F8FAFC] border-b border-slate-100 py-20 md:py-0">
+      <section className="relative flex items-center bg-[#F8FAFC] border-b border-slate-100 py-12 md:py-20">
         <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-sky-500/10 blur-[120px] rounded-full -translate-y-1/4 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[30%] h-[30%] bg-indigo-500/5 blur-[100px] rounded-full translate-y-1/4 pointer-events-none" />
         
@@ -149,27 +149,27 @@ const Index = () => {
       </section>
 
       {/* Intelligence Grid */}
-      <section className="py-48 bg-white">
-        <div className="container px-6 space-y-24">
+      <section className="py-12 bg-white">
+        <div className="container px-6 space-y-12">
           <div className="text-center space-y-4 max-w-2xl mx-auto">
             <h2 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic">Platform Intelligence</h2>
             <p className="text-slate-500 font-medium text-lg leading-relaxed">Integrated modules engineered for professional speed and tactical accuracy.</p>
-            <div className="h-1.5 w-24 bg-sky-500 mx-auto rounded-full mt-6" />
+            <div className="h-1.5 w-24 bg-sky-500 mx-auto rounded-full mt-2" />
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {featureGroups.map((group, i) => (
               <motion.div 
                 key={i}
                 whileHover={{ y: -10 }}
-                className="glass-panel p-10 rounded-[3.5rem] bg-white border-slate-100 shadow-xl shadow-slate-200/20 hover:border-sky-200 transition-all flex flex-col justify-between group"
+                className="glass-panel p-8 rounded-[3.5rem] bg-white border-slate-100 shadow-xl shadow-slate-200/20 hover:border-sky-200 transition-all flex flex-col justify-between group"
               >
-                <div className="space-y-8">
+                <div className="space-y-6">
                   <div className={cn("h-16 w-16 rounded-[1.5rem] flex items-center justify-center shadow-lg transition-transform group-hover:scale-110", group.bg, group.color)}>
                     <group.icon className="h-8 w-8" />
                   </div>
                   <h3 className="text-2xl font-black text-[#0B1F3A] uppercase italic leading-none">{group.category}</h3>
-                  <ul className="space-y-4">
+                  <ul className="space-y-3">
                     {group.features.map((f, j) => (
                       <li key={j} className="text-xs font-bold text-slate-500 flex items-center gap-3 uppercase tracking-tight">
                         <CheckCircle2 className={cn("h-4 w-4", group.color)} /> {f}
@@ -184,28 +184,28 @@ const Index = () => {
       </section>
 
       {/* Connectivity Section */}
-      <section className="py-48 bg-slate-50">
+      <section className="py-12 bg-slate-50">
         <div className="container px-6">
-          <div className="grid lg:grid-cols-12 gap-20 items-center">
-            <div className="lg:col-span-5 space-y-8">
+          <div className="grid lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-5 space-y-6">
               <Badge className="bg-sky-500 text-white font-black px-6 py-2 border-none text-[10px] uppercase tracking-widest rounded-full">Core Technology</Badge>
               <h2 className="text-5xl font-black text-[#0B1F3A] uppercase italic leading-[0.95] tracking-tighter">Advanced Connectivity</h2>
               <p className="text-lg text-slate-500 font-medium leading-relaxed">Our backbone uses distributed edge nodes to ensure every smash is logged and synced with <span className="text-sky-600 font-bold">sub-50ms latency</span> across the global network.</p>
               <Button variant="outline" className="h-14 px-10 rounded-2xl border-[#0B1F3A] text-[#0B1F3A] font-black uppercase tracking-widest text-xs hover:bg-[#0B1F3A] hover:text-white transition-all">View Architecture</Button>
             </div>
             
-            <div className="lg:col-span-7 grid md:grid-cols-2 gap-8">
+            <div className="lg:col-span-7 grid md:grid-cols-2 gap-6">
               {[
                 { title: "Real-time Scoring", desc: "Digital scoreboard with instant cloud synchronization.", icon: Database },
                 { title: "Global Registry", desc: "Centralized database of certified athlete performance.", icon: Globe },
                 { title: "AI Commentary", desc: "Automated event logs and contextual highlights.", icon: Zap },
                 { title: "Data Analytics", desc: "Deep dive into win rates and accuracy metrics.", icon: BarChart3 },
               ].map((item, i) => (
-                <div key={i} className="bg-white p-10 rounded-[3.5rem] border border-slate-100 flex flex-col gap-6 hover:shadow-2xl transition-all hover:border-sky-200 group">
+                <div key={i} className="bg-white p-8 rounded-[3.5rem] border border-slate-100 flex flex-col gap-4 hover:shadow-2xl transition-all hover:border-sky-200 group">
                    <div className="h-14 w-14 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                       <item.icon className="h-7 w-7" />
                    </div>
-                   <div className="space-y-2">
+                   <div className="space-y-1">
                       <h4 className="font-black text-[#0B1F3A] uppercase text-lg tracking-tight italic">{item.title}</h4>
                       <p className="text-sm text-slate-400 font-bold uppercase tracking-tight leading-relaxed">{item.desc}</p>
                    </div>
@@ -216,8 +216,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Heroic CTA Section - REFINED LIGHT VERSION */}
-      <section className="py-48 bg-white">
+      {/* Heroic CTA Section - COMPACT LIGHT VERSION */}
+      <section className="py-12 bg-white">
         <div className="container px-6">
           <div className="relative bg-sky-50 border border-sky-100 rounded-[3.5rem] p-10 md:p-12 overflow-hidden shadow-sm max-w-5xl mx-auto">
             {/* Background Accents */}
