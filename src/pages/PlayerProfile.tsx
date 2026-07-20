@@ -22,20 +22,34 @@ const PlayerProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('performance');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState<any>(null);
 
   useEffect(() => {
     const fetchAthlete = async () => {
-      if (!id || id === 'me') return;
       setLoading(true);
+      
+      // 1. If it's "me", load logged in user
+      if (!id || id === 'me') {
+        const saved = localStorage.getItem('userProfile');
+        if (saved) setProfileData(JSON.parse(saved));
+        setLoading(false);
+        return;
+      }
+
+      // 2. Otherwise, fetch by ID
       try {
         const { data, error } = await supabase.from('profiles').select('*').eq('id', id).single();
-        if (data) setProfileData(data);
+        if (data && !error) {
+          setProfileData(data);
+        } else {
+          // Check local fallback
+          const local = JSON.parse(localStorage.getItem('registered_users') || '[]');
+          const found = local.find((u: any) => u.id === id || String(u.mobile) === id);
+          if (found) setProfileData(found);
+        }
       } catch (e) {
-        const local = JSON.parse(localStorage.getItem('registered_users') || '[]');
-        const found = local.find((u: any) => u.id === id || u.mobile === id);
-        if (found) setProfileData(found);
+        console.warn("Dossier retrieval error.");
       } finally {
         setLoading(false);
       }
@@ -54,6 +68,8 @@ const PlayerProfile = () => {
 
   if (loading) return <div className="h-screen flex items-center justify-center bg-slate-50"><Loader2 className="animate-spin text-sky-500 h-10 w-10" /></div>;
 
+  const isOwnProfile = !id || id === 'me' || profileData?.mobile === JSON.parse(localStorage.getItem('userProfile') || '{}').mobile;
+
   return (
     <div className="min-h-screen bg-slate-50 text-[#0B1F3A] pb-32">
       <Navbar />
@@ -69,7 +85,7 @@ const PlayerProfile = () => {
           )}
         </div>
 
-        <ProfileHero />
+        {profileData && <ProfileHero profile={profileData} isOwnProfile={isOwnProfile} />}
 
         {/* Horizontal Navigation List */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
@@ -106,7 +122,7 @@ const PlayerProfile = () => {
                     <h2 className="text-xl font-black uppercase italic">Performance Core</h2>
                     <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Real-time Career pulse</p>
                   </div>
-                  <PerformanceStats />
+                  <PerformanceStats stats={profileData?.stats} />
                 </section>
               )}
 
