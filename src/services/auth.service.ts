@@ -3,10 +3,29 @@
 import { supabase, isCloudConfigured } from '@/lib/supabase';
 
 export const AuthService = {
+  async checkUserExists(mobile: string) {
+    // 1. Cloud Check
+    if (isCloudConfigured) {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('mobile', mobile)
+          .single();
+        if (data) return true;
+      } catch (err) {
+        console.warn("Cloud check skipped.");
+      }
+    }
+
+    // 2. Local Check
+    const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
+    return registered.some((u: any) => String(u.mobile) === String(mobile));
+  },
+
   async getProfileByMobile(mobile: string) {
     let profile = null;
 
-    // 1. Cloud Check
     if (isCloudConfigured) {
       try {
         const { data, error } = await supabase
@@ -18,7 +37,7 @@ export const AuthService = {
         if (!error && data) {
           profile = {
             ...data,
-            onboardingComplete: data.onboarding_complete ?? true // Normalize field name
+            onboardingComplete: data.onboarding_complete ?? true
           };
         }
       } catch (err) {
@@ -26,10 +45,8 @@ export const AuthService = {
       }
     }
 
-    // 2. Local registry check
     if (!profile) {
       const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
-      // Ensure we match mobile numbers consistently as strings
       const existing = registered.find((u: any) => String(u.mobile) === String(mobile));
       if (existing) {
         profile = {
@@ -39,7 +56,6 @@ export const AuthService = {
       }
     }
 
-    // 3. New Athlete Initialization (If truly not found)
     if (!profile) {
       profile = {
         name: "New Athlete",
@@ -62,8 +78,8 @@ export const AuthService = {
     const normalizedData = {
       ...profileData,
       country: 'India',
-      onboardingComplete: true, // Mark as done locally
-      onboarding_complete: true, // For cloud consistency
+      onboardingComplete: true,
+      onboarding_complete: true,
       smashId: 'SMASH#' + Math.floor(1000 + Math.random() * 9000)
     };
 
@@ -86,7 +102,7 @@ export const AuthService = {
         
         if (!error) savedProfile = { ...data, onboardingComplete: true };
       } catch (err) {
-        console.warn("Cloud registration failed, saving to local node.");
+        console.warn("Cloud registration failed.");
       }
     }
 
@@ -95,7 +111,6 @@ export const AuthService = {
       id: 'athlete_' + Date.now()
     };
     
-    // Update local registry
     const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
     const exists = registered.findIndex((u: any) => String(u.mobile) === String(profileData.mobile));
     if (exists > -1) registered[exists] = finalProfile;
@@ -109,16 +124,12 @@ export const AuthService = {
     if (!profile) return;
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('userProfile', JSON.stringify(profile));
-    
-    // Broadcast auth state change
     window.dispatchEvent(new Event('storage'));
-    window.dispatchEvent(new CustomEvent('auth-change', { detail: { isLoggedIn: true, profile } }));
   },
 
   logout() {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('userProfile');
     window.dispatchEvent(new Event('storage'));
-    window.dispatchEvent(new CustomEvent('auth-change', { detail: { isLoggedIn: false } }));
   }
 };
