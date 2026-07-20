@@ -6,33 +6,24 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 222 47% 11%;
-
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-
     --primary: 217 68% 14%; /* #0B1F3A */
     --primary-foreground: 210 40% 98%;
-
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 199 89% 48%; /* Neon Blue Accent */
+    --accent: 199 89% 48%;
     --accent-foreground: 222.2 47.4% 11.2%;
-
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
-
-    --radius: 1rem;
+    --radius: 0.75rem;
   }
 }
 
@@ -42,24 +33,24 @@
   }
   body {
     @apply bg-background text-foreground antialiased selection:bg-accent/30;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-size: 14px;
+    line-height: 1.5;
   }
+  h1 { @apply text-[20px] font-black tracking-tight leading-tight; }
+  h2 { @apply text-[16px] font-black tracking-tight; }
+  h3 { @apply text-[15px] font-bold tracking-tight; }
+}
+
+.app-card {
+  @apply bg-white border border-slate-100 rounded-xl shadow-sm overflow-hidden transition-all active:scale-[0.98];
 }
 
 .glass-panel {
-  @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-xl shadow-slate-900/5;
+  @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-lg;
 }
 
 .neon-glow {
-  box-shadow: 0 0 20px rgba(14, 165, 233, 0.2);
-}
-
-.text-navy {
-  color: #0B1F3A;
-}
-
-.bg-navy {
-  background-color: #0B1F3A;
+  box-shadow: 0 0 15px rgba(14, 165, 233, 0.15);
 }
 
 @keyframes marquee {
@@ -71,8 +62,4 @@
   display: inline-flex;
   animation: marquee 30s linear infinite;
   will-change: transform;
-}
-
-.animate-marquee:hover {
-  animation-play-state: paused;
 }

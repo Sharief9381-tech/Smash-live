@@ -1,194 +1,158 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
-  Activity, Trophy, Zap, 
-  Search as SearchIcon, MapPin, Radio, Loader2, User, ChevronRight, Globe
+  Trophy, Zap, Activity, Radio, Loader2, 
+  ChevronRight, PlusCircle, History, Target
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Link, useSearchParams } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { supabase, isCloudConfigured } from '@/lib/supabase';
+import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
 
 const Court = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const queryFromUrl = searchParams.get('q') || "";
-  const [searchQuery, setSearchQuery] = useState(queryFromUrl);
-  
+  const navigate = useNavigate();
   const [matches, setMatches] = useState<any[]>([]);
   const [tournaments, setTournaments] = useState<any[]>([]);
-  const [athletes, setAthletes] = useState<any[]>([]);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setSearchQuery(queryFromUrl);
-  }, [queryFromUrl]);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      const saved = localStorage.getItem('userProfile');
+      if (saved) setProfile(JSON.parse(saved));
+
       try {
-        const { data: activeMatches } = await supabase.from('matches').select('*').eq('status', 'live');
-        const { data: activeTourneys } = await supabase.from('tournaments').select('*').neq('status', 'Completed');
-        const { data: allProfiles } = await supabase.from('profiles').select('*');
+        const { data: activeMatches } = await supabase.from('matches').select('*').eq('status', 'live').limit(3);
+        const { data: activeTourneys } = await supabase.from('tournaments').select('*').neq('status', 'Completed').limit(2);
         
         const localMatches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
-        const localTourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
-        const localAthletes = JSON.parse(localStorage.getItem('registered_users') || '[]');
-
         setMatches([...(activeMatches || []), ...localMatches]);
-        setTournaments([...(activeTourneys || []), ...localTourneys]);
-        setAthletes([...(allProfiles || []), ...localAthletes]);
-      } catch (err) {
-        console.warn("Cloud sync unavailable.");
-      } finally {
-        setLoading(false);
-      }
+        setTournaments(activeTourneys || []);
+      } catch (err) { console.warn("Cloud sync limited."); }
+      finally { setLoading(false); }
     };
     fetchData();
   }, []);
 
-  const globalResults = useMemo(() => {
-    if (!searchQuery.trim()) return null;
-    const lowerQuery = searchQuery.toLowerCase();
-    const matchedMatches = matches.filter(m => m.name?.toLowerCase().includes(lowerQuery)).map(m => ({ ...m, resultType: 'Match', path: `/broadcast/${m.id}` }));
-    const matchedTourneys = tournaments.filter(t => t.name?.toLowerCase().includes(lowerQuery) || t.city?.toLowerCase().includes(lowerQuery)).map(t => ({ ...t, resultType: 'Tournament', path: `/tournament/${t.id}` }));
-    const matchedAthletes = athletes.filter(a => a.name?.toLowerCase().includes(lowerQuery) || a.smash_id?.toLowerCase().includes(lowerQuery) || a.smashId?.toLowerCase().includes(lowerQuery)).map(a => ({ ...a, resultType: 'Player', path: `/player/me` }));
-    return [...matchedMatches, ...matchedTourneys, ...matchedAthletes];
-  }, [searchQuery, matches, tournaments, athletes]);
-
   return (
-    <div className="min-h-screen bg-slate-50 pb-32">
+    <div className="min-h-screen bg-slate-50 pb-20">
       <Navbar />
       
-      <main className="container px-4 py-8 space-y-10">
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-sky-500 fill-current" />
-              <span className="text-[10px] font-black text-sky-600 uppercase tracking-widest">Command Center</span>
+      <main className="px-4 py-4 space-y-6">
+        {/* Greeting & Quick Actions */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">Welcome back,</p>
+              <h1 className="uppercase italic">{profile?.name || "Athlete"}</h1>
             </div>
-            <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-none">THE COURT</h1>
+            <Badge className="bg-sky-500 text-white font-black px-2 h-6 border-none text-[10px]">PRO ACTIVE</Badge>
           </div>
-          
-          <form onSubmit={(e) => { e.preventDefault(); setSearchParams({ q: searchQuery }); }} className="relative">
-            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-            <Input 
-              placeholder="Search Intelligence..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-16 pl-12 bg-white border-slate-200 rounded-3xl font-bold focus:border-sky-500 shadow-xl"
-            />
-          </form>
+
+          <div className="grid grid-cols-4 gap-2">
+            {[
+              { label: 'Studio', icon: Radio, path: '/broadcast/center', color: 'bg-indigo-50 text-indigo-600' },
+              { label: 'Circuit', icon: Trophy, path: '/tournaments/create', color: 'bg-amber-50 text-amber-600' },
+              { label: 'Match', icon: Activity, path: '/live-match/create', color: 'bg-emerald-50 text-emerald-600' },
+              { label: 'Archive', icon: History, path: '/archive', color: 'bg-slate-100 text-slate-600' },
+            ].map((action, i) => (
+              <button 
+                key={i} 
+                onClick={() => navigate(action.path)}
+                className="flex flex-col items-center gap-2 p-3 bg-white border border-slate-100 rounded-xl shadow-sm active:scale-95 transition-all"
+              >
+                <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center", action.color)}>
+                  <action.icon className="h-5 w-5" />
+                </div>
+                <span className="text-[10px] font-black uppercase text-[#0B1F3A]">{action.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {loading ? (
-          <div className="py-20 flex flex-col items-center justify-center gap-4">
-            <Loader2 className="h-10 w-10 text-sky-500 animate-spin" />
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Syncing Nodes...</p>
-          </div>
+          <div className="py-20 flex justify-center"><Loader2 className="h-8 w-8 text-sky-500 animate-spin" /></div>
         ) : (
-          <div className="space-y-10">
-            <AnimatePresence mode="wait">
-              {globalResults !== null ? (
-                <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-                    <h2 className="text-xl font-black text-[#0B1F3A] uppercase italic">Results</h2>
-                    <Badge className="bg-[#0B1F3A] text-white px-3 h-6 border-none">{globalResults.length}</Badge>
-                  </div>
-
-                  <div className="flex flex-col gap-4">
-                    {globalResults.map((item, i) => (
-                      <Link to={item.path} key={i}>
-                        <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-lg relative overflow-hidden">
-                          <span className="text-[8px] font-black text-sky-500 uppercase tracking-widest block mb-2">{item.resultType}</span>
-                          <h3 className="text-lg font-black text-[#0B1F3A] uppercase italic leading-tight">{item.name}</h3>
-                          <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                            {item.city || item.state || "Remote Node"}
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </motion.section>
-              ) : (
-                <div className="flex flex-col gap-8">
-                  {/* STUDIO CALLOUT */}
-                  <div className="bg-[#0B1F3A] p-10 rounded-[3rem] text-white space-y-6 relative overflow-hidden shadow-2xl">
-                    <Radio className="absolute -right-10 -bottom-10 h-40 w-40 opacity-10 rotate-12" />
-                    <div className="relative z-10 space-y-6">
-                      <Badge className="bg-sky-500 text-white font-black px-4 text-[9px]">STUDIO READY</Badge>
-                      <h3 className="text-4xl font-black italic uppercase leading-none">Broadcast <br /> Studio</h3>
-                      <Link to="/broadcast/center" className="block">
-                        <Button className="w-full h-16 bg-white text-[#0B1F3A] font-black rounded-2xl hover:bg-sky-500 transition-all">LAUNCH STUDIO</Button>
-                      </Link>
+          <div className="space-y-8">
+            {/* Live Matches Slider/Stack */}
+            <section className="space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <h2 className="uppercase italic flex items-center gap-2">
+                  <span className="h-2 w-2 bg-red-500 rounded-full animate-pulse" /> Live Now
+                </h2>
+                <Link to="/live-match/active" className="text-[11px] font-black text-sky-600 uppercase">View All</Link>
+              </div>
+              
+              <div className="flex flex-col gap-3">
+                {matches.length > 0 ? matches.map((match, i) => (
+                  <Link to={`/broadcast/${match.id}`} key={i} className="app-card p-4 space-y-3">
+                    <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
+                      <span>{match.name}</span>
+                      <span className="text-red-500 animate-pulse">Live Broadcast</span>
                     </div>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <p className="font-black text-[15px] text-[#0B1F3A] uppercase italic leading-none">{match.players?.p1?.name || "Athlete A"}</p>
+                        <p className="font-black text-[15px] text-[#0B1F3A] uppercase italic leading-none">{match.players?.p2?.name || "Athlete B"}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[24px] font-mono font-black text-sky-600 leading-none">
+                          {match.current_score ? `${match.current_score[0]}-${match.current_score[1]}` : "0-0"}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                )) : (
+                  <div className="py-10 text-center bg-slate-50 border border-dashed rounded-xl">
+                    <p className="text-[11px] font-black text-slate-400 uppercase italic">Awaiting match nodes...</p>
                   </div>
+                )}
+              </div>
+            </section>
 
-                  {/* LIVE FEED */}
-                  <section className="space-y-6">
-                    <h3 className="text-xl font-black text-[#0B1F3A] flex items-center gap-3 italic px-2">
-                      <Activity className="h-5 w-5 text-red-500 animate-pulse" /> Live Feed
-                    </h3>
-                    <div className="flex flex-col gap-4">
-                      {matches.length > 0 ? matches.slice(0, 3).map((match, i) => (
-                        <Link to={`/broadcast/${match.id}`} key={i}>
-                          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-4">
-                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{match.name}</p>
-                            <div className="flex justify-between items-center">
-                                <span className="font-black text-[#0B1F3A] text-xl italic uppercase leading-none">Live Protocol</span>
-                                <span className="text-3xl font-mono font-black text-sky-600">{match.current_score ? `${match.current_score[0]}-${match.current_score[1]}` : "0-0"}</span>
-                            </div>
-                          </div>
-                        </Link>
-                      )) : (
-                        <div className="py-12 text-center bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2.5rem]">
-                          <p className="text-[10px] font-black text-slate-400 uppercase">No Match Nodes Active</p>
-                        </div>
-                      )}
+            {/* Upcoming/Tournaments */}
+            <section className="space-y-3">
+              <h2 className="uppercase italic flex items-center gap-2 px-1">
+                <Trophy className="h-4 w-4 text-sky-500" /> Active Circuits
+              </h2>
+              <div className="flex flex-col gap-3">
+                {tournaments.map((t, i) => (
+                  <Link to={`/tournament/${t.id}`} key={i} className="app-card flex items-center justify-between p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-lg bg-[#0B1F3A] flex items-center justify-center text-sky-400">
+                        <Trophy className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="uppercase italic leading-none mb-1">{t.name}</h3>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.city}</p>
+                      </div>
                     </div>
-                  </section>
+                    <ChevronRight className="h-4 w-4 text-slate-300" />
+                  </Link>
+                ))}
+              </div>
+            </section>
 
-                  {/* TOURNAMENTS */}
-                  <section className="space-y-6">
-                    <h3 className="text-xl font-black text-[#0B1F3A] flex items-center gap-3 italic px-2">
-                      <Trophy className="h-5 w-5 text-sky-500" /> Active Circuits
-                    </h3>
-                    <div className="flex flex-col gap-4">
-                      {tournaments.length > 0 ? tournaments.slice(0, 3).map((tourney, i) => (
-                        <Link to={`/tournament/${tourney.id}`} key={i}>
-                          <div className="flex items-center justify-between p-6 rounded-[2.5rem] border border-slate-100 bg-white shadow-sm">
-                            <div className="flex items-center gap-4">
-                              <div className="h-10 w-10 rounded-2xl bg-[#0B1F3A] text-sky-400 flex items-center justify-center">
-                                <Trophy className="h-5 w-5" />
-                              </div>
-                              <div>
-                                <h4 className="font-black text-[#0B1F3A] italic uppercase">{tourney.name}</h4>
-                                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{tourney.city}</p>
-                              </div>
-                            </div>
-                            <Badge className="bg-sky-500 text-white font-black px-3">LIVE</Badge>
-                          </div>
-                        </Link>
-                      )) : (
-                        <div className="py-12 text-center bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2.5rem]">
-                          <p className="text-[10px] font-black text-slate-400 uppercase">No Active Circuits</p>
-                        </div>
-                      )}
-                    </div>
-                  </section>
+            {/* Platform Intel */}
+            <div className="bg-[#0B1F3A] p-6 rounded-2xl text-white relative overflow-hidden shadow-xl">
+              <Zap className="absolute -right-4 -bottom-4 h-24 w-24 opacity-10 rotate-12" />
+              <div className="relative z-10 space-y-4">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-sky-400 uppercase tracking-widest">Global Protocol</p>
+                  <h2 className="text-xl uppercase italic leading-none">AI BIOMECHANICS</h2>
+                  <p className="text-[11px] text-white/50 leading-relaxed max-w-[80%]">Upgrade to Pro for real-time court coverage heatmaps and athlete speed analysis.</p>
                 </div>
-              )}
-            </AnimatePresence>
+                <Button className="h-10 bg-white text-[#0B1F3A] font-black text-[11px] uppercase tracking-widest rounded-lg px-6">Explore Pro</Button>
+              </div>
+            </div>
           </div>
         )}
       </main>
-
       <Footer />
     </div>
   );
