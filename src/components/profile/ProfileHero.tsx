@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Share2, Edit3, LogOut, ShieldCheck, Flag, MapPin } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { showSuccess } from '@/utils/toast';
+import { cn } from '@/lib/utils';
 
 const ProfileHero = () => {
   const navigate = useNavigate();
@@ -20,7 +21,13 @@ const ProfileHero = () => {
 
   useEffect(() => {
     const saved = localStorage.getItem('userProfile');
-    if (saved) setProfileData(JSON.parse(saved));
+    if (saved) {
+      try {
+        setProfileData(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to parse profile");
+      }
+    }
   }, []);
 
   const handleSignOut = () => {
