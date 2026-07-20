@@ -72,6 +72,19 @@ const ScoringPage = () => {
     }
   };
 
+  const getSideNames = (side: 1 | 2) => {
+    if (!matchData?.players) return side === 1 ? "Side A" : "Side B";
+    
+    if (matchData.match_type === 'singles') {
+      const p = side === 1 ? matchData.players.p1 : matchData.players.p2;
+      return p?.name || (side === 1 ? "Athlete A" : "Athlete B");
+    } else {
+      const team = side === 1 ? matchData.players.sideA : matchData.players.sideB;
+      if (!team || !Array.isArray(team)) return side === 1 ? "Team A" : "Team B";
+      return team.map(p => p?.name || "Athlete").join(" / ");
+    }
+  };
+
   if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-sky-500 h-10 w-10" /></div>;
 
   return (
@@ -85,33 +98,33 @@ const ScoringPage = () => {
           </Button>
           <div className="flex items-center gap-2">
              <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-             <span className="text-[9px] font-black uppercase text-slate-400">Broadcasting: {matchData.name}</span>
+             <span className="text-[9px] font-black uppercase text-slate-400 max-w-[150px] truncate">Broadcasting: {matchData.name}</span>
           </div>
         </div>
 
         {/* VERTICAL SCORE STACK */}
         <div className="flex flex-col gap-4">
           {[1, 2].map((side) => {
-            const name = side === 1 ? (matchData.players?.p1?.name || "Side A") : (matchData.players?.p2?.name || "Side B");
+            const sideName = getSideNames(side as 1 | 2);
             const isActive = serving === side;
             return (
               <div key={side} className={cn(
-                "p-8 rounded-[3rem] border transition-all flex items-center justify-between shadow-xl relative overflow-hidden",
+                "p-6 rounded-[2.5rem] border transition-all flex items-center justify-between shadow-xl relative overflow-hidden",
                 isActive ? "bg-white border-sky-500 scale-[1.02]" : "bg-white/50 border-slate-100 opacity-60"
               )}>
                 {isActive && <Zap className="absolute right-4 top-4 h-12 w-12 text-sky-500 opacity-5" />}
-                <div className="space-y-2">
+                <div className="space-y-2 flex-1 mr-4">
                   <div className={cn("h-10 w-10 rounded-full flex items-center justify-center font-black text-white", side === 1 ? "bg-sky-500" : "bg-[#0B1F3A]")}>
-                    {name[0].toUpperCase()}
+                    {side === 1 ? "A" : "B"}
                   </div>
-                  <h2 className="text-xl font-black uppercase italic tracking-tighter">{name}</h2>
+                  <h2 className="text-[15px] font-black uppercase italic tracking-tighter leading-tight">{sideName}</h2>
                   <div className="flex gap-1.5">
                     {[...Array(Math.ceil((matchData.total_sets || 3)/2))].map((_, i) => (
-                      <div key={i} className={cn("h-2.5 w-2.5 rounded-full border", i < setsWon[side-1] ? "bg-sky-500 border-sky-500" : "bg-slate-100 border-slate-200")} />
+                      <div key={i} className={cn("h-2 w-2 rounded-full border", i < setsWon[side-1] ? "bg-sky-500 border-sky-500" : "bg-slate-100 border-slate-200")} />
                     ))}
                   </div>
                 </div>
-                <motion.span key={score[side-1]} initial={{ scale: 0.5 }} animate={{ scale: 1 }} className={cn("text-8xl font-black font-mono tabular-nums leading-none", side === 1 ? "text-sky-600" : "text-[#0B1F3A]")}>
+                <motion.span key={score[side-1]} initial={{ scale: 0.5 }} animate={{ scale: 1 }} className={cn("text-7xl font-black font-mono tabular-nums leading-none", side === 1 ? "text-sky-600" : "text-[#0B1F3A]")}>
                   {score[side-1]}
                 </motion.span>
               </div>
@@ -122,7 +135,7 @@ const ScoringPage = () => {
         {/* HUGE SCORING BUTTONS */}
         <div className="grid grid-cols-2 gap-4">
           {[1, 2].map((side) => (
-            <div key={side} className="relative h-32">
+            <div key={side} className="relative h-28">
               <Button 
                 onClick={() => setActiveOverlay(side as 1 | 2)}
                 className={cn("w-full h-full rounded-[2.5rem] text-white font-black text-3xl shadow-2xl transition-transform active:scale-95", side === 1 ? "bg-sky-500" : "bg-[#0B1F3A]")}
@@ -146,8 +159,8 @@ const ScoringPage = () => {
         </div>
 
         <div className="flex gap-4">
-          <Button onClick={() => setScore([0,0])} variant="outline" className="flex-1 h-16 rounded-3xl border-slate-200 font-black text-[10px] uppercase gap-2 bg-white"><RefreshCw className="h-4 w-4" /> Reset</Button>
-          <Button onClick={() => navigate('/smashed')} variant="outline" className="flex-1 h-16 rounded-3xl border-slate-200 font-black text-[10px] uppercase gap-2 bg-white"><StopCircle className="h-4 w-4" /> End Match</Button>
+          <Button onClick={() => setScore([0,0])} variant="outline" className="flex-1 h-14 rounded-2xl border-slate-200 font-black text-[10px] uppercase gap-2 bg-white"><RefreshCw className="h-4 w-4" /> Reset</Button>
+          <Button onClick={() => navigate('/smashed')} variant="outline" className="flex-1 h-14 rounded-2xl border-slate-200 font-black text-[10px] uppercase gap-2 bg-white"><StopCircle className="h-4 w-4" /> End Match</Button>
         </div>
       </main>
     </div>
