@@ -2,11 +2,13 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import { Search, Loader2, Minus, Trophy, TrendingUp, Zap } from 'lucide-react';
+import { Search, Loader2, Minus, Trophy, Zap, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
 const Rankings = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [scope, setScope] = useState("world");
   const [athletes, setAthletes] = useState<any[]>([]);
@@ -76,7 +78,8 @@ const Rankings = () => {
             filtered.map((row, idx) => (
               <div 
                 key={row.id || idx} 
-                className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 active:scale-[0.98] transition-all"
+                onClick={() => navigate(`/player/${row.id || row.mobile}`)}
+                className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 active:scale-[0.98] transition-all cursor-pointer group"
               >
                 {/* Rank Badge */}
                 <div className={cn(
@@ -90,22 +93,19 @@ const Rankings = () => {
 
                 {/* Athlete Identity */}
                 <div className="flex-1 flex items-center gap-3 overflow-hidden">
-                  <div className="h-10 w-10 shrink-0 rounded-full bg-[#0B1F3A] flex items-center justify-center text-[10px] font-black text-sky-400 uppercase shadow-inner border border-white/10">
+                  <div className="h-10 w-10 shrink-0 rounded-full bg-[#0B1F3A] flex items-center justify-center text-[10px] font-black text-sky-400 uppercase shadow-inner border border-white/10 group-hover:bg-sky-500 group-hover:text-white transition-colors">
                     {row.name ? row.name[0] : "?"}
                   </div>
                   <div className="overflow-hidden">
-                    <p className="font-black text-[#0B1F3A] uppercase italic text-sm leading-tight truncate">{row.name}</p>
+                    <p className="font-black text-[#0B1F3A] uppercase italic text-sm leading-tight truncate group-hover:text-sky-600 transition-colors">{row.name}</p>
                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight truncate">
                       {row.smash_id || row.smashId || "NODE_01"} • {row.state || "India"}
                     </p>
                   </div>
                 </div>
 
-                {/* Score Intel */}
-                <div className="text-right shrink-0 px-2 border-l border-slate-50">
-                  <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Points</p>
-                  <p className="text-[18px] font-black text-sky-600 font-mono leading-none">0</p>
-                </div>
+                {/* Action Link */}
+                <ChevronRight className="h-5 w-5 text-slate-200 group-hover:text-sky-500 transition-colors" />
               </div>
             ))
           ) : (
