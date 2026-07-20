@@ -7,6 +7,7 @@ import { Share2, Edit3, LogOut, ShieldCheck, Flag, MapPin } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { showSuccess } from '@/utils/toast';
 import { cn } from '@/lib/utils';
+import { AuthService } from '@/services/auth.service';
 
 const ProfileHero = () => {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ const ProfileHero = () => {
   }, []);
 
   const handleSignOut = () => {
-    localStorage.clear();
+    AuthService.logout();
     navigate('/');
   };
 
@@ -43,7 +44,7 @@ const ProfileHero = () => {
             {profileData.image ? (
               <img src={profileData.image} className="w-full h-full object-cover" alt="" />
             ) : (
-              <span className="text-[20px] font-black text-[#0B1F3A]">{profileData.name[0].toUpperCase()}</span>
+              <span className="text-[20px] font-black text-[#0B1F3A]">{profileData.name[0]?.toUpperCase() || "A"}</span>
             )}
           </div>
         </div>
