@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Share2, Edit3, LogOut, ShieldCheck, Flag, MapPin } from 'lucide-react';
+import { Share2, Edit3, LogOut, Flag, MapPin } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { showSuccess } from '@/utils/toast';
 import { cn } from '@/lib/utils';
@@ -52,7 +51,6 @@ const ProfileHero = () => {
         <div className="flex-1 space-y-1.5 pt-1">
           <div className="flex items-center justify-between">
             <h1 className="uppercase italic leading-none">{profileData.name}</h1>
-            <ShieldCheck className="h-4 w-4 text-sky-500" />
           </div>
           <p className="text-sky-600 font-mono text-[10px] font-black uppercase tracking-widest italic">{profileData.smashId}</p>
           <div className="flex items-center gap-3 text-[11px] font-bold text-slate-400 uppercase tracking-tight">

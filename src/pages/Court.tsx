@@ -50,7 +50,6 @@ const Court = () => {
               <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">Welcome back,</p>
               <h1 className="uppercase italic">{profile?.name || "Athlete"}</h1>
             </div>
-            <Badge className="bg-sky-500 text-white font-black px-2 h-6 border-none text-[10px]">PRO ACTIVE</Badge>
           </div>
 
           <div className="grid grid-cols-4 gap-2">
