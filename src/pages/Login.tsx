@@ -142,7 +142,7 @@ const Login = () => {
                           <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-slate-100 text-sm">
                             <SelectValue placeholder="Select" />
                           </SelectTrigger>
-                          <SelectContent className="rounded-xl">
+                          <SelectContent className="rounded-xl max-h-[300px]">
                             {INDIAN_STATES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                           </SelectContent>
                         </Select>
@@ -155,7 +155,7 @@ const Login = () => {
                           <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-slate-100 text-sm">
                             <SelectValue placeholder="Select District" />
                           </SelectTrigger>
-                          <SelectContent className="rounded-xl">
+                          <SelectContent className="rounded-xl max-h-[300px]">
                             {STATE_DISTRICTS[regData.state]?.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
                           </SelectContent>
                         </Select>
@@ -164,7 +164,7 @@ const Login = () => {
                   </div>
                 )}
                 
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 pb-4">
                   <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Mobile Number</Label>
                   <div className="flex gap-2">
                     <div className="h-12 px-3 border border-slate-100 rounded-xl bg-slate-50 flex items-center font-black text-xs">+91</div>
