@@ -3,27 +3,35 @@
 import { supabase, isCloudConfigured } from '@/lib/supabase';
 
 export const AuthService = {
+  // Normalize mobile to string and remove any whitespace/dashes
+  normalizeMobile(mobile: string | number): string {
+    return String(mobile).replace(/\D/g, "");
+  },
+
   async checkUserExists(mobile: string) {
+    const cleanMobile = this.normalizeMobile(mobile);
+
     // 1. Cloud Check
     if (isCloudConfigured) {
       try {
         const { data, error } = await supabase
           .from('profiles')
           .select('id')
-          .eq('mobile', mobile)
+          .eq('mobile', cleanMobile)
           .single();
-        if (data) return true;
+        if (data && !error) return true;
       } catch (err) {
         console.warn("Cloud check skipped.");
       }
     }
 
-    // 2. Local Check
+    // 2. Local Check (Fallback)
     const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
-    return registered.some((u: any) => String(u.mobile) === String(mobile));
+    return registered.some((u: any) => this.normalizeMobile(u.mobile) === cleanMobile);
   },
 
   async getProfileByMobile(mobile: string) {
+    const cleanMobile = this.normalizeMobile(mobile);
     let profile = null;
 
     if (isCloudConfigured) {
@@ -31,12 +39,13 @@ export const AuthService = {
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('mobile', mobile)
+          .eq('mobile', cleanMobile)
           .single();
         
         if (!error && data) {
           profile = {
             ...data,
+            mobile: cleanMobile, // Ensure it's present
             onboardingComplete: data.onboarding_complete ?? true
           };
         }
@@ -45,9 +54,10 @@ export const AuthService = {
       }
     }
 
+    // Always check local if not found or as additional backup
     if (!profile) {
       const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
-      const existing = registered.find((u: any) => String(u.mobile) === String(mobile));
+      const existing = registered.find((u: any) => this.normalizeMobile(u.mobile) === cleanMobile);
       if (existing) {
         profile = {
           ...existing,
@@ -56,15 +66,12 @@ export const AuthService = {
       }
     }
 
+    // Create a temporary skeleton if absolutely not found (shouldn't happen with checkUserExists guard)
     if (!profile) {
       profile = {
         name: "New Athlete",
-        mobile: mobile,
+        mobile: cleanMobile,
         country: "India",
-        state: "",
-        district: "",
-        gender: "male",
-        smashId: 'SMASH#' + Math.floor(1000 + Math.random() * 9000),
         onboardingComplete: false 
       };
     }
@@ -73,16 +80,19 @@ export const AuthService = {
   },
 
   async registerAthlete(profileData: { name: string; gender: string; state: string; district: string; mobile: string }) {
+    const cleanMobile = this.normalizeMobile(profileData.mobile);
     let savedProfile = null;
 
     const normalizedData = {
       ...profileData,
+      mobile: cleanMobile,
       country: 'India',
       onboardingComplete: true,
       onboarding_complete: true,
       smashId: 'SMASH#' + Math.floor(1000 + Math.random() * 9000)
     };
 
+    // Try cloud save
     if (isCloudConfigured) {
       try {
         const { data, error } = await supabase
@@ -92,7 +102,7 @@ export const AuthService = {
             gender: normalizedData.gender,
             state: normalizedData.state,
             district: normalizedData.district,
-            mobile: normalizedData.mobile,
+            mobile: cleanMobile,
             country: 'India',
             onboarding_complete: true,
             smash_id: normalizedData.smashId,
@@ -100,21 +110,29 @@ export const AuthService = {
           }], { onConflict: 'mobile' })
           .select().single();
         
-        if (!error) savedProfile = { ...data, onboardingComplete: true };
+        if (!error && data) {
+          savedProfile = { ...data, onboardingComplete: true, mobile: cleanMobile };
+        }
       } catch (err) {
         console.warn("Cloud registration failed.");
       }
     }
 
+    // Final profile object
     const finalProfile = savedProfile || { 
       ...normalizedData, 
       id: 'athlete_' + Date.now()
     };
     
+    // GUARANTEE local storage update
     const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
-    const exists = registered.findIndex((u: any) => String(u.mobile) === String(profileData.mobile));
-    if (exists > -1) registered[exists] = finalProfile;
-    else registered.push(finalProfile);
+    const existsIndex = registered.findIndex((u: any) => this.normalizeMobile(u.mobile) === cleanMobile);
+    
+    if (existsIndex > -1) {
+      registered[existsIndex] = finalProfile;
+    } else {
+      registered.push(finalProfile);
+    }
     
     localStorage.setItem('registered_users', JSON.stringify(registered));
     return finalProfile;
