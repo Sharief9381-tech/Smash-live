@@ -124,7 +124,6 @@ const CreateIndividualMatch = () => {
   const [registeredAthletes, setRegisteredAthletes] = useState<any[]>([]);
   const [matchType, setMatchType] = useState<'singles' | 'doubles' | 'mixed'>('singles');
   
-  // Dynamic player slots based on matchType
   const [selectedPlayers, setSelectedPlayers] = useState<Record<string, any | null>>({
     p1: null, p2: null, tA1: null, tA2: null, tB1: null, tB2: null
   });
@@ -163,7 +162,6 @@ const CreateIndividualMatch = () => {
     setIsInitializing(true);
     const matchId = `live_${Date.now()}`;
     
-    // Structure players object for database
     const finalPlayers = isDoubles ? {
       sideA: [selectedPlayers.tA1, selectedPlayers.tA2],
       sideB: [selectedPlayers.tB1, selectedPlayers.tB2]
@@ -188,15 +186,16 @@ const CreateIndividualMatch = () => {
         .select().single();
 
       if (error) throw error;
-      navigate(`/scoring/${data.id}`);
+      showSuccess("Match Initialized");
+      navigate('/smashed');
     } catch (err) {
-      // Fallback to local
       const localMatch = { ...formData, players: finalPlayers, match_type: matchType, id: matchId, status: 'live', current_score: [0,0], sets_won: [0,0] };
       localStorage.setItem(matchId, JSON.stringify(localMatch));
       const active = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
       active.push(localMatch);
       localStorage.setItem('active_studio_matches', JSON.stringify(active));
-      navigate(`/scoring/${matchId}`);
+      showSuccess("Match Initialized (Offline Node)");
+      navigate('/smashed');
     }
   };
 

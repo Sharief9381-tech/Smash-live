@@ -92,11 +92,11 @@ const CreateBroadcast = () => {
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Player / Team 1</Label>
-                        <Input placeholder="Search Player" className="h-12 bg-slate-50 border-slate-200 rounded-xl px-4 font-bold" />
+                        <Input placeholder="Search Player" className="h-12 bg-slate-50 border-slate-100 rounded-xl px-4 font-bold" />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Player / Team 2</Label>
-                        <Input placeholder="Search Player" className="h-12 bg-slate-50 border-slate-200 rounded-xl px-4 font-bold" />
+                        <Input placeholder="Search Player" className="h-12 bg-slate-50 border-slate-100 rounded-xl px-4 font-bold" />
                       </div>
                     </div>
 
@@ -156,7 +156,7 @@ const CreateBroadcast = () => {
                       </div>
                     </div>
                     <Button 
-                      onClick={() => navigate('/broadcast/live-active')}
+                      onClick={() => navigate('/smashed')}
                       className="w-full h-16 bg-sky-500 text-white font-black text-lg rounded-2xl shadow-xl hover:bg-sky-400 transition-transform active:scale-95"
                     >
                       GO LIVE NOW <Play className="ml-2 h-5 w-5 fill-current" />
