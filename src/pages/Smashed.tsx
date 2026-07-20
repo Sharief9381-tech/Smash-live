@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Trash2, ChevronRight, Users, Zap, Activity, Loader2, MapPin } from 'lucide-react';
+import { Trophy, Trash2, ChevronRight, Zap, Activity, Loader2, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
@@ -66,59 +66,70 @@ const Smashed = () => {
             <Zap className="h-4 w-4 text-sky-500 fill-current" />
             <span className="text-[10px] font-black text-sky-600 uppercase tracking-widest">Initialized Dossier</span>
           </div>
-          <h1 className="uppercase italic text-[24px]">SMASHED</h1>
+          <h1 className="uppercase italic text-[20px] font-black">SMASHED</h1>
         </div>
 
         {loading ? (
-          <div className="py-20 flex justify-center"><Loader2 className="h-8 w-8 text-sky-500 animate-spin" /></div>
+          <div className="py-20 flex justify-center">
+            <Loader2 className="h-8 w-8 text-sky-500 animate-spin" />
+          </div>
         ) : (
           <div className="grid grid-cols-1 gap-4">
             <AnimatePresence mode="popLayout">
-              {items.length > 0 ? items.map((item) => (
-                <motion.div 
-                  layout
-                  key={item.id}
-                  className="app-card p-5 space-y-4 relative"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className={cn(
-                      "h-10 w-10 rounded-lg flex items-center justify-center shadow-sm",
-                      item.type === 'tournament' ? "bg-[#0B1F3A] text-sky-400" : "bg-sky-500 text-white"
-                    )}>
-                      {item.type === 'tournament' ? <Trophy className="h-5 w-5" /> : <Activity className="h-5 w-5" />}
+              {items.length > 0 ? (
+                items.map((item) => (
+                  <motion.div 
+                    layout
+                    key={item.id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="app-card p-5 space-y-4 relative"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className={cn(
+                        "h-10 w-10 rounded-lg flex items-center justify-center shadow-sm",
+                        item.type === 'tournament' ? "bg-[#0B1F3A] text-sky-400" : "bg-sky-500 text-white"
+                      )}>
+                        {item.type === 'tournament' ? <Trophy className="h-5 w-5" /> : <Activity className="h-5 w-5" />}
+                      </div>
+                      <button onClick={() => deleteItem(item.id, item.type)} className="p-2 text-slate-300 hover:text-red-500 transition-colors">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
-                    <button onClick={() => deleteItem(item.id, item.type)} className="p-2 text-slate-300 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
-                  </div>
 
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Badge className={cn("border-none font-black text-[8px] uppercase px-2 h-5", item.type === 'tournament' ? "bg-slate-100 text-slate-500" : "bg-sky-100 text-sky-600")}>{item.type}</Badge>
-                      <span className="text-[9px] font-black text-slate-300">ID: {item.id.slice(-6).toUpperCase()}</span>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Badge className={cn("border-none font-black text-[8px] uppercase px-2 h-5", item.type === 'tournament' ? "bg-slate-100 text-slate-500" : "bg-sky-100 text-sky-600")}>
+                          {item.type}
+                        </Badge>
+                        <span className="text-[9px] font-black text-slate-300">ID: {String(item.id).slice(-6).toUpperCase()}</span>
+                      </div>
+                      <h2 className="uppercase italic leading-tight text-[16px] font-black">{item.name}</h2>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <MapPin className="h-3 w-3 text-sky-500" /> {item.city || "Remote Node"}
+                      </p>
                     </div>
-                    <h2 className="uppercase italic leading-tight">{item.name}</h2>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><MapPin className="h-3 w-3" /> {item.city || "Remote"}</p>
-                  </div>
 
-                  <div className="pt-4 border-t border-slate-50 flex justify-between items-center">
-                     <div className="flex items-center gap-2">
-                        <Zap className="h-3.5 w-3.5 text-sky-500 fill-current" />
-                        <span className="font-black text-[12px] text-[#0B1F3A]">
-                          {item.current_score ? `${item.current_score[0]}-${item.current_score[1]}` : "Sync Ready"}
-                        </span>
-                     </div>
-                     <Button 
-                      onClick={() => navigate(item.type === 'tournament' ? `/tournament/${item.id}` : `/scoring/${item.id}`)} 
-                      variant="ghost" 
-                      className="text-sky-500 font-black text-[10px] uppercase p-0 h-auto gap-1"
-                    >
-                      {item.type === 'tournament' ? 'MANAGE' : 'RESUME'} <ChevronRight className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </motion.div>
-              ))}
-              
-              {items.length === 0 && (
-                <div className="py-20 text-center border-2 border-dashed rounded-2xl bg-white/50">
+                    <div className="pt-4 border-t border-slate-50 flex justify-between items-center">
+                       <div className="flex items-center gap-2">
+                          <Zap className="h-3.5 w-3.5 text-sky-500 fill-current" />
+                          <span className="font-black text-[12px] text-[#0B1F3A]">
+                            {item.current_score ? `${item.current_score[0]}-${item.current_score[1]}` : "Sync Ready"}
+                          </span>
+                       </div>
+                       <Button 
+                        onClick={() => navigate(item.type === 'tournament' ? `/tournament/${item.id}` : `/scoring/${item.id}`)} 
+                        variant="ghost" 
+                        className="text-sky-500 font-black text-[10px] uppercase p-0 h-auto gap-1 hover:bg-transparent"
+                      >
+                        {item.type === 'tournament' ? 'MANAGE' : 'RESUME'} <ChevronRight className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="py-20 text-center border-2 border-dashed rounded-2xl bg-white/50 border-slate-200">
                   <p className="text-[11px] font-black text-slate-400 uppercase italic">Intel Registry Empty</p>
                 </div>
               )}
