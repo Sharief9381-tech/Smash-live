@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Trophy, Radio, ListOrdered, User } from 'lucide-react';
+import { LayoutDashboard, Radio, Activity, ListOrdered, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const BottomNav = () => {
@@ -13,8 +13,8 @@ const BottomNav = () => {
 
   const items = [
     { name: 'Home', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Circuit', path: '/tournaments', icon: Trophy },
-    { name: 'Live', path: '/live-match/active', icon: Radio },
+    { name: 'Studio', path: '/broadcast/center', icon: Radio },
+    { name: 'Live', path: '/live-match/active', icon: Activity },
     { name: 'Ladder', path: '/rankings', icon: ListOrdered },
     { name: 'Profile', path: '/player/me', icon: User },
   ];
@@ -46,7 +46,7 @@ const BottomNav = () => {
           );
         })}
       </div>
-      <div className="h-safe-bottom bg-white" /> {/* Placeholder for mobile bottom notch */}
+      <div className="h-safe-bottom bg-white" />
     </div>
   );
 };

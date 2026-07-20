@@ -45,7 +45,6 @@ const Court = () => {
       <Navbar />
       
       <main className="px-4 py-4 space-y-6">
-        {/* Greeting & Quick Actions */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
@@ -57,7 +56,7 @@ const Court = () => {
 
           <div className="grid grid-cols-4 gap-2">
             {[
-              { label: 'Studio', icon: Radio, path: '/broadcast/center', color: 'bg-indigo-50 text-indigo-600' },
+              { label: 'Smashed', icon: Zap, path: '/smashed', color: 'bg-indigo-50 text-indigo-600' },
               { label: 'New', icon: Newspaper, path: '/news', color: 'bg-sky-50 text-sky-600' },
               { label: 'Circuit', icon: Trophy, path: '/tournaments', color: 'bg-amber-50 text-amber-600' },
               { label: 'Ladder', icon: ListOrdered, path: '/rankings', color: 'bg-emerald-50 text-emerald-600' },
@@ -80,7 +79,6 @@ const Court = () => {
           <div className="py-20 flex justify-center"><Loader2 className="h-8 w-8 text-sky-500 animate-spin" /></div>
         ) : (
           <div className="space-y-8">
-            {/* Live Matches Slider/Stack */}
             <section className="space-y-3">
               <div className="flex items-center justify-between px-1">
                 <h2 className="uppercase italic flex items-center gap-2">
@@ -116,7 +114,6 @@ const Court = () => {
               </div>
             </section>
 
-            {/* Upcoming/Tournaments */}
             <section className="space-y-3">
               <h2 className="uppercase italic flex items-center gap-2 px-1">
                 <Trophy className="h-4 w-4 text-sky-500" /> Active Circuits
