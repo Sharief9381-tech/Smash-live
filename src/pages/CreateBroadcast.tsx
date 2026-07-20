@@ -2,14 +2,13 @@
 
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
-  Trophy, Radio, Target, Users, 
+  Trophy, Radio, Target, 
   MapPin, Upload, ChevronRight, Play,
-  Globe, Shield, Activity, Zap
+  Shield, Zap
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
@@ -19,7 +18,7 @@ const CreateBroadcast = () => {
   const [type, setType] = useState<'tournament' | 'individual' | null>(null);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground pb-20">
       <Navbar />
       
       <main className="container max-w-4xl px-4 py-16">
@@ -171,8 +170,6 @@ const CreateBroadcast = () => {
           )}
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

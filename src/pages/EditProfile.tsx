@@ -2,14 +2,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
-  User, Camera, Globe, Shield, Trophy,
-  ChevronLeft, Save, Zap, MapPin, Activity, Upload
+  User, Camera, ChevronLeft, Save, Zap, Upload
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { showSuccess, showError } from '@/utils/toast';
@@ -83,7 +81,7 @@ const EditProfile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-[#0B1F3A]">
+    <div className="min-h-screen bg-slate-50 text-[#0B1F3A] pb-20">
       <Navbar />
       <main className="container max-w-5xl px-6 py-12">
         <div className="space-y-12">
@@ -193,8 +191,6 @@ const EditProfile = () => {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

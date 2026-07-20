@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { motion } from 'framer-motion';
 import { 
   ArrowRight, Activity, Trophy, Users, 
   Zap, TrendingUp, Monitor,
-  ShieldCheck, CheckCircle2
+  ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -121,8 +120,6 @@ const Index = () => {
           ))}
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 };

@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Activity, Play, Search, Zap, Radio, Loader2 } from 'lucide-react';
@@ -82,7 +81,7 @@ const LiveMatch = () => {
   }, [query, activeCategory, liveMatches, liveTournaments]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 pb-20">
       <Navbar />
       <main className="container px-6 py-12 space-y-12">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
@@ -179,8 +178,6 @@ const LiveMatch = () => {
           )}
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

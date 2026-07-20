@@ -2,16 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import PremiumScoreboard from '@/components/broadcast/PremiumScoreboard';
 import CommentaryFeed from '@/components/broadcast/CommentaryFeed';
 import MatchStatGrid from '@/components/broadcast/MatchStatGrid';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Trophy, Clock, Activity, Zap, Bell, Check, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Trophy, Clock, Activity, Zap, Bell, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { showSuccess } from '@/utils/toast';
 import { useParams } from 'react-router-dom';
 
 const LiveBroadcast = () => {
@@ -103,8 +100,6 @@ const LiveBroadcast = () => {
           <MatchStatGrid />
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 };

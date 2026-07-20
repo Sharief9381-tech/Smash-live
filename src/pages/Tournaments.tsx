@@ -2,18 +2,15 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Trophy, MapPin, Calendar, Search, Plus, ChevronRight, Zap } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
 
 const Tournaments = () => {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState("All");
   const [tournaments, setTournaments] = useState<any[]>([]);
 
   useEffect(() => {
@@ -97,8 +94,6 @@ const Tournaments = () => {
           </AnimatePresence>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import ProfileHero from '@/components/profile/ProfileHero';
 import PerformanceStats from '@/components/profile/PerformanceStats';
 import TournamentSection from '@/components/profile/TournamentSection';
@@ -71,7 +70,7 @@ const PlayerProfile = () => {
           </section>
         </div>
 
-        {/* Mobile CTA */}
+        {/* CTA */}
         <section className="bg-[#0B1F3A] p-12 rounded-[3.5rem] flex flex-col items-center text-center gap-8 relative overflow-hidden shadow-2xl">
           <Zap className="absolute -right-10 -bottom-10 h-60 w-60 text-sky-400 opacity-10" />
           <h2 className="text-4xl font-black text-white tracking-tighter leading-tight italic uppercase relative z-10">ELEVATE YOUR <br /> INTEL</h2>
@@ -79,8 +78,6 @@ const PlayerProfile = () => {
           <button className="w-full bg-sky-500 text-white rounded-2xl font-black px-12 h-16 text-lg shadow-xl relative z-10">GO PRO NOW</button>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 };

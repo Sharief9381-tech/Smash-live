@@ -2,11 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { motion } from 'framer-motion';
 import { 
-  Trophy, Zap, Activity, Radio, Loader2, 
-  ChevronRight, Newspaper, ListOrdered, Target
+  Trophy, Zap, Activity, Loader2, 
+  ChevronRight, Newspaper, ListOrdered
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -142,7 +141,6 @@ const Court = () => {
           </div>
         )}
       </main>
-      <Footer />
     </div>
   );
 };

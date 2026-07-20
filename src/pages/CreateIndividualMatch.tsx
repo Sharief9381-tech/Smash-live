@@ -2,15 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from '@/components/ui/badge';
 import { 
-  Target, Users, Trophy, Zap, Search,
-  X, User, ChevronRight, ShieldCheck, Loader2, UserPlus
+  Users, Trophy, Zap, Search,
+  X, ChevronRight, ShieldCheck, Loader2, UserPlus
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { showSuccess, showError } from '@/utils/toast';
@@ -339,7 +337,6 @@ const CreateIndividualMatch = () => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

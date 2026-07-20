@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import BroadcastActionCard from '@/components/broadcast/BroadcastActionCard';
 import PlayerBroadcastStats from '@/components/broadcast/PlayerBroadcastStats';
 import { 
@@ -21,7 +20,7 @@ const BroadcastCenter = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 pb-20">
       <Navbar />
       
       {/* Header Section */}
@@ -69,8 +68,6 @@ const BroadcastCenter = () => {
           <PlayerBroadcastStats />
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 };

@@ -2,16 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   Trophy, Calendar, Users, MapPin, 
-  Play, ChevronLeft, Activity, Globe, Loader2
+  ChevronLeft, Activity, Globe, Loader2
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
-import { cn } from '@/lib/utils';
+import { showSuccess } from '@/utils/toast';
 
 const TournamentDetail = () => {
   const { id } = useParams();
@@ -59,7 +58,7 @@ const TournamentDetail = () => {
 
   if (!tournament) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC]">
+      <div className="min-h-screen bg-[#F8FAFC] pb-20">
         <Navbar />
         <main className="container flex flex-col items-center justify-center py-40 gap-6 text-center px-6">
            <Trophy className="h-16 w-16 text-slate-200" />
@@ -69,18 +68,17 @@ const TournamentDetail = () => {
            </div>
            <Button onClick={() => navigate('/tournaments')} className="bg-[#0B1F3A] text-white px-10 h-14 rounded-2xl font-black uppercase tracking-widest text-[10px]">Return to Circuit</Button>
         </main>
-        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-[#0B1F3A]">
+    <div className="min-h-screen bg-slate-50 text-[#0B1F3A] pb-20">
       <Navbar />
       
       <div className="relative h-[400px] w-full overflow-hidden bg-[#0B1F3A]">
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0B1F3A] via-[#0B1F3A]/40 to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0B1F3A] via-[#0B1F3A]/60 to-transparent z-10" />
         
         <img 
           src="https://images.unsplash.com/photo-1626224580175-340ad0e3a242?q=80&w=2070&auto=format&fit=crop" 
@@ -186,8 +184,6 @@ const TournamentDetail = () => {
             </div>
          </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

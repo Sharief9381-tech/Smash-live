@@ -2,15 +2,13 @@
 
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Trophy, Zap, Settings, Shield, ListOrdered, Layers, ArrowRight, Loader2, Copy, Check } from 'lucide-react';
+import { Trophy, Check, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { showSuccess, showError } from '@/utils/toast';
-import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const CreateTournament = () => {
@@ -61,7 +59,7 @@ const CreateTournament = () => {
   const registrationLink = `${window.location.origin}/register/${slug}`;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-[#F8FAFC] pb-20">
       <Navbar />
       <main className="container max-w-6xl px-6 py-12">
         <AnimatePresence mode="wait">
@@ -112,8 +110,6 @@ const CreateTournament = () => {
           )}
         </AnimatePresence>
       </main>
-
-      <Footer />
     </div>
   );
 };

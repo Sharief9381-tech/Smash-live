@@ -2,14 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Trash2, ChevronRight, Zap, Activity, Loader2, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
-import { showSuccess, showError } from '@/utils/toast';
+import { showSuccess } from '@/utils/toast';
 import { cn } from '@/lib/utils';
 
 const Smashed = () => {
@@ -137,7 +136,6 @@ const Smashed = () => {
           </div>
         )}
       </main>
-      <Footer />
     </div>
   );
 };

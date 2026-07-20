@@ -2,10 +2,9 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
-import { Search, Globe, Flag, MapPin, Loader2, Minus } from 'lucide-react';
+import { Search, Loader2, Minus } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { supabase, isCloudConfigured } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
 const Rankings = () => {
@@ -98,7 +97,6 @@ const Rankings = () => {
           )}
         </div>
       </main>
-      <Footer />
     </div>
   );
 };
