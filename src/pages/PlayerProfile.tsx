@@ -6,13 +6,13 @@ import Footer from '@/components/layout/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, Zap, Activity, Target, 
-  Award, Trophy, TrendingUp, 
+  Settings, Award, Trophy, TrendingUp, 
   MapPin, Edit3, Share2, LogOut,
   Star, Flame, ArrowUpRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Link, useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
 
 const PlayerProfile = () => {
   const navigate = useNavigate();
