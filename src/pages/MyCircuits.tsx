@@ -52,11 +52,10 @@ const MyCircuits = () => {
         }
 
         // 2. Fetch scheduled matches for this user
-        // Note: This logic assumes match player objects store IDs/Names
         const { data: matches } = await supabase
           .from('matches')
           .select('*')
-          .eq('status', 'live'); // Or 'scheduled' if your schema supports it
+          .eq('status', 'live'); 
 
         const userMatches = matches?.filter(m => {
           const p = m.players;
@@ -67,7 +66,7 @@ const MyCircuits = () => {
 
         setUpcomingMatches(userMatches || []);
       } catch (err) {
-        console.warn("Personal intelligence sync limited.");
+        console.warn("Personal sync limited.");
       } finally {
         setLoading(false);
       }
@@ -84,20 +83,20 @@ const MyCircuits = () => {
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-sky-500" />
-            <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.4em]">Athlete Itinerary</span>
+            <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.4em]">My Schedule</span>
           </div>
-          <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-none">Your Circuit</h1>
-          <p className="text-[11px] font-medium text-slate-400 max-w-xs">Upcoming match nodes and tournament entries synced to your Smash ID.</p>
+          <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-none">Upcoming</h1>
+          <p className="text-[11px] font-medium text-slate-400 max-w-xs">Your next matches and registered tournaments linked to your Smash ID.</p>
         </div>
 
         {loading ? (
           <div className="py-20 flex justify-center"><Loader2 className="h-8 w-8 text-sky-500 animate-spin" /></div>
         ) : (
           <div className="space-y-10">
-            {/* MATCH NODES */}
+            {/* MATCHES */}
             <section className="space-y-4">
               <h2 className="uppercase italic flex items-center gap-2 px-1 text-sky-600">
-                <Activity className="h-4 w-4" /> Priority Matches
+                <Activity className="h-4 w-4" /> Next Matches
               </h2>
               
               <div className="space-y-3">
@@ -115,22 +114,22 @@ const MyCircuits = () => {
                         </p>
                       </div>
                       <Button onClick={() => navigate(`/broadcast/${match.id}`)} className="h-10 px-4 bg-[#0B1F3A] text-white rounded-xl text-[10px] font-black uppercase tracking-widest">
-                        Enter
+                        Go to Match
                       </Button>
                     </div>
                   </div>
                 )) : (
                   <div className="py-12 text-center bg-white/50 border border-dashed rounded-[2rem] border-slate-200">
-                    <p className="text-[10px] font-black text-slate-400 uppercase italic">No immediate match nodes found</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase italic">No matches scheduled</p>
                   </div>
                 )}
               </div>
             </section>
 
-            {/* REGISTERED CIRCUITS */}
+            {/* REGISTERED TOURNAMENTS */}
             <section className="space-y-4">
               <h2 className="uppercase italic flex items-center gap-2 px-1 text-amber-600">
-                <Trophy className="h-4 w-4" /> Active Registrations
+                <Trophy className="h-4 w-4" /> Tournament Registration
               </h2>
               <div className="space-y-3">
                 {registeredTourneys.length > 0 ? registeredTourneys.map((t, i) => (
@@ -152,8 +151,8 @@ const MyCircuits = () => {
                 )) : (
                   <div className="py-12 text-center bg-white/50 border border-dashed rounded-[2rem] border-slate-200">
                     <AlertCircle className="h-8 w-8 text-slate-200 mx-auto mb-3" />
-                    <p className="text-[10px] font-black text-slate-400 uppercase italic">Not registered in any active circuits</p>
-                    <Button onClick={() => navigate('/tournaments')} variant="ghost" className="mt-2 text-sky-500 font-black text-[9px] uppercase hover:bg-transparent">Explore Tournaments</Button>
+                    <p className="text-[10px] font-black text-slate-400 uppercase italic">No active registrations</p>
+                    <Button onClick={() => navigate('/tournaments')} variant="ghost" className="mt-2 text-sky-500 font-black text-[9px] uppercase hover:bg-transparent">Find Tournaments</Button>
                   </div>
                 )}
               </div>

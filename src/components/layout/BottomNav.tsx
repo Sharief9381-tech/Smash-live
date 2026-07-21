@@ -15,7 +15,7 @@ const BottomNav = () => {
     { name: 'Home', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Studio', path: '/broadcast/center', icon: Radio },
     { name: 'Live', path: '/live-match/active', icon: Activity },
-    { name: 'Ladder', path: '/rankings', icon: ListOrdered },
+    { name: 'Rankings', path: '/rankings', icon: ListOrdered },
     { name: 'Profile', path: '/player/me', icon: User },
   ];
 

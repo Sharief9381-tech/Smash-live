@@ -38,9 +38,9 @@ const Rankings = () => {
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Trophy className="h-5 w-5 text-sky-500" />
-            <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.4em]">Global Circuit</span>
+            <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.4em]">Global Ranks</span>
           </div>
-          <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter italic uppercase leading-none">The Ladder</h1>
+          <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter italic uppercase leading-none">Player Rankings</h1>
           
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             {['world', 'country', 'state'].map((s) => (
@@ -61,7 +61,7 @@ const Rankings = () => {
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
           <input 
-            placeholder="Search Athlete Dossiers..." 
+            placeholder="Search Players..." 
             className="w-full h-14 pl-12 pr-4 bg-white border border-slate-100 rounded-2xl font-bold text-xs shadow-sm outline-none focus:border-sky-500 transition-all"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -72,7 +72,7 @@ const Rankings = () => {
           {isLoading ? (
             <div className="py-20 flex flex-col items-center justify-center gap-4">
               <Loader2 className="h-8 w-8 text-sky-500 animate-spin" />
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Querying Cloud Registry...</p>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Loading Rankings...</p>
             </div>
           ) : filtered.length > 0 ? (
             filtered.map((row, idx) => (
@@ -91,7 +91,7 @@ const Rankings = () => {
                   #{idx + 1}
                 </div>
 
-                {/* Athlete Identity */}
+                {/* Player Identity */}
                 <div className="flex-1 flex items-center gap-3 overflow-hidden">
                   <div className="h-10 w-10 shrink-0 rounded-full bg-[#0B1F3A] flex items-center justify-center text-[10px] font-black text-sky-400 uppercase shadow-inner border border-white/10 group-hover:bg-sky-500 group-hover:text-white transition-colors">
                     {row.name ? row.name[0] : "?"}
@@ -111,7 +111,7 @@ const Rankings = () => {
           ) : (
             <div className="py-24 text-center border-2 border-dashed border-slate-200 rounded-[2.5rem] bg-white/50">
               <Zap className="h-10 w-10 text-slate-200 mx-auto mb-4" />
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">No matching athletes found</p>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">No players found</p>
             </div>
           )}
         </div>

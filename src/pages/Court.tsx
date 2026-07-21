@@ -34,7 +34,7 @@ const Court = () => {
         const localMatches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
         setMatches([...(activeMatches || []), ...localMatches]);
         setTournaments(activeTourneys || []);
-      } catch (err) { console.warn("Cloud sync limited."); }
+      } catch (err) { console.warn("Sync limited."); }
       finally { setLoading(false); }
     };
     fetchData();
@@ -49,16 +49,16 @@ const Court = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">Welcome back,</p>
-              <h1 className="uppercase italic">{profile?.name || "Athlete"}</h1>
+              <h1 className="uppercase italic">{profile?.name || "Player"}</h1>
             </div>
           </div>
 
           <div className="grid grid-cols-4 gap-2">
             {[
-              { label: 'Circuit', icon: Trophy, path: '/my-circuits', color: 'bg-amber-50 text-amber-600' },
-              { label: 'Smashed', icon: Zap, path: '/smashed', color: 'bg-indigo-50 text-indigo-600' },
-              { label: 'Ladder', icon: ListOrdered, path: '/rankings', color: 'bg-emerald-50 text-emerald-600' },
-              { label: 'News', icon: Newspaper, path: '/news', color: 'bg-blue-50 text-sky-600' },
+              { label: 'Schedule', icon: Calendar, path: '/my-circuits', color: 'bg-blue-50 text-sky-600' },
+              { label: 'Matches', icon: Zap, path: '/smashed', color: 'bg-indigo-50 text-indigo-600' },
+              { label: 'Tourney', icon: Trophy, path: '/tournaments', color: 'bg-amber-50 text-amber-600' },
+              { label: 'Rankings', icon: ListOrdered, path: '/rankings', color: 'bg-emerald-50 text-emerald-600' },
             ].map((action, i) => (
               <button 
                 key={i} 
@@ -91,12 +91,12 @@ const Court = () => {
                   <Link to={`/broadcast/${match.id}`} key={i} className="app-card p-4 space-y-3">
                     <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
                       <span>{match.name}</span>
-                      <span className="text-red-500 animate-pulse">Live Broadcast</span>
+                      <span className="text-red-500 animate-pulse">Live Score</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <p className="font-black text-[15px] text-[#0B1F3A] uppercase italic leading-none">{match.players?.p1?.name || match.players?.sideA?.[0]?.name || "Athlete A"}</p>
-                        <p className="font-black text-[15px] text-[#0B1F3A] uppercase italic leading-none">{match.players?.p2?.name || match.players?.sideB?.[0]?.name || "Athlete B"}</p>
+                        <p className="font-black text-[15px] text-[#0B1F3A] uppercase italic leading-none">{match.players?.p1?.name || match.players?.sideA?.[0]?.name || "Player A"}</p>
+                        <p className="font-black text-[15px] text-[#0B1F3A] uppercase italic leading-none">{match.players?.p2?.name || match.players?.sideB?.[0]?.name || "Player B"}</p>
                       </div>
                       <div className="text-right">
                         <p className="text-[24px] font-mono font-black text-sky-600 leading-none">
@@ -107,7 +107,7 @@ const Court = () => {
                   </Link>
                 )) : (
                   <div className="py-10 text-center bg-slate-50 border border-dashed rounded-xl">
-                    <p className="text-[11px] font-black text-slate-400 uppercase italic">Awaiting match nodes...</p>
+                    <p className="text-[11px] font-black text-slate-400 uppercase italic">No active matches...</p>
                   </div>
                 )}
               </div>
@@ -115,7 +115,7 @@ const Court = () => {
 
             <section className="space-y-3">
               <h2 className="uppercase italic flex items-center gap-2 px-1">
-                <Trophy className="h-4 w-4 text-sky-500" /> Active Circuits
+                <Trophy className="h-4 w-4 text-sky-500" /> Active Tournaments
               </h2>
               <div className="flex flex-col gap-3">
                 {tournaments.length > 0 ? tournaments.map((t, i) => (
@@ -133,7 +133,7 @@ const Court = () => {
                   </Link>
                 )) : (
                   <div className="py-10 text-center bg-slate-50 border border-dashed rounded-xl">
-                    <p className="text-[11px] font-black text-slate-400 uppercase italic">No circuits initialized.</p>
+                    <p className="text-[11px] font-black text-slate-400 uppercase italic">No tournaments found.</p>
                   </div>
                 )}
               </div>

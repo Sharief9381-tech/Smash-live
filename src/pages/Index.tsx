@@ -29,32 +29,32 @@ const Index = () => {
 
   const featureGroups = [
     {
-      category: "Match Intel",
+      category: "Live Scores",
       icon: Activity,
       color: "text-sky-500",
       bg: "bg-sky-50",
-      features: ["Live Scoring", "Point Sync"]
+      features: ["Real-time Sync", "Point Tracking"]
     },
     {
       category: "Broadcast",
       icon: Monitor,
       color: "text-indigo-500",
       bg: "bg-indigo-50",
-      features: ["Low Latency", "AI Commentary"]
+      features: ["Live Streams", "AI Commentary"]
     },
     {
-      category: "Circuit",
+      category: "Tournaments",
       icon: Trophy,
       color: "text-amber-500",
       bg: "bg-amber-50",
-      features: ["Auto-Brackets", "Entry Portal"]
+      features: ["Brackets", "Easy Entry"]
     },
     {
-      category: "Dossier",
+      category: "Rankings",
       icon: Users,
       color: "text-emerald-500",
       bg: "bg-emerald-50",
-      features: ["Smash ID", "Career Logs"]
+      features: ["Player Ranks", "Career Stats"]
     }
   ];
 
@@ -66,7 +66,7 @@ const Index = () => {
         <div className="space-y-8">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm">
             <span className="flex h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-[8px] font-black uppercase tracking-widest text-[#0B1F3A]">Node Online</span>
+            <span className="text-[8px] font-black uppercase tracking-widest text-[#0B1F3A]">Platform Live</span>
           </div>
 
           <div className="space-y-3">
@@ -78,13 +78,13 @@ const Index = () => {
           </div>
 
           <p className="text-base text-slate-500 font-medium leading-relaxed max-w-xs">
-            Professional badminton intelligence through <span className="text-[#0B1F3A] font-black">real-time synchronization</span>.
+            The professional badminton network built for <span className="text-[#0B1F3A] font-black">real-time stats</span> and rankings.
           </p>
 
           <div className="flex flex-col gap-3">
             <Link to={isLoggedIn ? "/dashboard" : "/login"} className="w-full">
               <Button size="lg" className="w-full h-14 bg-[#0B1F3A] text-white rounded-xl font-black text-sm hover:bg-sky-600 shadow-xl group border-none uppercase tracking-widest">
-                ENTER COURT <ArrowRight className="ml-2 h-4 w-4" />
+                ENTER THE COURT <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>
@@ -93,18 +93,18 @@ const Index = () => {
             <div className="flex items-center justify-between border-b border-slate-50 pb-4">
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-sky-500" />
-                <h4 className="text-[10px] font-black text-[#0B1F3A] uppercase tracking-widest">Network Pulse</h4>
+                <h4 className="text-[10px] font-black text-[#0B1F3A] uppercase tracking-widest">Live Pulse</h4>
               </div>
-              <Badge className="bg-red-500 text-white animate-pulse border-none h-6 px-3 text-[8px] font-black rounded-full uppercase">Live</Badge>
+              <Badge className="bg-red-500 text-white animate-pulse border-none h-6 px-3 text-[8px] font-black rounded-full uppercase">Online</Badge>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Registered</p>
+                <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Players</p>
                 <p className="text-2xl font-black text-[#0B1F3A]">{stats.athletes}</p>
               </div>
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Circuits</p>
+                <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Tournaments</p>
                 <p className="text-2xl font-black text-[#0B1F3A]">{stats.tourneys}</p>
               </div>
             </div>

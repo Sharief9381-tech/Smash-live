@@ -29,7 +29,6 @@ const PlayerProfile = () => {
     const fetchAthlete = async () => {
       setLoading(true);
       
-      // 1. If it's "me", load logged in user
       if (!id || id === 'me') {
         const saved = localStorage.getItem('userProfile');
         if (saved) setProfileData(JSON.parse(saved));
@@ -37,19 +36,17 @@ const PlayerProfile = () => {
         return;
       }
 
-      // 2. Otherwise, fetch by ID
       try {
         const { data, error } = await supabase.from('profiles').select('*').eq('id', id).single();
         if (data && !error) {
           setProfileData(data);
         } else {
-          // Check local fallback
           const local = JSON.parse(localStorage.getItem('registered_users') || '[]');
           const found = local.find((u: any) => u.id === id || String(u.mobile) === id);
           if (found) setProfileData(found);
         }
       } catch (e) {
-        console.warn("Dossier retrieval error.");
+        console.warn("Profile retrieval error.");
       } finally {
         setLoading(false);
       }
@@ -58,8 +55,8 @@ const PlayerProfile = () => {
   }, [id]);
 
   const tabs = [
-    { id: 'performance', label: 'Intel', icon: Activity },
-    { id: 'analytics', label: 'Stats', icon: BarChart3 },
+    { id: 'performance', label: 'Stats', icon: Activity },
+    { id: 'analytics', label: 'Analysis', icon: BarChart3 },
     { id: 'ladder', label: 'Rank', icon: ListOrdered },
     { id: 'history', label: 'History', icon: Trophy },
     { id: 'team', label: 'Teams', icon: Users },
@@ -78,7 +75,7 @@ const PlayerProfile = () => {
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-3">
             <div className="h-1 w-10 bg-sky-500 rounded-full" />
-            <span className="text-[9px] font-black text-sky-600 uppercase tracking-widest">Athlete Dossier</span>
+            <span className="text-[9px] font-black text-sky-600 uppercase tracking-widest">Player Profile</span>
           </div>
           {id && id !== 'me' && (
             <button onClick={() => navigate(-1)} className="text-[9px] font-black text-slate-400 uppercase flex items-center gap-1"><ChevronLeft className="h-3 w-3" /> Back</button>
@@ -87,7 +84,6 @@ const PlayerProfile = () => {
 
         {profileData && <ProfileHero profile={profileData} isOwnProfile={isOwnProfile} />}
 
-        {/* Horizontal Navigation List */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
           {tabs.map((tab) => (
             <button
@@ -106,7 +102,6 @@ const PlayerProfile = () => {
           ))}
         </div>
 
-        {/* Dynamic Display Area */}
         <div className="min-h-[400px]">
           <AnimatePresence mode="wait">
             <motion.div
@@ -119,8 +114,8 @@ const PlayerProfile = () => {
               {activeTab === 'performance' && (
                 <section className="space-y-6">
                   <div className="px-2">
-                    <h2 className="text-xl font-black uppercase italic">Performance Core</h2>
-                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Real-time Career pulse</p>
+                    <h2 className="text-xl font-black uppercase italic">Match Stats</h2>
+                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Career Performance Breakdown</p>
                   </div>
                   <PerformanceStats stats={profileData?.stats} />
                 </section>
@@ -129,8 +124,8 @@ const PlayerProfile = () => {
               {activeTab === 'analytics' && (
                 <section className="space-y-6">
                   <div className="px-2">
-                    <h2 className="text-xl font-black uppercase italic">Strategic Analytics</h2>
-                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Tactical intelligence breakdown</p>
+                    <h2 className="text-xl font-black uppercase italic">Technical Analysis</h2>
+                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">In-depth game insights</p>
                   </div>
                   <AnalyticsSection />
                 </section>
@@ -138,21 +133,21 @@ const PlayerProfile = () => {
 
               {activeTab === 'ladder' && (
                 <section className="space-y-6">
-                  <h2 className="text-xl font-black uppercase italic px-2 text-sky-600">Ladder Standing</h2>
+                  <h2 className="text-xl font-black uppercase italic px-2 text-sky-600">Global Rank</h2>
                   <RankingSection />
                 </section>
               )}
 
               {activeTab === 'history' && (
                 <section className="space-y-6">
-                  <h2 className="text-xl font-black uppercase italic px-2">Circuit History</h2>
+                  <h2 className="text-xl font-black uppercase italic px-2">Match History</h2>
                   <TournamentSection />
                 </section>
               )}
 
               {activeTab === 'team' && (
                 <section className="space-y-6">
-                  <h2 className="text-xl font-black uppercase italic px-2">Team Sync</h2>
+                  <h2 className="text-xl font-black uppercase italic px-2">My Partners</h2>
                   <TeamSection />
                 </section>
               )}
@@ -167,12 +162,11 @@ const PlayerProfile = () => {
           </AnimatePresence>
         </div>
 
-        {/* Refined Bottom Section */}
         <section className="bg-[#0B1F3A] p-10 rounded-[2.5rem] flex flex-col items-center text-center gap-6 relative overflow-hidden shadow-2xl">
           <Zap className="absolute -right-8 -bottom-8 h-40 w-40 text-sky-400 opacity-5" />
-          <h2 className="text-3xl font-black text-white tracking-tighter leading-tight italic uppercase relative z-10">ELEVATE INTEL</h2>
-          <p className="text-white/40 font-medium text-[11px] leading-relaxed relative z-10">Access advanced biomechanical court heatmaps and neural network simulations.</p>
-          <button className="w-full bg-sky-500 text-white rounded-xl font-black px-8 h-14 text-xs uppercase tracking-widest shadow-xl relative z-10">UPGRADE Dossier</button>
+          <h2 className="text-3xl font-black text-white tracking-tighter leading-tight italic uppercase relative z-10">GET MORE STATS</h2>
+          <p className="text-white/40 font-medium text-[11px] leading-relaxed relative z-10">Upgrade to Pro for advanced court heatmaps and simulation data.</p>
+          <button className="w-full bg-sky-500 text-white rounded-xl font-black px-8 h-14 text-xs uppercase tracking-widest shadow-xl relative z-10">UPGRADE PROFILE</button>
         </section>
       </main>
     </div>
