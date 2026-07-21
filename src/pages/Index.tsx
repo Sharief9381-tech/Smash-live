@@ -10,29 +10,22 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 const Index = () => {
-  const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [stats, setStats] = useState({ athletes: 124, tourneys: 8 });
 
   useEffect(() => {
-    // Check auth status
     const authStatus = localStorage.getItem('isLoggedIn') === 'true';
     setIsLoggedIn(authStatus);
-    
-    // Auto-redirect if already logged in
-    if (authStatus) {
-      navigate('/dashboard', { replace: true });
-    }
 
     const athletes = JSON.parse(localStorage.getItem('registered_users') || '[]');
     const tourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
     if (athletes.length > 0) setStats(s => ({ ...s, athletes: athletes.length }));
     if (tourneys.length > 0) setStats(s => ({ ...s, tourneys: tourneys.length }));
-  }, [navigate]);
+  }, []);
 
   const featureGroups = [
     {
@@ -65,8 +58,6 @@ const Index = () => {
     }
   ];
 
-  if (isLoggedIn) return null; // Prevent flicker before redirect
-
   return (
     <div className="min-h-screen bg-white selection:bg-sky-500/30 overflow-x-hidden pb-20">
       <Navbar />
@@ -91,7 +82,7 @@ const Index = () => {
           </p>
 
           <div className="flex flex-col gap-3">
-            <Link to="/login" className="w-full">
+            <Link to={isLoggedIn ? "/dashboard" : "/login"} className="w-full">
               <Button size="lg" className="w-full h-14 bg-[#0B1F3A] text-white rounded-xl font-black text-sm hover:bg-sky-600 shadow-xl group border-none uppercase tracking-widest">
                 ENTER COURT <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
