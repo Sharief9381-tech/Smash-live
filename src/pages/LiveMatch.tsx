@@ -51,8 +51,8 @@ const LiveMatch = () => {
       id: m.id,
       type: 'match',
       title: m.name,
-      p1: m.players?.p1?.name || "Athlete A",
-      p2: m.players?.p2?.name || "Athlete B",
+      p1: m.players?.p1?.name || "Player A",
+      p2: m.players?.p2?.name || "Player B",
       score: m.current_score ? `${m.current_score[0]}-${m.current_score[1]}` : "0-0",
       category: "Match",
       path: `/broadcast/${m.id}`
@@ -83,25 +83,23 @@ const LiveMatch = () => {
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
       <Navbar />
-      <main className="container px-6 py-12 space-y-12">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-sky-500 fill-current" />
-              <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.4em]">Operational Broadcast Network</span>
-            </div>
-            <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-none">Global Live Scopes</h1>
+      <main className="px-4 py-8 space-y-8">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <Zap className="h-4 w-4 text-sky-500 fill-current" />
+            <span className="text-[10px] font-black text-sky-600 uppercase tracking-widest">Real-time Feed</span>
           </div>
-          
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-            <Input 
-              placeholder="Search Name or Event..." 
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="h-14 pl-12 bg-white border-slate-200 rounded-[2rem] font-bold focus:border-sky-500 transition-all shadow-sm"
-            />
-          </div>
+          <h1 className="text-3xl font-black text-[#0B1F3A] uppercase italic">Live Matches</h1>
+        </div>
+        
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+          <Input 
+            placeholder="Search Player or Event..." 
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="h-14 pl-12 bg-white border-slate-100 rounded-2xl font-bold focus:border-sky-500 shadow-sm"
+          />
         </div>
 
         <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-hide">
@@ -110,7 +108,7 @@ const LiveMatch = () => {
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={cn(
-                "whitespace-nowrap px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all",
+                "whitespace-nowrap px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
                 activeCategory === cat ? "bg-[#0B1F3A] text-white shadow-xl" : "bg-white text-slate-400 border border-slate-100"
               )}
             >
@@ -119,24 +117,25 @@ const LiveMatch = () => {
           ))}
         </div>
 
-        <div className="glass-panel p-10 rounded-[3.5rem] space-y-8 border-slate-200 shadow-xl bg-white/50 min-h-[400px]">
+        <div className="space-y-6">
           {isLoading ? (
              <div className="py-32 flex flex-col items-center justify-center gap-4">
                 <Loader2 className="h-10 w-10 text-sky-500 animate-spin" />
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Checking the court...</p>
              </div>
           ) : (
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 gap-4">
               <AnimatePresence mode="popLayout">
                 {filteredItems.length > 0 ? filteredItems.map((item) => (
                   <motion.div 
                     layout
                     key={item.id}
                     onClick={() => navigate(item.path)}
-                    className="flex flex-col items-stretch p-8 rounded-[3rem] border border-slate-100 bg-white transition-all group cursor-pointer hover:border-sky-500/40 hover:shadow-2xl"
+                    className="app-card p-6 flex flex-col gap-6"
                   >
-                    <div className="flex justify-between items-start mb-6">
+                    <div className="flex justify-between items-start">
                       <Badge className={cn(
-                        "text-white border-none text-[9px] font-black uppercase px-4 h-6",
+                        "text-white border-none text-[9px] font-black uppercase px-3 h-6",
                         item.type === 'match' ? "bg-[#0B1F3A]" : "bg-sky-500"
                       )}>
                         {item.category}
@@ -145,32 +144,32 @@ const LiveMatch = () => {
                     </div>
 
                     <div className="flex items-center justify-between gap-4">
-                      <div className="space-y-2 flex-1">
-                        <p className="text-[10px] font-black text-sky-600 uppercase tracking-widest">{item.title}</p>
+                      <div className="space-y-1.5 flex-1">
+                        <p className="text-[9px] font-black text-sky-600 uppercase tracking-widest">{item.title}</p>
                         {item.type === 'match' ? (
-                          <div className="font-black text-2xl text-[#0B1F3A] tracking-tighter uppercase italic leading-none">
+                          <div className="font-black text-lg text-[#0B1F3A] uppercase italic leading-none">
                             {item.p1} <br />
-                            <span className="text-sky-500 opacity-20 text-sm">VS</span> <br />
+                            <span className="text-sky-500 opacity-20 text-xs">VS</span> <br />
                             {item.p2}
                           </div>
                         ) : (
-                          <div className="font-black text-3xl text-[#0B1F3A] tracking-tighter uppercase italic leading-none">
+                          <div className="font-black text-xl text-[#0B1F3A] uppercase italic leading-none">
                             {item.title}
                           </div>
                         )}
                       </div>
-                      <div className="flex flex-col items-end gap-6">
-                         {item.type === 'match' && <span className="text-5xl font-black font-mono text-sky-600">{item.score}</span>}
-                         <Button className="h-14 w-14 rounded-2xl bg-[#0B1F3A] text-white shadow-xl border-none">
-                            <Play className="h-6 w-6 fill-current ml-1" />
+                      <div className="flex flex-col items-end gap-4">
+                         {item.type === 'match' && <span className="text-4xl font-black font-mono text-sky-600">{item.score}</span>}
+                         <Button className="h-12 w-12 rounded-xl bg-[#0B1F3A] text-white border-none">
+                            <Play className="h-5 w-5 fill-current ml-0.5" />
                          </Button>
                       </div>
                     </div>
                   </motion.div>
                 )) : (
-                  <div className="col-span-2 py-32 text-center bg-slate-50 rounded-[4rem] border-2 border-dashed border-slate-200">
-                    <Activity className="h-12 w-12 text-slate-200 mx-auto mb-4" />
-                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest italic">No Intel Found</p>
+                  <div className="py-20 text-center border-2 border-dashed rounded-3xl bg-white/50 border-slate-200">
+                    <Activity className="h-10 w-10 text-slate-200 mx-auto mb-3" />
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">No live matches right now</p>
                   </div>
                 )}
               </AnimatePresence>
