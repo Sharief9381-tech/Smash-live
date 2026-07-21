@@ -5,9 +5,9 @@ import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Trophy, Check, Loader2 } from 'lucide-react';
+import { Trophy, Check, Loader2, ChevronLeft, MapPin, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
+import { supabase, isCloudConfigured } from '@/lib/supabase';
 import { showSuccess, showError } from '@/utils/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -16,13 +16,12 @@ const CreateTournament = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showLinkState, setShowLinkState] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [formData, setFormData] = useState({ name: "", startDate: "", endDate: "", city: "" });
-  const [format, setFormat] = useState<'elimination' | 'round-robin' | 'league'>('elimination');
+  const [formData, setFormData] = useState({ name: "", startDate: "", city: "" });
   const [slug, setSlug] = useState("");
 
   const handleInitialize = async () => {
     if (!formData.name || !formData.startDate || !formData.city) {
-      showError("Please complete all intelligence fields.");
+      showError("Please fill in all the details.");
       return;
     }
 
@@ -30,25 +29,28 @@ const CreateTournament = () => {
     const generatedSlug = formData.name.trim().toLowerCase().replace(/\s+/g, '-') + '-' + Math.random().toString(36).substring(7);
 
     try {
-      const { data, error } = await supabase
-        .from('tournaments')
-        .insert([{
-          name: formData.name,
-          slug: generatedSlug,
-          start_date: formData.startDate,
-          end_date: formData.endDate,
-          city: formData.city,
-          format: format,
-          status: 'Accepting'
-        }])
-        .select()
-        .single();
+      if (isCloudConfigured) {
+        const { error } = await supabase
+          .from('tournaments')
+          .insert([{
+            name: formData.name,
+            slug: generatedSlug,
+            start_date: formData.startDate,
+            city: formData.city,
+            format: 'elimination',
+            status: 'Accepting'
+          }]);
+        if (error) throw error;
+      }
 
-      if (error) throw error;
+      // Save locally as well for the list
+      const active = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
+      active.push({ ...formData, id: 'local_' + Date.now(), slug: generatedSlug, status: 'Live' });
+      localStorage.setItem('active_studio_tournaments', JSON.stringify(active));
 
       setSlug(generatedSlug);
       setShowLinkState(true);
-      showSuccess("Circuit synchronized to cloud.");
+      showSuccess("Tournament started!");
     } catch (err: any) {
       showError(err.message);
     } finally {
@@ -59,53 +61,100 @@ const CreateTournament = () => {
   const registrationLink = `${window.location.origin}/register/${slug}`;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-20">
+    <div className="min-h-screen bg-slate-50">
       <Navbar />
-      <main className="container max-w-6xl px-6 py-12">
+      <main className="container max-w-lg px-4 py-6">
         <AnimatePresence mode="wait">
           {!showLinkState ? (
-            <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12">
-               <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <div className="bg-[#0B1F3A]/5 p-2.5 rounded-xl text-sky-500">
-                    <Trophy className="h-6 w-6" />
-                  </div>
-                  <span className="text-xs font-black text-[#0B1F3A] uppercase tracking-[0.3em]">Operational Protocol</span>
-                </div>
-                <h1 className="text-6xl font-black tracking-tighter text-[#0B1F3A] uppercase italic">Initialize Event</h1>
-              </div>
-
-              <div className="grid lg:grid-cols-12 gap-10">
-                <div className="lg:col-span-7">
-                  <section className="glass-panel p-10 rounded-[3.5rem] bg-white border-slate-200 space-y-8">
-                    <div className="space-y-6">
-                      <Label className="text-[10px] font-black uppercase text-slate-400">Event Identifier</Label>
-                      <Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="h-14 rounded-2xl" placeholder="e.g. Mumbai Open" />
-                      <div className="grid grid-cols-2 gap-4">
-                        <Input type="date" value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} className="h-14 rounded-2xl" />
-                        <Input value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} className="h-14 rounded-2xl" placeholder="City" />
-                      </div>
-                    </div>
-                  </section>
-                </div>
-                <div className="lg:col-span-5">
-                   <Button onClick={handleInitialize} disabled={isLoading} className="w-full h-20 bg-[#0B1F3A] text-white font-black rounded-[2rem]">
-                     {isLoading ? <Loader2 className="animate-spin" /> : "START CIRCUIT"}
-                   </Button>
-                </div>
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div key="success" initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="max-w-xl mx-auto space-y-8 text-center">
-              <div className="bg-green-500/10 w-24 h-24 rounded-full flex items-center justify-center mx-auto text-green-500"><Check className="h-12 w-12" /></div>
-              <h2 className="text-4xl font-black text-[#0B1F3A]">Link Synchronized</h2>
-              <div className="p-8 bg-[#0B1F3A] rounded-[2rem] text-white">
-                <p className="text-xs font-mono break-all opacity-70 mb-4">{registrationLink}</p>
-                <Button onClick={() => { navigator.clipboard.writeText(registrationLink); setCopied(true); }} className="w-full bg-sky-500">
-                  {copied ? "COPIED" : "COPY LINK"}
+            <motion.div key="form" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+              {/* Top Header & Action Row */}
+              <div className="flex items-center justify-between">
+                <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-slate-400 hover:text-[#0B1F3A]">
+                  <ChevronLeft className="h-6 w-6" />
+                </button>
+                <h1 className="text-xl font-black text-[#0B1F3A] uppercase italic">New Tournament</h1>
+                <Button 
+                  onClick={handleInitialize} 
+                  disabled={isLoading}
+                  className="h-10 bg-[#0B1F3A] text-white px-6 rounded-xl font-black text-[10px] uppercase tracking-widest"
+                >
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Start"}
                 </Button>
               </div>
-              <Button onClick={() => navigate('/smashed')} variant="outline" className="w-full h-14 rounded-2xl">Enter Dashboard</Button>
+
+              <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-xl space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Tournament Name</Label>
+                    <div className="relative">
+                      <Trophy className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
+                      <Input 
+                        value={formData.name} 
+                        onChange={e => setFormData({...formData, name: e.target.value})} 
+                        className="h-12 pl-11 rounded-xl bg-slate-50 border-slate-100 font-bold" 
+                        placeholder="e.g. Mumbai Open" 
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Location / City</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
+                      <Input 
+                        value={formData.city} 
+                        onChange={e => setFormData({...formData, city: e.target.value})} 
+                        className="h-12 pl-11 rounded-xl bg-slate-50 border-slate-100 font-bold" 
+                        placeholder="City" 
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Start Date</Label>
+                    <div className="relative">
+                      <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
+                      <Input 
+                        type="date" 
+                        value={formData.startDate} 
+                        onChange={e => setFormData({...formData, startDate: e.target.value})} 
+                        className="h-12 pl-11 rounded-xl bg-slate-50 border-slate-100 font-bold" 
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4">
+                Tournament details will be public once started.
+              </p>
+            </motion.div>
+          ) : (
+            <motion.div key="success" initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="space-y-8 text-center pt-10">
+              <div className="bg-green-500/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto text-green-500 shadow-lg border border-green-100">
+                <Check className="h-10 w-10 stroke-[3px]" />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-3xl font-black text-[#0B1F3A] italic uppercase">Link Ready</h2>
+                <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Share this link for players to register</p>
+              </div>
+              <div className="p-6 bg-[#0B1F3A] rounded-[2rem] text-white shadow-2xl space-y-4">
+                <div className="bg-white/5 p-4 rounded-xl font-mono text-[10px] break-all border border-white/10 opacity-70">
+                  {registrationLink}
+                </div>
+                <Button 
+                  onClick={() => { navigator.clipboard.writeText(registrationLink); setCopied(true); }} 
+                  className="w-full h-12 bg-sky-500 text-white font-black uppercase tracking-widest rounded-xl hover:bg-sky-400"
+                >
+                  {copied ? "Copied!" : "Copy Link"}
+                </Button>
+              </div>
+              <div className="flex flex-col gap-3">
+                <Button onClick={() => navigate('/smashed')} variant="outline" className="h-14 rounded-2xl border-slate-200 bg-white font-black uppercase tracking-widest text-xs">
+                  Open Dashboard
+                </Button>
+                <button onClick={() => navigate('/')} className="text-[10px] font-black text-slate-400 uppercase underline decoration-2">Return Home</button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

@@ -40,12 +40,12 @@ const BroadcastCenter = () => {
         </div>
       </div>
 
-      <main className="px-4 py-8 space-y-10">
-        {/* Action Cards */}
-        <div className="grid grid-cols-1 gap-6">
+      <main className="px-4 py-8 space-y-8">
+        {/* Action Cards - Changed to side-by-side on larger mobile or very compact vertically */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <BroadcastActionCard 
             title="Start Match"
-            description="Quick setup for a singles or doubles match with live scoring."
+            description="Setup a quick match with live scoring."
             icon={Target}
             buttonText="New Match"
             onClick={() => navigate('/live-match/create')}
@@ -53,16 +53,18 @@ const BroadcastCenter = () => {
           />
           <BroadcastActionCard 
             title="New Tournament"
-            description="Organize a tournament with automatic brackets and live updates."
+            description="Organize events and live brackets."
             icon={Trophy}
-            buttonText="Create Tournament"
+            buttonText="Create"
             onClick={() => navigate('/tournaments/create')}
             variant="secondary"
           />
         </div>
 
         {/* Player Stats Panel */}
-        <PlayerBroadcastStats />
+        <div className="pt-2">
+          <PlayerBroadcastStats />
+        </div>
       </main>
     </div>
   );
