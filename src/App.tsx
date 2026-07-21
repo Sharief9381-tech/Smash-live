@@ -25,6 +25,7 @@ import CreateIndividualMatch from "./pages/CreateIndividualMatch";
 import ScoringPage from "./pages/ScoringPage";
 import Onboarding from "./pages/Onboarding";
 import RegisterParticipant from "./pages/RegisterParticipant";
+import MyCircuits from "./pages/MyCircuits";
 import NotFound from "./pages/NotFound";
 import BottomNav from "./components/layout/BottomNav";
 
@@ -55,6 +56,7 @@ const App = () => (
             <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Court /></ProtectedRoute>} />
             <Route path="/court" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/my-circuits" element={<ProtectedRoute><MyCircuits /></ProtectedRoute>} />
             <Route path="/smashed" element={<ProtectedRoute><Smashed /></ProtectedRoute>} />
             <Route path="/live-match/active" element={<LiveMatch />} />
             <Route path="/live-match/create" element={<ProtectedRoute><CreateIndividualMatch /></ProtectedRoute>} />

@@ -5,7 +5,8 @@ import Navbar from '@/components/layout/Navbar';
 import { motion } from 'framer-motion';
 import { 
   Trophy, Zap, Activity, Loader2, 
-  ChevronRight, Newspaper, ListOrdered
+  ChevronRight, Newspaper, ListOrdered,
+  Calendar
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -54,8 +55,8 @@ const Court = () => {
 
           <div className="grid grid-cols-4 gap-2">
             {[
+              { label: 'Schedule', icon: Calendar, path: '/my-circuits', color: 'bg-blue-50 text-sky-600' },
               { label: 'Smashed', icon: Zap, path: '/smashed', color: 'bg-indigo-50 text-indigo-600' },
-              { label: 'New', icon: Newspaper, path: '/news', color: 'bg-sky-50 text-sky-600' },
               { label: 'Circuit', icon: Trophy, path: '/tournaments', color: 'bg-amber-50 text-amber-600' },
               { label: 'Ladder', icon: ListOrdered, path: '/rankings', color: 'bg-emerald-50 text-emerald-600' },
             ].map((action, i) => (
