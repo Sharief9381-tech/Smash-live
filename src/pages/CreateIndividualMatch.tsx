@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { showSuccess, showError } from '@/utils/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/lib/supabase';
+import { supabase, isCloudConfigured } from '@/lib/supabase';
 
 const PlayerSlot = ({ 
   label, 
@@ -138,10 +138,17 @@ const CreateIndividualMatch = () => {
 
   useEffect(() => {
     const fetchAthletes = async () => {
-      const { data } = await supabase.from('profiles').select('*');
+      // Direct local fetch for speed
       const local = JSON.parse(localStorage.getItem('registered_users') || '[]');
-      const combined = [...(data || []), ...local];
-      setRegisteredAthletes(combined);
+      setRegisteredAthletes(local);
+
+      // Async cloud fetch in background
+      if (isCloudConfigured) {
+        try {
+          const { data } = await supabase.from('profiles').select('*');
+          if (data) setRegisteredAthletes(prev => [...data, ...local]);
+        } catch (e) {}
+      }
     };
     fetchAthletes();
   }, []);
@@ -168,33 +175,56 @@ const CreateIndividualMatch = () => {
       p2: selectedPlayers.p2
     };
 
-    try {
-      const { data, error } = await supabase
-        .from('matches')
-        .insert([{
-          name: formData.name,
-          players: finalPlayers,
-          match_type: matchType,
-          status: 'live',
-          current_score: [0, 0],
-          sets_won: [0, 0],
-          total_sets: parseInt(formData.sets),
-          serving: 1
-        }])
-        .select().single();
+    const localMatch = { 
+      ...formData, 
+      players: finalPlayers, 
+      match_type: matchType, 
+      id: matchId, 
+      status: 'live', 
+      current_score: [0, 0], 
+      sets_won: [0, 0],
+      total_sets: parseInt(formData.sets),
+      serving: 1 
+    };
 
-      if (error) throw error;
-      showSuccess("Match Initialized");
-      navigate('/smashed');
-    } catch (err) {
-      const localMatch = { ...formData, players: finalPlayers, match_type: matchType, id: matchId, status: 'live', current_score: [0,0], sets_won: [0,0] };
-      localStorage.setItem(matchId, JSON.stringify(localMatch));
-      const active = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
-      active.push(localMatch);
-      localStorage.setItem('active_studio_matches', JSON.stringify(active));
-      showSuccess("Match Initialized (Offline Node)");
-      navigate('/smashed');
+    // Always save locally first for instant redirect
+    localStorage.setItem(matchId, JSON.stringify(localMatch));
+    const active = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
+    active.push(localMatch);
+    localStorage.setItem('active_studio_matches', JSON.stringify(active));
+
+    // Try cloud sync in background
+    if (isCloudConfigured) {
+      try {
+        const { data, error } = await supabase
+          .from('matches')
+          .insert([{
+            id: matchId,
+            name: formData.name,
+            players: finalPlayers,
+            match_type: matchType,
+            status: 'live',
+            current_score: [0, 0],
+            sets_won: [0, 0],
+            total_sets: parseInt(formData.sets),
+            serving: 1
+          }])
+          .select().single();
+        
+        if (data) {
+          // Update local ID if cloud provides one
+          localStorage.removeItem(matchId);
+          localStorage.setItem(data.id, JSON.stringify({...localMatch, id: data.id}));
+          navigate(`/scoring/${data.id}`, { replace: true });
+          return;
+        }
+      } catch (err) {
+        console.warn("Cloud sync failed, using local node.");
+      }
     }
+
+    showSuccess("Match Initialized");
+    navigate(`/scoring/${matchId}`, { replace: true });
   };
 
   return (

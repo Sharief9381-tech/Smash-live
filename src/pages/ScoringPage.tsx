@@ -8,7 +8,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { showSuccess, showError } from '@/utils/toast';
-import { supabase } from '@/lib/supabase';
+import { supabase, isCloudConfigured } from '@/lib/supabase';
 
 const ScoringPage = () => {
   const { matchId } = useParams();
@@ -21,30 +21,37 @@ const ScoringPage = () => {
   const [activeOverlay, setActiveOverlay] = useState<1 | 2 | null>(null);
 
   useEffect(() => {
-    const fetchMatch = async () => {
-      try {
-        const { data, error } = await supabase.from('matches').select('*').eq('id', matchId).single();
-        if (error) throw error;
+    const initMatch = async () => {
+      // 1. Immediate Local Load
+      const local = localStorage.getItem(matchId || "");
+      if (local) {
+        const data = JSON.parse(local);
         setMatchData(data);
-        if (data.current_score) setScore(data.current_score);
-        if (data.sets_won) setSetsWon(data.sets_won);
+        if (data.current_score || data.currentScore) setScore(data.current_score || data.currentScore);
+        if (data.sets_won || data.setsWon) setSetsWon(data.sets_won || data.setsWon);
         if (data.serving) setServing(data.serving as 1 | 2);
-      } catch (err) {
-        const local = localStorage.getItem(matchId || "");
-        if (local) {
-          const data = JSON.parse(local);
-          setMatchData(data);
-          if (data.currentScore) setScore(data.currentScore);
-          if (data.setsWon) setSetsWon(data.setsWon);
-          if (data.serving) setServing(data.serving);
-        } else {
-          navigate('/broadcast/center');
-        }
-      } finally {
         setLoading(false);
       }
+
+      // 2. Cloud Sync in Background
+      if (isCloudConfigured) {
+        try {
+          const { data } = await supabase.from('matches').select('*').eq('id', matchId).single();
+          if (data) {
+            setMatchData(prev => ({ ...prev, ...data }));
+            if (data.current_score) setScore(data.current_score);
+            if (data.sets_won) setSetsWon(data.sets_won);
+            if (data.serving) setServing(data.serving as 1 | 2);
+          }
+        } catch (err) {}
+      }
+
+      if (!local && !isCloudConfigured) {
+        navigate('/broadcast/center');
+      }
+      setLoading(false);
     };
-    if (matchId) fetchMatch();
+    initMatch();
   }, [matchId, navigate]);
 
   const handlePoint = async (side: 1 | 2, type: string) => {
@@ -65,17 +72,20 @@ const ScoringPage = () => {
       setScore(finalScore);
     }
 
-    try {
-      await supabase.from('matches').update({ current_score: finalScore, sets_won: finalSets, serving: side, last_update: new Date().toISOString() }).eq('id', matchId);
-    } catch (e) {
-      localStorage.setItem(matchId!, JSON.stringify({ ...matchData, currentScore: finalScore, setsWon: finalSets, serving: side }));
+    // Save locally first
+    const updated = { ...matchData, current_score: finalScore, sets_won: finalSets, serving: side };
+    localStorage.setItem(matchId!, JSON.stringify(updated));
+
+    // Async sync
+    if (isCloudConfigured) {
+      supabase.from('matches').update({ current_score: finalScore, sets_won: finalSets, serving: side, last_update: new Date().toISOString() }).eq('id', matchId).then(() => {});
     }
   };
 
   const getSideNames = (side: 1 | 2) => {
     if (!matchData?.players) return side === 1 ? "Side A" : "Side B";
     
-    if (matchData.match_type === 'singles') {
+    if (matchData.match_type === 'singles' || matchData.matchType === 'singles') {
       const p = side === 1 ? matchData.players.p1 : matchData.players.p2;
       return p?.name || (side === 1 ? "Athlete A" : "Athlete B");
     } else {
@@ -98,7 +108,7 @@ const ScoringPage = () => {
           </Button>
           <div className="flex items-center gap-2">
              <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-             <span className="text-[9px] font-black uppercase text-slate-400 max-w-[150px] truncate">Broadcasting: {matchData.name}</span>
+             <span className="text-[9px] font-black uppercase text-slate-400 max-w-[150px] truncate">Broadcasting: {matchData?.name}</span>
           </div>
         </div>
 
@@ -119,7 +129,7 @@ const ScoringPage = () => {
                   </div>
                   <h2 className="text-[15px] font-black uppercase italic tracking-tighter leading-tight">{sideName}</h2>
                   <div className="flex gap-1.5">
-                    {[...Array(Math.ceil((matchData.total_sets || 3)/2))].map((_, i) => (
+                    {[...Array(2)].map((_, i) => (
                       <div key={i} className={cn("h-2 w-2 rounded-full border", i < setsWon[side-1] ? "bg-sky-500 border-sky-500" : "bg-slate-100 border-slate-200")} />
                     ))}
                   </div>
