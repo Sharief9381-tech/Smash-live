@@ -32,13 +32,16 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased selection:bg-accent/30;
+    @apply bg-slate-50 text-foreground antialiased selection:bg-accent/30;
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.4;
   }
+  /* Mobile-optimized Typography Scale */
   h1 { @apply text-[20px] font-black tracking-tight leading-tight; }
   h2 { @apply text-[16px] font-black tracking-tight; }
   h3 { @apply text-[15px] font-bold tracking-tight; }
+  .text-caption { @apply text-[12px] font-medium text-slate-400; }
+  .text-btn { @apply text-[14px] font-black uppercase tracking-wider; }
 }
 
 .app-card {
@@ -46,11 +49,16 @@
 }
 
 .glass-panel {
-  @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-lg;
+  @apply bg-white/80 backdrop-blur-xl border border-white/20 shadow-lg;
 }
 
-.neon-glow {
-  box-shadow: 0 0 15px rgba(14, 165, 233, 0.15);
+.custom-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Native-feel interactions */
+.active-press {
+  @apply active:scale-95 transition-transform duration-100;
 }
 
 @keyframes marquee {
@@ -61,5 +69,8 @@
 .animate-marquee {
   display: inline-flex;
   animation: marquee 30s linear infinite;
-  will-change: transform;
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 80px);
 }
