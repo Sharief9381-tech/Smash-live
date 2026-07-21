@@ -55,10 +55,10 @@ const Court = () => {
 
           <div className="grid grid-cols-4 gap-2">
             {[
-              { label: 'Schedule', icon: Calendar, path: '/my-circuits', color: 'bg-blue-50 text-sky-600' },
+              { label: 'Circuit', icon: Trophy, path: '/my-circuits', color: 'bg-amber-50 text-amber-600' },
               { label: 'Smashed', icon: Zap, path: '/smashed', color: 'bg-indigo-50 text-indigo-600' },
-              { label: 'Circuit', icon: Trophy, path: '/tournaments', color: 'bg-amber-50 text-amber-600' },
               { label: 'Ladder', icon: ListOrdered, path: '/rankings', color: 'bg-emerald-50 text-emerald-600' },
+              { label: 'News', icon: Newspaper, path: '/news', color: 'bg-blue-50 text-sky-600' },
             ].map((action, i) => (
               <button 
                 key={i} 
