@@ -20,7 +20,7 @@ const BottomNav = () => {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[100] bg-background border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+    <div className="fixed bottom-0 left-0 right-0 z-[100] bg-white border-t border-slate-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
       <div className="flex items-center justify-around h-[64px] px-2">
         {items.map((item) => {
           const isActive = location.pathname === item.path;
@@ -32,13 +32,13 @@ const BottomNav = () => {
             >
               <div className={cn(
                 "p-1.5 rounded-xl transition-all",
-                isActive ? "bg-primary text-sky-400" : "text-muted-foreground"
+                isActive ? "bg-[#0B1F3A] text-sky-400" : "text-slate-400"
               )}>
                 <item.icon className="h-5 w-5" />
               </div>
               <span className={cn(
                 "text-[10px] font-bold uppercase tracking-tight",
-                isActive ? "text-foreground" : "text-muted-foreground"
+                isActive ? "text-[#0B1F3A]" : "text-slate-400"
               )}>
                 {item.name}
               </span>
@@ -46,7 +46,7 @@ const BottomNav = () => {
           );
         })}
       </div>
-      <div className="h-safe-bottom bg-background" />
+      <div className="h-safe-bottom bg-white" />
     </div>
   );
 };
