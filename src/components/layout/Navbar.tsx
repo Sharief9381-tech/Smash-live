@@ -44,7 +44,7 @@ const Navbar = () => {
       isScrolled ? "bg-white/95 backdrop-blur-md border-slate-200 shadow-sm" : "bg-white border-transparent"
     )}>
       <div className="w-full flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 group">
+        <Link to={isLoggedIn ? "/dashboard" : "/"} className="flex items-center gap-2 group">
           <Logo className="h-8 w-8" />
           <span className="text-[18px] font-black tracking-tighter text-[#0B1F3A] uppercase">
             Smash<span className="text-sky-500">Live</span>

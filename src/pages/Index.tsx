@@ -2,26 +2,37 @@
 
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 import { motion } from 'framer-motion';
 import { 
   ArrowRight, Activity, Trophy, Users, 
-  Zap, TrendingUp, Monitor,
-  ShieldCheck
+  Zap, TrendingUp, Monitor
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 const Index = () => {
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [stats, setStats] = useState({ athletes: 124, tourneys: 8 });
 
   useEffect(() => {
+    // Check auth status
+    const authStatus = localStorage.getItem('isLoggedIn') === 'true';
+    setIsLoggedIn(authStatus);
+    
+    // Auto-redirect if already logged in
+    if (authStatus) {
+      navigate('/dashboard', { replace: true });
+    }
+
     const athletes = JSON.parse(localStorage.getItem('registered_users') || '[]');
     const tourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
     if (athletes.length > 0) setStats(s => ({ ...s, athletes: athletes.length }));
     if (tourneys.length > 0) setStats(s => ({ ...s, tourneys: tourneys.length }));
-  }, []);
+  }, [navigate]);
 
   const featureGroups = [
     {
@@ -53,6 +64,8 @@ const Index = () => {
       features: ["Smash ID", "Career Logs"]
     }
   ];
+
+  if (isLoggedIn) return null; // Prevent flicker before redirect
 
   return (
     <div className="min-h-screen bg-white selection:bg-sky-500/30 overflow-x-hidden pb-20">
