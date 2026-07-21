@@ -23,22 +23,25 @@ const LiveMatch = () => {
 
   useEffect(() => {
     const fetchLiveData = async () => {
-      if (!isCloudConfigured) {
-        setIsLoading(false);
-        return;
-      }
+      const localMatches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
+      const localTourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
 
-      try {
-        const { data: matches } = await supabase.from('matches').select('*').eq('status', 'live');
-        const { data: tourneys } = await supabase.from('tournaments').select('*').neq('status', 'Completed');
+      if (isCloudConfigured) {
+        try {
+          const { data: matches } = await supabase.from('matches').select('*').eq('status', 'live');
+          const { data: tourneys } = await supabase.from('tournaments').select('*').neq('status', 'Completed');
 
-        if (matches) setLiveMatches(matches);
-        if (tourneys) setLiveTournaments(tourneys);
-      } catch (err) {
-        console.warn("Sync error:", err);
-      } finally {
-        setIsLoading(false);
+          if (matches) setLiveMatches([...matches, ...localMatches]);
+          if (tourneys) setLiveTournaments([...tourneys, ...localTourneys]);
+        } catch (err) {
+          setLiveMatches(localMatches);
+          setLiveTournaments(localTourneys);
+        }
+      } else {
+        setLiveMatches(localMatches);
+        setLiveTournaments(localTourneys);
       }
+      setIsLoading(false);
     };
 
     fetchLiveData();
@@ -51,8 +54,8 @@ const LiveMatch = () => {
       id: m.id,
       type: 'match',
       title: m.name,
-      p1: m.players?.p1?.name || "Player A",
-      p2: m.players?.p2?.name || "Player B",
+      p1: m.players?.p1?.name || m.players?.sideA?.[0]?.name || "Player A",
+      p2: m.players?.p2?.name || m.players?.sideB?.[0]?.name || "Player B",
       score: m.current_score ? `${m.current_score[0]}-${m.current_score[1]}` : "0-0",
       category: "Match",
       path: `/broadcast/${m.id}`
@@ -63,7 +66,6 @@ const LiveMatch = () => {
       type: 'tournament',
       title: t.name,
       loc: t.city,
-      athletes: t.participants?.length || 0,
       category: "Tournament",
       path: `/tournament/${t.id}`
     }));
