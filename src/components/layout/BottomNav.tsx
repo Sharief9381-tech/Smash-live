@@ -20,24 +20,24 @@ const BottomNav = () => {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[100] bg-background/95 backdrop-blur-xl border-t border-border shadow-[0_-4px_30px_rgba(0,0,0,0.1)]">
-      <div className="flex items-center justify-around h-[68px] px-2">
+    <div className="fixed bottom-0 left-0 right-0 z-[100] bg-background border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+      <div className="flex items-center justify-around h-[64px] px-2">
         {items.map((item) => {
           const isActive = location.pathname === item.path;
           return (
             <Link 
               key={item.name} 
               to={item.path} 
-              className="flex flex-col items-center justify-center flex-1 h-full gap-1.5 transition-all active:scale-90"
+              className="flex flex-col items-center justify-center flex-1 h-full gap-1 transition-all active:scale-90"
             >
               <div className={cn(
-                "p-2 rounded-2xl transition-all duration-300",
-                isActive ? "bg-sky-500 text-white shadow-lg shadow-sky-500/20" : "text-muted-foreground hover:bg-muted"
+                "p-1.5 rounded-xl transition-all",
+                isActive ? "bg-primary text-sky-400" : "text-muted-foreground"
               )}>
                 <item.icon className="h-5 w-5" />
               </div>
               <span className={cn(
-                "text-[9px] font-black uppercase tracking-widest",
+                "text-[10px] font-bold uppercase tracking-tight",
                 isActive ? "text-foreground" : "text-muted-foreground"
               )}>
                 {item.name}

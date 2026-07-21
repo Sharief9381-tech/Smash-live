@@ -20,19 +20,19 @@ const ShuttleIcon = () => (
 
 const PremiumScoreboard = ({ p1, p2, currentScore, serving }: ScoreboardProps) => {
   return (
-    <div className="w-full glass-panel rounded-[2.5rem] p-6 border bg-card shadow-2xl shadow-black/10">
+    <div className="w-full glass-panel rounded-[2rem] p-6 border bg-card shadow-sm">
       <div className="flex items-center justify-between gap-2">
         {/* Player 1 Profile */}
         <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
           <div className="relative">
-            <div className="h-16 w-16 rounded-full bg-muted border-2 border-background overflow-hidden shadow-lg flex items-center justify-center">
-               <span className="text-sm font-black text-foreground uppercase">{p1.name[0]}</span>
+            <div className="h-14 w-14 rounded-full bg-muted border-2 border-background overflow-hidden shadow-md flex items-center justify-center">
+               <span className="text-xs font-black text-foreground uppercase">{p1.name[0]}</span>
             </div>
             {serving === 1 && (
               <motion.div 
-                animate={{ scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }}
-                transition={{ repeat: Infinity, duration: 2.5 }}
-                className="absolute -top-1 -right-1 h-7 w-7 bg-sky-500 rounded-full border-2 border-background shadow-lg flex items-center justify-center"
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="absolute -top-1 -right-1 h-6 w-6 bg-sky-500 rounded-full border-2 border-background shadow-md flex items-center justify-center"
               >
                 <ShuttleIcon />
               </motion.div>
@@ -40,38 +40,38 @@ const PremiumScoreboard = ({ p1, p2, currentScore, serving }: ScoreboardProps) =
           </div>
           <div className="text-center w-full">
             <h2 className="text-[11px] font-black tracking-tighter uppercase italic text-foreground leading-tight truncate">{p1.name}</h2>
-            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{p1.country}</p>
+            <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">{p1.country}</p>
           </div>
         </div>
 
-        {/* Dynamic Score Matrix */}
+        {/* Dynamic Score Core */}
         <div className="flex flex-col items-center px-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <motion.span 
               key={currentScore[0]}
-              initial={{ y: 5, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              className="text-6xl font-black text-sky-500 font-mono tabular-nums leading-none tracking-tighter"
+              initial={{ scale: 1.2, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="text-5xl font-black text-sky-600 font-mono tabular-nums leading-none tracking-tighter"
             >
               {currentScore[0]}
             </motion.span>
-            <div className="h-10 w-0.5 bg-border rotate-[15deg] rounded-full opacity-50" />
+            <div className="h-8 w-0.5 bg-border rotate-12 rounded-full" />
             <motion.span 
               key={currentScore[1]}
-              initial={{ y: 5, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              className="text-6xl font-black text-foreground font-mono tabular-nums leading-none tracking-tighter"
+              initial={{ scale: 1.2, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="text-5xl font-black text-foreground font-mono tabular-nums leading-none tracking-tighter"
             >
               {currentScore[1]}
             </motion.span>
           </div>
           
-          <div className="flex gap-1.5 mt-4">
+          <div className="flex gap-1.5 mt-3">
             {p1.sets.map((set, i) => (
-              <div key={i} className="bg-muted/50 border border-border/50 rounded-xl px-3 py-1 flex gap-3 items-center">
-                <span className={cn("text-[10px] font-black", set > p2.sets[i] ? "text-sky-500" : "text-muted-foreground")}>{set}</span>
-                <span className="text-[10px] font-black opacity-10">/</span>
-                <span className={cn("text-[10px] font-black", p2.sets[i] > set ? "text-sky-500" : "text-muted-foreground")}>{p2.sets[i]}</span>
+              <div key={i} className="bg-muted border border-border rounded-lg px-2 py-0.5 flex gap-2 items-center">
+                <span className={cn("text-[10px] font-black", set > p2.sets[i] ? "text-sky-600" : "text-muted-foreground")}>{set}</span>
+                <span className="text-[8px] font-black opacity-20">/</span>
+                <span className={cn("text-[10px] font-black", p2.sets[i] > set ? "text-sky-600" : "text-muted-foreground")}>{p2.sets[i]}</span>
               </div>
             ))}
           </div>
@@ -80,14 +80,14 @@ const PremiumScoreboard = ({ p1, p2, currentScore, serving }: ScoreboardProps) =
         {/* Player 2 Profile */}
         <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
           <div className="relative">
-            <div className="h-16 w-16 rounded-full bg-muted border-2 border-background overflow-hidden shadow-lg flex items-center justify-center">
-               <span className="text-sm font-black text-foreground uppercase">{p2.name[0]}</span>
+            <div className="h-14 w-14 rounded-full bg-muted border-2 border-background overflow-hidden shadow-md flex items-center justify-center">
+               <span className="text-xs font-black text-foreground uppercase">{p2.name[0]}</span>
             </div>
             {serving === 2 && (
               <motion.div 
-                animate={{ scale: [1, 1.2, 1], rotate: [0, -10, 10, 0] }}
-                transition={{ repeat: Infinity, duration: 2.5 }}
-                className="absolute -top-1 -right-1 h-7 w-7 bg-sky-500 rounded-full border-2 border-background shadow-lg flex items-center justify-center"
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="absolute -top-1 -right-1 h-6 w-6 bg-sky-500 rounded-full border-2 border-background shadow-md flex items-center justify-center"
               >
                 <ShuttleIcon />
               </motion.div>
@@ -95,7 +95,7 @@ const PremiumScoreboard = ({ p1, p2, currentScore, serving }: ScoreboardProps) =
           </div>
           <div className="text-center w-full">
             <h2 className="text-[11px] font-black tracking-tighter uppercase italic text-foreground leading-tight truncate">{p2.name}</h2>
-            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{p2.country}</p>
+            <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">{p2.country}</p>
           </div>
         </div>
       </div>
