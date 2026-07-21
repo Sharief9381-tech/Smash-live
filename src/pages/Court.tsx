@@ -57,7 +57,7 @@ const Court = () => {
             {[
               { label: 'Schedule', icon: Calendar, path: '/my-circuits', color: 'bg-blue-50 text-sky-600' },
               { label: 'Matches', icon: Zap, path: '/smashed', color: 'bg-indigo-50 text-indigo-600' },
-              { label: 'Tourney', icon: Trophy, path: '/tournaments', color: 'bg-amber-50 text-amber-600' },
+              { label: 'Tournaments', icon: Trophy, path: '/tournaments', color: 'bg-amber-50 text-amber-600' },
               { label: 'Rankings', icon: ListOrdered, path: '/rankings', color: 'bg-emerald-50 text-emerald-600' },
             ].map((action, i) => (
               <button 
