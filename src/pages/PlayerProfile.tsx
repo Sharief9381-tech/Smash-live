@@ -11,7 +11,7 @@ import AchievementSection from '@/components/profile/AchievementSection';
 import RankingSection from '@/components/profile/RankingSection';
 import { 
   Activity, BarChart3, ListOrdered, 
-  Trophy, Users, Award, Zap, ChevronLeft, Loader2, Star
+  Trophy, Users, Award, Zap, ChevronLeft, Loader2, Star, Flame
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
