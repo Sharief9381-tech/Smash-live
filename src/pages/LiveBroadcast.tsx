@@ -26,10 +26,11 @@ const LiveBroadcast = () => {
     return () => clearInterval(interval);
   }, [id]);
 
+  // Use simple labels if match data isn't loaded yet
   const p1 = matchData?.players?.p1 || { name: "Athlete A", country: "IN" };
   const p2 = matchData?.players?.p2 || { name: "Athlete B", country: "IN" };
-  const score = matchData?.currentScore || [0, 0];
-  const sets = matchData?.setsWon || [0, 0];
+  const score = matchData?.currentScore || matchData?.current_score || [0, 0];
+  const sets = matchData?.setsWon || matchData?.sets_won || [0, 0];
   const serving = matchData?.serving || 1;
 
   return (
