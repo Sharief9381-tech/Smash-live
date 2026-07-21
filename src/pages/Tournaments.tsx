@@ -4,91 +4,141 @@ import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Trophy, MapPin, Calendar, Search, Plus, ChevronRight, Zap } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Trophy, MapPin, Calendar, Search, Plus, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 const Tournaments = () => {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  const [tournaments, setTournaments] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState("All");
+  const [tourneys, setTourneys] = useState<any[]>([]);
 
   useEffect(() => {
     const load = () => {
+      // Local matches for demo/user-created ones
       const active = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
-      setTournaments(active.map((t: any) => ({ ...t, category: "Pro", prize: "TBD", points: "Dynamic", img: "https://images.unsplash.com/photo-1626224580175-340ad0e3a242?q=80&w=2070&auto=format&fit=crop" })));
+      
+      // Mock data for better visual representation of Past/Upcoming
+      const mockData = [
+        { id: 'm1', name: 'National Open 2024', city: 'Mumbai', startDate: '2024-10-15', status: 'Past' },
+        { id: 'm2', name: 'Summer Smash', city: 'Bangalore', startDate: '2025-05-20', status: 'Upcoming' },
+      ];
+
+      setTourneys([
+        ...active.map((t: any) => ({ ...t, status: t.status || 'Live' })),
+        ...mockData
+      ]);
     };
     load();
     window.addEventListener('storage', load);
     return () => window.removeEventListener('storage', load);
   }, []);
 
-  const filtered = useMemo(() => tournaments.filter(t => t.name.toLowerCase().includes(query.toLowerCase()) || t.city.toLowerCase().includes(query.toLowerCase())), [query, tournaments]);
+  const filtered = useMemo(() => {
+    return tourneys.filter(t => {
+      const matchesSearch = t.name.toLowerCase().includes(query.toLowerCase()) || 
+                           t.city.toLowerCase().includes(query.toLowerCase());
+      const matchesTab = activeTab === "All" || t.status === activeTab;
+      return matchesSearch && matchesTab;
+    });
+  }, [query, tourneys, activeTab]);
 
   return (
-    <div className="min-h-screen bg-white pb-32">
+    <div className="min-h-screen bg-slate-50 pb-32">
       <Navbar />
       
-      <section className="bg-[#F8FAFC] px-4 py-10 space-y-6">
+      <main className="container px-4 py-6 space-y-6">
+        {/* Simplified Header */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <h1 className="text-2xl font-black text-[#0B1F3A] uppercase italic leading-none">Tourney List</h1>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Live, upcoming, and past events</p>
+          </div>
+          <Button 
+            onClick={() => navigate('/tournaments/create')}
+            className="h-10 bg-sky-500 hover:bg-sky-600 text-white rounded-xl px-4 font-black text-[10px] uppercase tracking-widest border-none shadow-lg shadow-sky-500/20"
+          >
+            <Plus className="mr-1.5 h-4 w-4" /> New Tourney
+          </Button>
+        </div>
+
+        {/* Search & Tabs */}
         <div className="space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-500/10 text-sky-600">
-            <Trophy className="h-4 w-4" />
-            <span className="text-[9px] font-black uppercase tracking-widest">Global Circuit</span>
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <input 
+              placeholder="Search by name or place..." 
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="w-full h-12 pl-11 pr-4 bg-white border border-slate-100 rounded-2xl font-bold text-xs shadow-sm outline-none focus:border-sky-500 transition-all"
+            />
           </div>
-          <h1 className="text-5xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-[0.95]">
-            Intelligence <br /><span className="text-sky-500">Calendar</span>
-          </h1>
-          <p className="text-sm text-slate-500 font-medium leading-relaxed">Track active tournaments and athlete registries.</p>
-        </div>
 
-        <div className="bg-[#0B1F3A] p-8 rounded-[2.5rem] text-white relative overflow-hidden shadow-2xl">
-          <Trophy className="absolute -right-6 -bottom-6 h-32 w-32 opacity-10" />
-          <div className="relative z-10 space-y-4">
-            <Badge className="bg-sky-500 text-white font-black px-3 h-6 uppercase text-[8px] border-none">STUDIO</Badge>
-            <h4 className="text-xl font-black italic uppercase">Initialize Circuit</h4>
-            <Link to="/tournaments/create">
-              <Button className="w-full h-12 bg-white text-[#0B1F3A] font-black rounded-xl text-[9px] uppercase tracking-widest">START TOURNAMENT <Plus className="ml-2 h-4 w-4" /></Button>
-            </Link>
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {['All', 'Live', 'Upcoming', 'Past'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={cn(
+                  "px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shadow-sm",
+                  activeTab === tab 
+                    ? "bg-[#0B1F3A] text-white" 
+                    : "bg-white text-slate-400 border border-slate-100"
+                )}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
         </div>
-      </section>
 
-      <main className="container px-4 py-10 space-y-10">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-          <input 
-            placeholder="Find Event..." 
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full h-14 pl-12 pr-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xs shadow-sm outline-none"
-          />
-        </div>
-
-        <div className="flex flex-col gap-6">
+        {/* Simplified Cards */}
+        <div className="space-y-3">
           <AnimatePresence mode="popLayout">
             {filtered.length > 0 ? filtered.map((t) => (
-              <motion.div layout key={t.id} className="group glass-panel rounded-[2.5rem] overflow-hidden border-slate-200 shadow-xl bg-white">
-                <div className="aspect-[16/9] overflow-hidden relative">
-                  <img src={t.img} className="w-full h-full object-cover opacity-90" alt="" />
-                  <Badge className="absolute top-4 left-4 bg-sky-500 text-white font-black px-3 h-6 uppercase text-[8px] border-none">{t.status}</Badge>
-                </div>
-                <div className="p-8 space-y-6">
-                  <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-[#0B1F3A] uppercase italic leading-tight">{t.name}</h3>
-                    <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                      <span className="flex items-center gap-1.5"><MapPin className="h-3 w-3 text-sky-500" /> {t.city}</span>
-                      <span className="flex items-center gap-1.5"><Calendar className="h-3 w-3 text-sky-500" /> {t.startDate}</span>
+              <motion.div 
+                layout 
+                key={t.id} 
+                onClick={() => navigate(`/tournament/${t.id}`)}
+                className="app-card p-4 flex items-center justify-between group cursor-pointer"
+              >
+                <div className="flex items-center gap-4">
+                  <div className={cn(
+                    "h-12 w-12 rounded-xl flex items-center justify-center shadow-sm",
+                    t.status === 'Live' ? "bg-red-50 text-red-500" : 
+                    t.status === 'Upcoming' ? "bg-sky-50 text-sky-500" : "bg-slate-50 text-slate-400"
+                  )}>
+                    <Trophy className="h-6 w-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-black text-[#0B1F3A] uppercase italic leading-tight group-hover:text-sky-600 transition-colors">
+                        {t.name}
+                      </h3>
+                      {t.status === 'Live' && <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />}
+                    </div>
+                    <div className="flex items-center gap-3 text-[9px] font-bold text-slate-400 uppercase">
+                      <span className="flex items-center gap-1"><MapPin className="h-3 w-3 text-sky-500" /> {t.city}</span>
+                      <span className="flex items-center gap-1"><Calendar className="h-3 w-3 text-sky-500" /> {t.startDate}</span>
                     </div>
                   </div>
-                  <Button onClick={() => navigate(`/tournament/${t.id}`)} className="w-full h-12 bg-[#0B1F3A] text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-sky-500 transition-all border-none">
-                    VIEW Dossier <ChevronRight className="ml-1 h-3 w-3" />
-                  </Button>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge className={cn(
+                    "h-6 px-3 border-none text-[8px] font-black uppercase rounded-lg",
+                    t.status === 'Live' ? "bg-red-500 text-white" : 
+                    t.status === 'Upcoming' ? "bg-sky-500 text-white" : "bg-slate-100 text-slate-400"
+                  )}>
+                    {t.status}
+                  </Badge>
+                  <ChevronRight className="h-4 w-4 text-slate-200 group-hover:text-sky-500 group-hover:translate-x-1 transition-all" />
                 </div>
               </motion.div>
             )) : (
-              <div className="py-24 text-center border-2 border-dashed border-slate-100 rounded-[3rem]">
-                <Zap className="h-10 w-10 text-slate-200 mx-auto mb-4" />
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Circuit Empty</p>
+              <div className="py-20 text-center border-2 border-dashed border-slate-100 rounded-[2rem] bg-white/50">
+                <p className="text-[10px] font-black text-slate-400 uppercase italic">No {activeTab.toLowerCase()} events found</p>
               </div>
             )}
           </AnimatePresence>

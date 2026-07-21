@@ -57,7 +57,7 @@ const Court = () => {
             {[
               { label: 'Schedule', icon: Calendar, path: '/my-circuits', color: 'bg-blue-50 text-sky-600' },
               { label: 'Matches', icon: Zap, path: '/smashed', color: 'bg-indigo-50 text-indigo-600' },
-              { label: 'Tournaments', icon: Trophy, path: '/tournaments', color: 'bg-amber-50 text-amber-600' },
+              { label: 'Tourney', icon: Trophy, path: '/tournaments', color: 'bg-amber-50 text-amber-600' },
               { label: 'Rankings', icon: ListOrdered, path: '/rankings', color: 'bg-emerald-50 text-emerald-600' },
             ].map((action, i) => (
               <button 
@@ -115,7 +115,7 @@ const Court = () => {
 
             <section className="space-y-3">
               <h2 className="uppercase italic flex items-center gap-2 px-1">
-                <Trophy className="h-4 w-4 text-sky-500" /> Active Tournaments
+                <Trophy className="h-4 w-4 text-sky-500" /> Active Tourneys
               </h2>
               <div className="flex flex-col gap-3">
                 {tournaments.length > 0 ? tournaments.map((t, i) => (
