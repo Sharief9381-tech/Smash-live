@@ -55,18 +55,10 @@ const Tournaments = () => {
       <Navbar />
       
       <main className="container px-4 py-6 space-y-6">
-        {/* Header with clear action button */}
-        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between">
-          <div className="space-y-1">
-            <h1 className="text-2xl font-black text-[#0B1F3A] uppercase italic leading-none">Tourney List</h1>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tournament Directory</p>
-          </div>
-          <Button 
-            onClick={() => navigate('/tournaments/create')}
-            className="h-12 bg-[#0B1F3A] hover:bg-sky-500 text-white rounded-2xl px-6 font-black text-[10px] uppercase tracking-widest border-none shadow-xl transition-all active:scale-95"
-          >
-            <Plus className="mr-2 h-4 w-4" /> New Tourney
-          </Button>
+        {/* Simple Header */}
+        <div className="space-y-1 px-1">
+          <h1 className="text-3xl font-black text-[#0B1F3A] uppercase italic leading-none">Tournaments</h1>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Circuit Directory</p>
         </div>
 
         {/* Search and Filters */}
@@ -74,7 +66,7 @@ const Tournaments = () => {
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input 
-              placeholder="Search by name or city..." 
+              placeholder="Search..." 
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="w-full h-14 pl-12 pr-4 bg-white border border-slate-100 rounded-2xl font-bold text-sm shadow-sm outline-none focus:border-sky-500 transition-all"
@@ -139,6 +131,16 @@ const Tournaments = () => {
               </div>
             )}
           </AnimatePresence>
+        </div>
+
+        {/* New Tourney Button at the Bottom */}
+        <div className="pt-6">
+          <Button 
+            onClick={() => navigate('/tournaments/create')}
+            className="w-full h-16 bg-[#0B1F3A] hover:bg-sky-500 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] border-none shadow-2xl transition-all active:scale-95 flex items-center justify-center gap-3"
+          >
+            <Plus className="h-5 w-5" /> Initialize New Tourney
+          </Button>
         </div>
       </main>
     </div>
