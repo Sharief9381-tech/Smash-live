@@ -1,0 +1,174 @@
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import Navbar from '@/components/layout/Navbar';
+import { 
+  Users, Search, UserPlus, ChevronRight, 
+  Loader2, UserCheck, MessageSquare, Flame
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { supabase, isCloudConfigured } from '@/lib/supabase';
+
+const Social = () => {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'followers' | 'following' | 'explore'>('followers');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [athletes, setAthletes] = useState<any[]>([]);
+  const [userProfile, setUserProfile] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+      setUserProfile(profile);
+
+      // Local Fallback
+      const local = JSON.parse(localStorage.getItem('registered_users') || '[]');
+      
+      if (isCloudConfigured) {
+        try {
+          const { data } = await supabase.from('profiles').select('*');
+          if (data) {
+            // Filter out self
+            const filtered = data.filter((p: any) => p.mobile !== profile.mobile);
+            setAthletes(filtered);
+          } else {
+            setAthletes(local.filter((p: any) => p.mobile !== profile.mobile));
+          }
+        } catch (e) {
+          setAthletes(local.filter((p: any) => p.mobile !== profile.mobile));
+        }
+      } else {
+        setAthletes(local.filter((p: any) => p.mobile !== profile.mobile));
+      }
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  const filteredAthletes = athletes.filter(p => 
+    p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.smashId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.smash_id?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // For demo, we split athletes into followers/following
+  const followers = filteredAthletes.slice(0, Math.ceil(athletes.length / 2));
+  const following = filteredAthletes.slice(Math.ceil(athletes.length / 2));
+
+  const displayList = activeTab === 'followers' ? followers : activeTab === 'following' ? following : filteredAthletes;
+
+  return (
+    <div className="min-h-screen bg-slate-50 pb-32">
+      <Navbar />
+      
+      <main className="container max-w-lg px-4 py-8 space-y-8">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-sky-500" />
+            <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.4em]">Athlete Network</span>
+          </div>
+          <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-none">Social Hub</h1>
+        </div>
+
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+          <Input 
+            placeholder="Find Athletes..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-14 pl-12 bg-white border-slate-100 rounded-2xl font-bold focus:border-sky-500 shadow-sm"
+          />
+        </div>
+
+        <div className="flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-100 shadow-sm">
+          {[
+            { id: 'followers', label: 'Followers' },
+            { id: 'following', label: 'Following' },
+            { id: 'explore', label: 'Explore' }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={cn(
+                "flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                activeTab === tab.id ? "bg-[#0B1F3A] text-white shadow-md" : "text-slate-400 hover:text-[#0B1F3A]"
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="space-y-3">
+          {loading ? (
+            <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-sky-500 h-8 w-8" /></div>
+          ) : (
+            <AnimatePresence mode="popLayout">
+              {displayList.length > 0 ? displayList.map((p, idx) => (
+                <motion.div 
+                  layout
+                  key={p.id || idx}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  onClick={() => navigate(`/player/${p.id || p.mobile}`)}
+                  className="app-card p-4 flex items-center justify-between bg-white cursor-pointer group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <div className="h-12 w-12 rounded-full bg-[#0B1F3A] flex items-center justify-center text-xs font-black text-sky-400 uppercase shadow-inner">
+                        {p.image ? (
+                          <img src={p.image} className="w-full h-full object-cover rounded-full" alt="" />
+                        ) : (
+                          p.name[0]
+                        )}
+                      </div>
+                      {idx % 3 === 0 && (
+                        <div className="absolute -bottom-1 -right-1 bg-orange-500 p-1 rounded-full border-2 border-white shadow-sm">
+                          <Flame className="h-2 w-2 text-white fill-current" />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="font-black text-[#0B1F3A] uppercase italic leading-none group-hover:text-sky-600 transition-colors">
+                        {p.name}
+                      </h3>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight mt-1">
+                        {p.smash_id || p.smashId || "ATHLETE"} • {p.state || "India"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {activeTab === 'followers' ? (
+                      <Badge className="bg-sky-50 text-sky-600 border-none text-[8px] font-black uppercase px-2">Follows You</Badge>
+                    ) : activeTab === 'following' ? (
+                      <UserCheck className="h-4 w-4 text-sky-500" />
+                    ) : (
+                      <UserPlus className="h-4 w-4 text-slate-300 group-hover:text-sky-500 transition-colors" />
+                    )}
+                    <ChevronRight className="h-4 w-4 text-slate-200 group-hover:text-sky-500 transition-all" />
+                  </div>
+                </motion.div>
+              )) : (
+                <div className="py-24 text-center border-2 border-dashed rounded-[2.5rem] bg-white border-slate-200">
+                  <Users className="h-10 w-10 text-slate-200 mx-auto mb-4" />
+                  <p className="text-[10px] font-black text-slate-400 uppercase italic">No connections found in this scope</p>
+                </div>
+              )}
+            </AnimatePresence>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default Social;

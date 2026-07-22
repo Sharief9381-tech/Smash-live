@@ -20,6 +20,7 @@ import News from "./pages/News";
 import Smashed from "./pages/Smashed";
 import Login from "./pages/Login";
 import Court from "./pages/Court";
+import Social from "./pages/Social";
 import BroadcastCenter from "./pages/BroadcastCenter";
 import CreateIndividualMatch from "./pages/CreateIndividualMatch";
 import ScoringPage from "./pages/ScoringPage";
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/court" element={<Navigate to="/dashboard" replace />} />
             <Route path="/my-circuits" element={<ProtectedRoute><MyCircuits /></ProtectedRoute>} />
             <Route path="/smashed" element={<ProtectedRoute><Smashed /></ProtectedRoute>} />
+            <Route path="/social" element={<ProtectedRoute><Social /></ProtectedRoute>} />
             <Route path="/live-match/active" element={<LiveMatch />} />
             <Route path="/live-match/create" element={<ProtectedRoute><CreateIndividualMatch /></ProtectedRoute>} />
             <Route path="/scoring/:matchId" element={<ProtectedRoute><ScoringPage /></ProtectedRoute>} />

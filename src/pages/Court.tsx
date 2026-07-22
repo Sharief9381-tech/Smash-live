@@ -60,7 +60,7 @@ const Court = () => {
             { label: 'Schedule', icon: Calendar, path: '/my-circuits', color: 'text-sky-600', bg: 'bg-sky-50' },
             { label: 'Matches', icon: Zap, path: '/smashed', color: 'text-indigo-600', bg: 'bg-indigo-50' },
             { label: 'Studio', icon: Activity, path: '/broadcast/center', color: 'text-amber-600', bg: 'bg-amber-50' },
-            { label: 'Social', icon: Users, path: '/rankings', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+            { label: 'Social', icon: Users, path: '/social', color: 'text-emerald-600', bg: 'bg-emerald-50' },
           ].map((action, i) => (
             <button 
               key={i} 
