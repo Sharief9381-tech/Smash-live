@@ -13,8 +13,8 @@ const BottomNav = () => {
 
   const items = [
     { name: 'Home', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Tourney', path: '/tournaments', icon: Trophy },
-    { name: 'Live', path: '/live-match/active', icon: Activity },
+    { name: 'Studio', path: '/broadcast/center', icon: Activity },
+    { name: 'Live', path: '/live-match/active', icon: Radio },
     { name: 'Ranks', path: '/rankings', icon: ListOrdered },
     { name: 'Profile', path: '/player/me', icon: User },
   ];
