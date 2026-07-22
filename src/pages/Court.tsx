@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import SmashRating from '@/components/dashboard/SmashRating';
-import DailyChallenges from '@/components/dashboard/DailyChallenges';
 import { motion } from 'framer-motion';
 import { 
   Trophy, Zap, Activity, Loader2, 
@@ -109,9 +108,6 @@ const Court = () => {
             )}
           </div>
         </section>
-
-        {/* 4. Daily Challenges */}
-        <DailyChallenges />
 
         {/* 5. Tournament Insights */}
         <section className="space-y-3">
