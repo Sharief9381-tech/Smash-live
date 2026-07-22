@@ -13,6 +13,7 @@ import {
   Activity, BarChart3, ListOrdered, 
   Trophy, Users, Award, Zap, ChevronLeft, Loader2, Star, Flame
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
