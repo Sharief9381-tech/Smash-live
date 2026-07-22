@@ -2,97 +2,73 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Bell, Menu, X, Zap } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { motion, AnimatePresence } from 'framer-motion';
 import Logo from './Logo';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState("V. Axelsen");
+  const [userName, setUserName] = useState("Athlete");
   const [userImage, setUserImage] = useState("");
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [searchVal, setSearchVal] = useState("");
-  
   const location = useLocation();
+
+  const checkAuth = () => {
+    const authStatus = localStorage.getItem('isLoggedIn') === 'true';
+    setIsLoggedIn(authStatus);
+    const saved = localStorage.getItem('userProfile');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setUserName(parsed.name || "Athlete");
+        setUserImage(parsed.image || "");
+      } catch (e) { console.error("Profile error"); }
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
-    
-    const checkAuth = () => {
-      const authStatus = localStorage.getItem('isLoggedIn') === 'true';
-      setIsLoggedIn(authStatus);
-      const saved = localStorage.getItem('userProfile');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          setUserName(parsed.name || "Athlete");
-          setUserImage(parsed.image || "");
-        } catch (e) {}
-      }
-    };
-    
     checkAuth();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const navItems = [
-    { name: isLoggedIn ? 'COURT' : 'Home', path: isLoggedIn ? '/dashboard' : '/' },
-    { name: 'Live', path: '/live-match/active' },
-    { name: 'Tournaments', path: '/tournaments' },
-    { name: 'Studio', path: '/broadcast/center' },
-    { name: 'Rankings', path: '/rankings' },
-  ];
+    window.addEventListener('storage', checkAuth);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('storage', checkAuth);
+    };
+  }, [location.pathname]);
 
   return (
     <nav className={cn(
-      "sticky top-0 z-50 w-full transition-all duration-300 h-20 flex items-center border-b",
+      "sticky top-0 z-[100] w-full h-[56px] flex items-center transition-all px-4 border-b",
       isScrolled ? "bg-white/95 backdrop-blur-md border-slate-200 shadow-sm" : "bg-white border-transparent"
     )}>
-      <div className="container flex items-center justify-between px-6">
-        <div className="flex items-center gap-10">
-          <Link to="/" className="flex items-center gap-3 shrink-0 group">
-            <Logo className="h-11 w-11" />
-            <span className="hidden sm:block text-2xl font-black tracking-tighter text-[#0B1F3A] uppercase">
-              Smash<span className="text-sky-500">Live</span>
-            </span>
-          </Link>
+      <div className="w-full flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-2 group">
+          <Logo className="h-8 w-8" />
+          <span className="text-[18px] font-black tracking-tighter text-[#0B1F3A] uppercase">
+            Smash<span className="text-sky-500">Live</span>
+          </span>
+        </Link>
 
-          <div className="hidden lg:flex items-center gap-6">
-            {navItems.map((item) => (
-              <Link 
-                key={item.name} 
-                to={item.path}
-                className={cn(
-                  "text-[11px] font-black uppercase tracking-[0.15em] transition-colors hover:text-sky-500",
-                  location.pathname === item.path ? "text-sky-500" : "text-[#0B1F3A]/70"
-                )}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </div>
-        </div>
+        <div className="flex items-center gap-3">
+          <button className="relative p-2 text-[#0B1F3A]/60 hover:bg-slate-50 rounded-full transition-all">
+            <Bell className="h-5 w-5" />
+            <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full border-2 border-white" />
+          </button>
 
-        <div className="flex items-center gap-4">
           {isLoggedIn ? (
-            <Link to="/player/me" className="flex items-center group">
-              <Avatar className="h-10 w-10 border-2 border-slate-200 group-hover:border-sky-500 transition-all shadow-sm">
+            <Link to="/player/me">
+              <Avatar className="h-8 w-8 border-2 border-slate-100 shadow-sm">
                 <AvatarImage src={userImage} />
-                <AvatarFallback className="font-black bg-slate-100">{userName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                <AvatarFallback className="text-[10px] font-black bg-slate-100">
+                  {userName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                </AvatarFallback>
               </Avatar>
             </Link>
           ) : (
-            <Link to="/login">
-              <Button className="bg-[#0B1F3A] text-white px-7 rounded-full font-black text-xs hover:bg-[#0B1F3A]/90 transition-all border-none h-11">
-                Login
-              </Button>
+            <Link to="/login" className="text-[12px] font-black text-[#0B1F3A] uppercase tracking-wider bg-slate-50 px-4 py-2 rounded-lg">
+              Login
             </Link>
           )}
         </div>
