@@ -1,18 +1,18 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
+import Navbar from '../components/layout/Navbar';
+import Footer from '../components/layout/Footer';
 import { motion } from 'framer-motion';
 import { 
   ArrowRight, Activity, Trophy, Users, 
   Zap, TrendingUp, Monitor, Globe, 
-  ShieldCheck, Radio, Sparkles
+  ShieldCheck, Radio, Sparkles, ChevronRight
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
 import { Link } from 'react-router-dom';
-import { cn } from '@/lib/utils';
+import { cn } from '../lib/utils';
 
 const Index = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -68,7 +68,7 @@ const Index = () => {
         <div className="absolute top-0 right-0 w-[60%] h-full bg-sky-500/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/4 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[40%] h-full bg-[#0B1F3A]/5 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none" />
 
-        <div className="container grid lg:grid-cols-12 gap-16 items-center relative z-10">
+        <div className="container mx-auto grid lg:grid-cols-12 gap-16 items-center relative z-10">
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
@@ -82,7 +82,7 @@ const Index = () => {
 
             <div className="space-y-4">
               <motion.h1 
-                className="text-7xl md:text-[120px] font-black text-[#0B1F3A] leading-[0.85] tracking-tighter uppercase italic"
+                className="text-7xl md:text-[100px] font-black text-[#0B1F3A] leading-[0.85] tracking-tighter uppercase italic"
                 initial={{ scale: 0.95 }}
                 animate={{ scale: 1 }}
                 transition={{ duration: 1 }}
@@ -93,7 +93,7 @@ const Index = () => {
               <div className="h-2.5 w-40 bg-sky-500 rounded-full" />
             </div>
 
-            <p className="text-2xl text-slate-500 font-medium max-w-xl leading-relaxed tracking-tight">
+            <p className="text-xl md:text-2xl text-slate-500 font-medium max-w-xl leading-relaxed tracking-tight">
               The definitive <span className="text-[#0B1F3A] font-black">athlete network</span>. Empowering players and organizers with real-time intelligence and elite broadcasting tools.
             </p>
 
@@ -126,7 +126,7 @@ const Index = () => {
                   </div>
                   <div>
                     <h4 className="text-sm font-black text-[#0B1F3A] uppercase tracking-widest italic">Live Intelligence</h4>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">BWF Circuit Link</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global Node Connect</p>
                   </div>
                 </div>
                 <Radio className="h-5 w-5 text-red-500 animate-pulse" />
@@ -152,30 +152,18 @@ const Index = () => {
               <div className="bg-[#0B1F3A] p-6 rounded-3xl text-white flex items-center justify-between">
                  <div className="flex items-center gap-3">
                     <ShieldCheck className="h-5 w-5 text-sky-400" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-sky-400">Node Secure: Node_01_SG</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-sky-400">Node Secure: SG_01</span>
                  </div>
                  <TrendingUp className="h-4 w-4 text-green-400" />
               </div>
             </div>
-            
-            {/* Decorative Floating Elements */}
-            <motion.div 
-              animate={{ y: [0, -15, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -top-10 -right-10 h-32 w-32 bg-sky-500/10 blur-3xl rounded-full"
-            />
-            <motion.div 
-              animate={{ y: [0, 15, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-              className="absolute -bottom-10 -left-10 h-40 w-40 bg-indigo-500/10 blur-3xl rounded-full"
-            />
           </motion.div>
         </div>
       </section>
 
       {/* 2. Platform Intelligence Grid */}
       <section className="py-40 bg-white">
-        <div className="container px-6 space-y-20">
+        <div className="container mx-auto px-6 space-y-20">
           <div className="text-center space-y-6 max-w-3xl mx-auto">
             <Badge className="bg-sky-500/10 text-sky-600 font-black px-6 py-1 border-none rounded-full uppercase tracking-widest">The Ecosystem</Badge>
             <h2 className="text-6xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-[0.95]">Engineered for <br /> Professional Excellence</h2>
@@ -209,50 +197,6 @@ const Index = () => {
             ))}
           </div>
         </div>
-      </section>
-
-      {/* 3. Global Reach CTA */}
-      <section className="container px-6 py-20">
-         <div className="bg-[#0B1F3A] rounded-[4rem] p-16 md:p-24 relative overflow-hidden text-center md:text-left shadow-2xl group">
-            <div className="absolute top-0 right-0 p-20 opacity-5 pointer-events-none group-hover:rotate-12 transition-transform duration-1000">
-               <Trophy className="h-96 w-96 text-white" />
-            </div>
-            
-            <div className="grid lg:grid-cols-2 gap-16 items-center relative z-10">
-               <div className="space-y-10">
-                  <div className="flex items-center justify-center md:justify-start gap-3">
-                     <Sparkles className="h-8 w-8 text-sky-400 fill-current" />
-                     <span className="text-xs font-black text-sky-400 uppercase tracking-[0.4em]">Operational Readiness</span>
-                  </div>
-                  <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase italic leading-[0.9]">Start Your <br /> Circuit Today</h2>
-                  <p className="text-xl text-white/60 font-medium max-w-lg">Bring professional-grade intelligence to your court. Setup in minutes, scale globally.</p>
-                  <Link to="/login" className="inline-block">
-                    <Button size="lg" className="bg-sky-500 text-white rounded-full px-12 h-20 font-black text-xl hover:bg-sky-400 shadow-[0_20px_40px_rgba(14,165,233,0.3)] transition-all active:scale-95 border-none">
-                      INITIALIZE NOW
-                    </Button>
-                  </Link>
-               </div>
-               
-               <div className="grid grid-cols-2 gap-6">
-                  <div className="bg-white/5 border border-white/10 rounded-[3rem] p-10 space-y-3 hover:bg-white/10 transition-colors">
-                     <p className="text-4xl font-black text-white italic tracking-tighter">100%</p>
-                     <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">BWF Protocol Align</p>
-                  </div>
-                  <div className="bg-white/5 border border-white/10 rounded-[3rem] p-10 space-y-3 hover:bg-white/10 transition-colors">
-                     <p className="text-4xl font-black text-white italic tracking-tighter">Sub-50ms</p>
-                     <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Global Latency</p>
-                  </div>
-                  <div className="bg-white/5 border border-white/10 rounded-[3rem] p-10 space-y-3 hover:bg-white/10 transition-colors">
-                     <p className="text-4xl font-black text-white italic tracking-tighter">AI-GEN</p>
-                     <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Real-time Intel</p>
-                  </div>
-                  <div className="bg-white/5 border border-white/10 rounded-[3rem] p-10 space-y-3 hover:bg-white/10 transition-colors">
-                     <p className="text-4xl font-black text-white italic tracking-tighter">4K-Ready</p>
-                     <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Broadcast Core</p>
-                  </div>
-               </div>
-            </div>
-         </div>
       </section>
 
       <Footer />

@@ -1,11 +1,14 @@
 "use client";
 
+import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { safeJsonParse } from "@/lib/utils";
+
+// Pages
 import Index from "./pages/Index";
 import LiveMatch from "./pages/LiveMatch";
 import Tournaments from "./pages/Tournaments";
@@ -28,6 +31,8 @@ import Onboarding from "./pages/Onboarding";
 import RegisterParticipant from "./pages/RegisterParticipant";
 import MyCircuits from "./pages/MyCircuits";
 import NotFound from "./pages/NotFound";
+
+// Layout
 import BottomNav from "./components/layout/BottomNav";
 
 const queryClient = new QueryClient();
@@ -50,7 +55,7 @@ const App = () => (
       <Toaster />
       <Sonner position="top-center" />
       <BrowserRouter>
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col bg-white">
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
