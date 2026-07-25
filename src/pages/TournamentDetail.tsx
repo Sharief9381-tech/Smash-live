@@ -11,6 +11,7 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase, isCloudConfigured } from '@/lib/supabase';
 import { showSuccess } from '@/utils/toast';
+import { cn } from '@/lib/utils';
 
 const TournamentDetail = () => {
   const { id } = useParams();
