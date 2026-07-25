@@ -74,7 +74,7 @@ const Tournaments = () => {
           </div>
 
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            {['All', 'Live', 'Upcoming', 'Past'].map((tab) => (
+            {['All', 'Live', 'Upcoming'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}

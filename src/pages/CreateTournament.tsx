@@ -5,7 +5,7 @@ import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Trophy, Check, Loader2, ChevronLeft, MapPin, Calendar } from 'lucide-react';
+import { Trophy, Check, Loader2, ChevronLeft, MapPin, Calendar, QrCode, Copy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, isCloudConfigured } from '@/lib/supabase';
 import { showSuccess, showError } from '@/utils/toast';
@@ -59,6 +59,7 @@ const CreateTournament = () => {
   };
 
   const registrationLink = `${window.location.origin}/register/${slug}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(registrationLink)}`;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -134,24 +135,37 @@ const CreateTournament = () => {
               <div className="bg-green-500/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto text-green-500 shadow-lg border border-green-100">
                 <Check className="h-10 w-10 stroke-[3px]" />
               </div>
+              
               <div className="space-y-2">
-                <h2 className="text-3xl font-black text-[#0B1F3A] italic uppercase">Link Ready</h2>
-                <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Share this link for players to register</p>
+                <h2 className="text-3xl font-black text-[#0B1F3A] italic uppercase leading-none">Circuit Initialized</h2>
+                <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Registrations are now open</p>
               </div>
-              <div className="p-6 bg-[#0B1F3A] rounded-[2rem] text-white shadow-2xl space-y-4">
-                <div className="bg-white/5 p-4 rounded-xl font-mono text-[10px] break-all border border-white/10 opacity-70">
-                  {registrationLink}
-                </div>
-                <Button 
-                  onClick={() => { navigator.clipboard.writeText(registrationLink); setCopied(true); }} 
-                  className="w-full h-12 bg-sky-500 text-white font-black uppercase tracking-widest rounded-xl hover:bg-sky-400"
-                >
-                  {copied ? "Copied!" : "Copy Link"}
-                </Button>
+
+              <div className="bg-white rounded-[3rem] p-8 border border-slate-100 shadow-2xl space-y-8">
+                 <div className="flex flex-col items-center gap-6">
+                    <div className="p-4 bg-white rounded-3xl border-4 border-[#0B1F3A]/5 shadow-inner">
+                       <img src={qrUrl} alt="Registration QR" className="w-40 h-40" />
+                    </div>
+                    <div className="space-y-2 w-full">
+                       <Label className="text-[9px] font-black uppercase text-slate-400">Direct Entry Link</Label>
+                       <div className="flex gap-2">
+                          <div className="flex-1 h-12 bg-slate-50 border border-slate-100 rounded-xl px-4 flex items-center overflow-hidden">
+                             <span className="text-[10px] font-mono text-slate-500 truncate">{registrationLink}</span>
+                          </div>
+                          <Button 
+                            onClick={() => { navigator.clipboard.writeText(registrationLink); setCopied(true); setTimeout(() => setCopied(false), 2000); }} 
+                            className="h-12 w-12 bg-[#0B1F3A] text-white rounded-xl shadow-lg shrink-0"
+                          >
+                            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                          </Button>
+                       </div>
+                    </div>
+                 </div>
               </div>
+
               <div className="flex flex-col gap-3">
-                <Button onClick={() => navigate('/smashed')} variant="outline" className="h-14 rounded-2xl border-slate-200 bg-white font-black uppercase tracking-widest text-xs">
-                  Open Dashboard
+                <Button onClick={() => navigate('/tournaments')} className="h-16 bg-[#0B1F3A] text-white rounded-[2rem] font-black uppercase tracking-widest shadow-xl">
+                  GO TO TOURNAMENTS
                 </Button>
                 <button onClick={() => navigate('/')} className="text-[10px] font-black text-slate-400 uppercase underline decoration-2">Return Home</button>
               </div>
