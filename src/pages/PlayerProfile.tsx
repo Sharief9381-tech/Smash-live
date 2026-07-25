@@ -10,7 +10,7 @@ import AnalyticsSection from '@/components/profile/AnalyticsSection';
 import AchievementSection from '@/components/profile/AchievementSection';
 import RankingSection from '@/components/profile/RankingSection';
 import { 
-  Activity, BarChart3, ListOrdered, 
+  Activity, BarChart3, 
   Trophy, Users, Award, Zap, ChevronLeft, Loader2, Star, Flame
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -39,6 +39,12 @@ const PlayerProfile = () => {
       try {
         const { data } = await supabase.from('profiles').select('*').eq('id', id).single();
         if (data) setProfileData(data);
+        else {
+          // Check local registered users if cloud missing
+          const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
+          const local = registered.find((u: any) => u.id === id || u.mobile === id);
+          if (local) setProfileData(local);
+        }
       } catch (e) { console.warn("Sync issue."); }
       finally { setLoading(false); }
     };
@@ -64,21 +70,21 @@ const PlayerProfile = () => {
         {/* Profile Identity Card */}
         <ProfileHero profile={profileData} isOwnProfile={isOwnProfile} />
 
-        {/* Engagement Ribbon */}
+        {/* Engagement Ribbon - Now Dynamic (showing 0/empty for new users) */}
         <div className="app-card flex divide-x divide-slate-50">
            <div className="flex-1 p-3 text-center">
               <p className="text-[10px] font-black text-slate-300 uppercase">Followers</p>
-              <p className="text-sm font-black">1.2k</p>
+              <p className="text-sm font-black">{profileData?.stats?.followers || 0}</p>
            </div>
            <div className="flex-1 p-3 text-center">
               <p className="text-[10px] font-black text-slate-300 uppercase">Streak</p>
               <p className="text-sm font-black text-orange-500 flex items-center justify-center gap-1">
-                <Flame className="h-3 w-3" /> 4
+                <Flame className="h-3 w-3" /> {profileData?.stats?.streak || 0}
               </p>
            </div>
            <div className="flex-1 p-3 text-center">
               <p className="text-[10px] font-black text-slate-300 uppercase">Win Rate</p>
-              <p className="text-sm font-black text-sky-600">84%</p>
+              <p className="text-sm font-black text-sky-600">{profileData?.stats?.winRate || "0%"}</p>
            </div>
         </div>
 
@@ -101,7 +107,6 @@ const PlayerProfile = () => {
           ))}
         </div>
 
-        {/* Tab Content with Smooth Transitions */}
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -117,8 +122,7 @@ const PlayerProfile = () => {
           </motion.div>
         </AnimatePresence>
 
-        {/* Shareable Card Button */}
-        <Button className="w-full h-14 bg-sky-500 text-white rounded-2xl font-black text-btn gap-2 shadow-lg active-press">
+        <Button className="w-full h-14 bg-sky-500 text-white rounded-2xl font-black text-[12px] uppercase tracking-widest gap-2 shadow-lg active-press">
           <Star className="h-4 w-4" /> Share Athlete Dossier
         </Button>
       </main>

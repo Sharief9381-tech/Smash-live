@@ -30,7 +30,7 @@ const PerformanceStats = ({ stats }: PerformanceStatsProps) => {
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 gap-3">
       {data.map((stat, i) => (
         <div key={i} className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm space-y-2 hover:border-sky-500/20 transition-all">
           <div className="flex items-center gap-2">

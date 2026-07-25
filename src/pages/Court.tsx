@@ -48,13 +48,13 @@ const Court = () => {
         {/* 1. Header & Quick Stats */}
         <section className="space-y-3">
           <div className="flex justify-between items-center">
-            <h1 className="uppercase italic">Hello, {profile?.name?.split(' ')[0] || "Player"}! 🔥</h1>
-            <Badge className="bg-sky-500 text-white border-none text-[10px] font-black h-6">PRO</Badge>
+            <h1 className="uppercase italic">Hello, {profile?.name?.split(' ')[0] || "Athlete"}! 🔥</h1>
+            <Badge className="bg-sky-500 text-white border-none text-[10px] font-black h-6 uppercase">Active</Badge>
           </div>
-          <SmashRating />
+          <SmashRating rating={profile?.stats?.rating || 0} level={profile?.stats?.level || 1} xp={0} />
         </section>
 
-        {/* 2. Quick Actions Grid - High Information Density */}
+        {/* 2. Quick Actions Grid */}
         <div className="grid grid-cols-4 gap-2">
           {[
             { label: 'Schedule', icon: Calendar, path: '/my-circuits', color: 'text-sky-600', bg: 'bg-sky-50' },
@@ -75,7 +75,7 @@ const Court = () => {
           ))}
         </div>
 
-        {/* 3. Live & Upcoming */}
+        {/* 3. Live Feed */}
         <section className="space-y-3">
           <div className="flex items-center justify-between px-1">
             <h2 className="uppercase italic flex items-center gap-2">
@@ -90,8 +90,8 @@ const Court = () => {
                 <div className="flex-1 min-w-0 pr-4">
                   <p className="text-[10px] font-black text-slate-300 uppercase truncate mb-1">{match.name}</p>
                   <div className="space-y-0.5">
-                    <p className="font-black text-sm text-[#0B1F3A] uppercase truncate">{match.players?.p1?.name || "Player A"}</p>
-                    <p className="font-black text-sm text-[#0B1F3A] uppercase truncate">{match.players?.p2?.name || "Player B"}</p>
+                    <p className="font-black text-sm text-[#0B1F3A] uppercase truncate">{match.players?.p1?.name || match.players?.sideA?.[0]?.name || "Side A"}</p>
+                    <p className="font-black text-sm text-[#0B1F3A] uppercase truncate">{match.players?.p2?.name || match.players?.sideB?.[0]?.name || "Side B"}</p>
                   </div>
                 </div>
                 <div className="bg-slate-50 px-4 py-2 rounded-xl text-center min-w-[70px]">
@@ -102,14 +102,14 @@ const Court = () => {
                 </div>
               </Link>
             )) : (
-              <div className="py-8 text-center bg-slate-50 border border-dashed rounded-xl">
-                <p className="text-[11px] font-black text-slate-400 uppercase italic">Awaiting Next Match...</p>
+              <div className="py-8 text-center bg-white/50 border border-dashed rounded-xl border-slate-200">
+                <p className="text-[11px] font-black text-slate-400 uppercase italic">No active matches in network</p>
               </div>
             )}
           </div>
         </section>
 
-        {/* 5. Tournament Insights */}
+        {/* 4. Tournament Section */}
         <section className="space-y-3">
           <h2 className="uppercase italic flex items-center gap-2 px-1">
             <Trophy className="h-4 w-4 text-amber-500" /> Featured Circuits
@@ -121,7 +121,7 @@ const Court = () => {
                   <div className="h-10 w-10 rounded-xl bg-[#0B1F3A] flex items-center justify-center text-sky-400 shrink-0">
                     <Trophy className="h-5 w-5" />
                   </div>
-                  <div>
+                  <div className="overflow-hidden">
                     <h3 className="uppercase italic leading-tight mb-0.5 truncate max-w-[180px]">{t.name}</h3>
                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{t.city} • {t.status}</p>
                   </div>
@@ -129,32 +129,22 @@ const Court = () => {
                 <ChevronRight className="h-4 w-4 text-slate-300" />
               </Link>
             )) : (
-              <div className="py-8 text-center bg-slate-50 border border-dashed rounded-xl">
-                <p className="text-[11px] font-black text-slate-400 uppercase italic">No Active Circuits.</p>
+              <div className="py-8 text-center bg-white/50 border border-dashed rounded-xl border-slate-200">
+                <p className="text-[11px] font-black text-slate-400 uppercase italic">No circuits found</p>
               </div>
             )}
           </div>
         </section>
 
-        {/* 6. Social Feed Preview - Native Feel */}
+        {/* 5. Zero-State Feed */}
         <section className="space-y-3">
           <h2 className="uppercase italic flex items-center gap-2 px-1">
-            <Users className="h-4 w-4 text-emerald-500" /> Friend Activity
+            <Users className="h-4 w-4 text-emerald-500" /> Network Activity
           </h2>
-          <div className="app-card p-4 space-y-4">
-            <div className="flex items-start gap-3">
-               <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center font-black text-[10px]">VA</div>
-               <div className="space-y-1">
-                  <p className="text-[12px] font-bold text-[#0B1F3A]">Viktor Axelsen <span className="font-medium text-slate-400">won a match!</span></p>
-                  <div className="p-2 rounded-lg bg-slate-50 border border-slate-100 inline-block">
-                     <p className="text-[10px] font-black text-sky-600">21-14, 21-18 vs Shi Yuqi</p>
-                  </div>
-                  <div className="flex gap-4 pt-1">
-                     <button className="flex items-center gap-1 text-[10px] font-bold text-slate-400"><Heart className="h-3 w-3" /> 12</button>
-                     <button className="flex items-center gap-1 text-[10px] font-bold text-slate-400"><MessageSquare className="h-3 w-3" /> 4</button>
-                  </div>
-               </div>
-            </div>
+          <div className="app-card p-8 text-center border-dashed border-2 bg-slate-50/30">
+            <MessageSquare className="h-8 w-8 text-slate-200 mx-auto mb-3" />
+            <p className="text-[10px] font-black text-slate-400 uppercase italic">Connect with athletes to see their match updates here.</p>
+            <Button onClick={() => navigate('/social')} variant="ghost" className="mt-2 text-sky-600 font-black text-[9px] uppercase hover:bg-transparent">Find Athletes</Button>
           </div>
         </section>
       </main>
