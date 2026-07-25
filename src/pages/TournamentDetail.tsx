@@ -9,7 +9,7 @@ import {
   ChevronLeft, Activity, Globe, Loader2
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
+import { supabase, isCloudConfigured } from '@/lib/supabase';
 import { showSuccess } from '@/utils/toast';
 
 const TournamentDetail = () => {
@@ -21,30 +21,44 @@ const TournamentDetail = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      try {
-        const { data: tourney, error: tError } = await supabase
-          .from('tournaments')
-          .select('*')
-          .eq('id', id)
-          .single();
+      setLoading(true);
+      
+      // 1. Try Cloud
+      if (isCloudConfigured && !id?.startsWith('local_')) {
+        try {
+          const { data: tourney } = await supabase
+            .from('tournaments')
+            .select('*')
+            .eq('id', id)
+            .single();
 
-        if (tError) throw tError;
-        setTournament(tourney);
-
-        const { data: athletes, error: pError } = await supabase
-          .from('participants')
-          .select('*')
-          .eq('tournament_id', id);
-
-        if (pError) throw pError;
-        setParticipants(athletes || []);
-
-      } catch (err) {
-        console.error("Data fetch error:", err);
-      } finally {
-        setLoading(false);
+          if (tourney) {
+            setTournament(tourney);
+            const { data: athletes } = await supabase
+              .from('participants')
+              .select('*')
+              .eq('tournament_id', id);
+            setParticipants(athletes || []);
+            setLoading(false);
+            return;
+          }
+        } catch (err) {}
       }
+
+      // 2. Fallback to Local
+      const localTourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
+      const localMatch = localTourneys.find((t: any) => t.id === id);
+      
+      if (localMatch) {
+        setTournament(localMatch);
+        // For local tournaments, we might check general registered users who joined
+        const allLocalAthletes = JSON.parse(localStorage.getItem('registered_users') || '[]');
+        setParticipants(allLocalAthletes.slice(0, 5)); // Mock some participants for local view
+      }
+
+      setLoading(false);
     };
+
     if (id) loadData();
   }, [id]);
 
@@ -66,7 +80,7 @@ const TournamentDetail = () => {
              <h2 className="text-3xl font-black text-[#0B1F3A] uppercase italic">Circuit Intelligence Lost</h2>
              <p className="text-slate-500 font-medium max-w-sm">This tournament is no longer active in the global registry.</p>
            </div>
-           <Button onClick={() => navigate('/tournaments')} className="bg-[#0B1F3A] text-white px-10 h-14 rounded-2xl font-black uppercase tracking-widest text-[10px]">Return to Circuit</Button>
+           <Button onClick={() => navigate('/tournaments')} className="bg-[#0B1F3A] text-white px-10 h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] border-none">Return to Circuit</Button>
         </main>
       </div>
     );
@@ -100,7 +114,7 @@ const TournamentDetail = () => {
         <div className="container relative z-20 h-full flex flex-col justify-end pb-12 px-6">
           <div className="space-y-6">
             <div className="flex flex-wrap items-center gap-3">
-              <Badge className="bg-sky-500 text-white font-black px-6 h-8 rounded-full border-none">{tournament.status.toUpperCase()}</Badge>
+              <Badge className="bg-sky-500 text-white font-black px-6 h-8 rounded-full border-none">{tournament.status?.toUpperCase() || "LIVE"}</Badge>
               <div className="flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
                 <Globe className="h-3 w-3 text-sky-400" />
                 <span className="text-[10px] font-black text-white uppercase tracking-widest">Global Entry Active</span>
@@ -115,7 +129,7 @@ const TournamentDetail = () => {
             </div>
             
             <div className="flex flex-wrap items-center gap-8 text-xs text-white/70 font-black uppercase tracking-[0.2em]">
-              <span className="flex items-center gap-2.5 bg-white/5 px-4 py-2 rounded-xl border border-white/10"><Calendar className="h-4 w-4 text-sky-500" /> {tournament.start_date}</span>
+              <span className="flex items-center gap-2.5 bg-white/5 px-4 py-2 rounded-xl border border-white/10"><Calendar className="h-4 w-4 text-sky-500" /> {tournament.start_date || tournament.startDate}</span>
               <span className="flex items-center gap-2.5 bg-white/5 px-4 py-2 rounded-xl border border-white/10"><MapPin className="h-4 w-4 text-sky-500" /> {tournament.city}</span>
               <span className="flex items-center gap-2.5 bg-white/5 px-4 py-2 rounded-xl border border-white/10"><Users className="h-4 w-4 text-sky-500" /> {participants.length} Participants</span>
             </div>
@@ -137,7 +151,7 @@ const TournamentDetail = () => {
                          <div className="h-10 w-10 rounded-full bg-[#0B1F3A] flex items-center justify-center text-sky-400 font-black text-xs uppercase">{p.name[0]}</div>
                          <div>
                             <p className="font-black text-[#0B1F3A] uppercase text-sm">{p.name}</p>
-                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{p.smash_id}</p>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{p.smash_id || p.smashId}</p>
                          </div>
                       </div>
                     )) : (
@@ -155,11 +169,11 @@ const TournamentDetail = () => {
                   <div className="space-y-4">
                      <div className="flex justify-between items-center">
                         <span className="text-sm font-bold text-[#0B1F3A]">Format</span>
-                        <Badge className="bg-[#0B1F3A] text-white font-black text-[8px] uppercase px-3">{tournament.format}</Badge>
+                        <Badge className="bg-[#0B1F3A] text-white font-black text-[8px] uppercase px-3">{tournament.format || "Elimination"}</Badge>
                      </div>
                      <div className="flex justify-between items-center">
                         <span className="text-sm font-bold text-[#0B1F3A]">System</span>
-                        <span className="text-[10px] font-black uppercase text-slate-400">Database Synchronized</span>
+                        <span className="text-[10px] font-black uppercase text-slate-400">Dossier Integrated</span>
                      </div>
                   </div>
                </div>
@@ -176,7 +190,7 @@ const TournamentDetail = () => {
                       navigator.clipboard.writeText(link);
                       showSuccess("Entry Link Copied!");
                     }}
-                    className="w-full h-14 bg-sky-500 hover:bg-sky-400 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all"
+                    className="w-full h-14 bg-sky-500 hover:bg-sky-400 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all border-none"
                   >
                     Copy Entry Link
                   </Button>
