@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   Trophy, Calendar, Users, MapPin, 
-  ChevronLeft, Activity, Globe, Loader2, Copy, Check
+  ChevronLeft, Activity, Globe, Loader2, Copy, Check, QrCode, Download
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase, isCloudConfigured } from '@/lib/supabase';
-import { showSuccess } from '@/utils/toast';
+import { showSuccess, showError } from '@/utils/toast';
 import { cn } from '@/lib/utils';
 
 const TournamentDetail = () => {
@@ -55,13 +55,33 @@ const TournamentDetail = () => {
     if (id) loadData();
   }, [id]);
 
+  const registrationLink = tournament ? `${window.location.origin}/register/${tournament.slug}` : "";
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(registrationLink)}`;
+
   const copyLink = () => {
     if (!tournament) return;
-    const link = `${window.location.origin}/register/${tournament.slug}`;
-    navigator.clipboard.writeText(link);
+    navigator.clipboard.writeText(registrationLink);
     setCopied(true);
     showSuccess("Registration link copied!");
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const downloadQR = async () => {
+    try {
+      const response = await fetch(qrUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `QR_${tournament.name.replace(/\s+/g, '_')}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      showSuccess("QR Downloaded!");
+    } catch (e) {
+      showError("Download failed.");
+    }
   };
 
   if (loading) return <div className="min-h-screen bg-slate-50 flex items-center justify-center"><Loader2 className="h-10 w-10 text-sky-500 animate-spin" /></div>;
@@ -87,7 +107,6 @@ const TournamentDetail = () => {
       <Navbar />
       
       <main className="container px-4 py-8 space-y-8">
-        {/* Simplified Header */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <button 
@@ -149,21 +168,38 @@ const TournamentDetail = () => {
 
           <div className="lg:col-span-4 space-y-6">
             <div className="bg-[#0B1F3A] p-8 rounded-[2.5rem] text-white space-y-6 shadow-xl relative overflow-hidden group">
-              <Trophy className="h-10 w-10 text-sky-400" />
-              <div className="space-y-2 relative z-10">
-                <h3 className="text-xl font-black italic tracking-tighter uppercase leading-tight">Athlete <br /> Entry Link</h3>
-                <p className="text-[9px] text-white/50 font-bold uppercase tracking-widest leading-relaxed">Share this link with players to synchronize the roster.</p>
+              <div className="flex items-center justify-between">
+                <Trophy className="h-8 w-8 text-sky-400" />
+                <QrCode className="h-6 w-6 text-white/20" />
               </div>
-              <Button 
-                onClick={copyLink}
-                className={cn(
-                  "w-full h-12 rounded-xl font-black uppercase tracking-widest text-[9px] transition-all border-none active:scale-95",
-                  copied ? "bg-green-500 hover:bg-green-600" : "bg-sky-500 hover:bg-sky-400"
-                )}
-              >
-                {copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
-                {copied ? "Link Copied" : "Copy Link"}
-              </Button>
+              
+              <div className="space-y-4">
+                <div className="bg-white p-3 rounded-2xl shadow-inner inline-block mx-auto relative group/qr">
+                  <img src={qrUrl} alt="QR Code" className="w-full aspect-square rounded-lg" />
+                  <Button 
+                    onClick={downloadQR}
+                    className="absolute -bottom-2 -right-2 h-10 w-10 bg-sky-500 text-white rounded-xl shadow-lg hover:bg-sky-400 border-none p-0"
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="space-y-2 text-center">
+                  <h3 className="text-lg font-black italic tracking-tighter uppercase">Athlete Entry</h3>
+                  <p className="text-[9px] text-white/50 font-bold uppercase tracking-widest leading-relaxed">Show this QR to athletes for instant circuit registration.</p>
+                </div>
+
+                <Button 
+                  onClick={copyLink}
+                  className={cn(
+                    "w-full h-11 rounded-xl font-black uppercase tracking-widest text-[9px] transition-all border-none active:scale-95",
+                    copied ? "bg-green-500 hover:bg-green-600" : "bg-sky-500 hover:bg-sky-400"
+                  )}
+                >
+                  {copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
+                  {copied ? "Link Copied" : "Copy Entry Link"}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
