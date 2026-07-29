@@ -30,9 +30,11 @@ const TournamentDetail = () => {
       
       if (localMatch) {
         setTournament(localMatch);
-        const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
-        // In a real app, participants would be linked to tournament ID
-        setParticipants(registered.slice(0, 8)); 
+        // Load participants specifically for this tournament
+        const tournamentId = localMatch.id || localMatch.slug;
+        const storageKey = `participants_${tournamentId}`;
+        const tournamentEntries = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        setParticipants(tournamentEntries);
         setLoading(false);
         return;
       }
@@ -59,7 +61,7 @@ const TournamentDetail = () => {
     const link = `${window.location.origin}/register/${tournament.slug}`;
     navigator.clipboard.writeText(link);
     setCopied(true);
-    showSuccess("Registration link copied to clipboard.");
+    showSuccess("Registration link copied!");
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -73,7 +75,7 @@ const TournamentDetail = () => {
            <Trophy className="h-16 w-16 text-slate-200" />
            <div className="space-y-2">
              <h2 className="text-3xl font-black text-[#0B1F3A] uppercase italic">Circuit Expired</h2>
-             <p className="text-slate-500 font-medium max-w-sm">The protocol for this tournament has been cleared or moved.</p>
+             <p className="text-slate-500 font-medium max-w-sm">The registration protocol for this circuit has been cleared.</p>
            </div>
            <Button onClick={() => navigate('/tournaments')} className="bg-[#0B1F3A] text-white px-10 h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] border-none shadow-xl">Return to Hub</Button>
         </main>
@@ -85,12 +87,11 @@ const TournamentDetail = () => {
     <div className="min-h-screen bg-[#F8FAFC] text-[#0B1F3A] pb-32">
       <Navbar />
       
-      {/* Lightened Hero Section */}
-      <div className="relative h-[380px] w-full overflow-hidden bg-sky-600">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0B1F3A] to-sky-500 opacity-90 z-10" />
+      <div className="relative h-[320px] w-full overflow-hidden bg-[#0B1F3A]">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0B1F3A] to-sky-500 opacity-60 z-10" />
         <img 
           src="https://images.unsplash.com/photo-1626224580175-340ad0e3a242?q=80&w=2070&auto=format&fit=crop" 
-          className="w-full h-full object-cover mix-blend-overlay"
+          className="w-full h-full object-cover mix-blend-overlay opacity-30"
           alt=""
         />
         
@@ -110,15 +111,15 @@ const TournamentDetail = () => {
               <Badge className="bg-sky-400 text-white font-black px-4 h-7 rounded-full border-none shadow-lg">{tournament.status?.toUpperCase() || "ACTIVE"}</Badge>
               <div className="flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
                 <Globe className="h-3 w-3 text-sky-300" />
-                <span className="text-[9px] font-black text-white uppercase tracking-widest">Registry Online</span>
+                <span className="text-[9px] font-black text-white uppercase tracking-widest">Registry Sync Active</span>
               </div>
             </div>
             
             <div className="space-y-1">
-              <h1 className="text-5xl md:text-6xl font-black tracking-tighter uppercase italic text-white leading-none">
+              <h1 className="text-4xl md:text-5xl font-black tracking-tighter uppercase italic text-white leading-none">
                 {tournament.name}
               </h1>
-              <div className="h-1.5 w-24 bg-sky-400 rounded-full mt-4" />
+              <div className="h-1 w-20 bg-sky-400 rounded-full mt-4" />
             </div>
             
             <div className="flex flex-wrap items-center gap-6 text-[10px] text-white/70 font-black uppercase tracking-widest">
@@ -135,7 +136,7 @@ const TournamentDetail = () => {
             <div className="lg:col-span-8 space-y-8">
                <div className="bg-white rounded-[2.5rem] border border-slate-100 p-8 space-y-8 shadow-2xl">
                   <div className="flex items-center justify-between border-b border-slate-50 pb-6">
-                     <h3 className="text-lg font-black uppercase italic text-[#0B1F3A]">Roster Intelligence</h3>
+                     <h3 className="text-lg font-black uppercase italic text-[#0B1F3A]">Entry Roster</h3>
                      <Activity className="h-5 w-5 text-sky-500" />
                   </div>
                   <div className="grid md:grid-cols-2 gap-4">
@@ -144,13 +145,13 @@ const TournamentDetail = () => {
                          <div className="h-10 w-10 rounded-full bg-[#0B1F3A] flex items-center justify-center text-sky-400 font-black text-xs uppercase shadow-inner">{p.name[0]}</div>
                          <div className="overflow-hidden">
                             <p className="font-black text-[#0B1F3A] uppercase text-xs truncate">{p.name}</p>
-                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest truncate">{p.smash_id || p.smashId}</p>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest truncate">{p.smash_id || p.smashId || "Dossier Active"}</p>
                          </div>
                       </div>
                     )) : (
                       <div className="col-span-full py-20 text-center space-y-3 opacity-40">
                          <Users className="h-10 w-10 mx-auto text-slate-300" />
-                         <p className="font-black text-slate-400 uppercase text-[10px] tracking-widest">Awaiting athlete synchronization...</p>
+                         <p className="font-black text-slate-400 uppercase text-[10px] tracking-widest">No entries synchronized yet.</p>
                       </div>
                     )}
                   </div>
@@ -161,8 +162,8 @@ const TournamentDetail = () => {
                <div className="bg-[#0B1F3A] p-8 rounded-[2.5rem] text-white space-y-6 shadow-2xl relative overflow-hidden group">
                   <Trophy className="h-12 w-12 text-sky-400 drop-shadow-[0_0_15px_rgba(56,189,248,0.5)]" />
                   <div className="space-y-2 relative z-10">
-                    <h3 className="text-2xl font-black italic tracking-tighter uppercase leading-tight">Direct Athlete <br /> Entry Link</h3>
-                    <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest leading-relaxed">Share this protocol link with athletes to populate your tournament registry.</p>
+                    <h3 className="text-2xl font-black italic tracking-tighter uppercase leading-tight">Athlete <br /> Entry Link</h3>
+                    <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest leading-relaxed">Share this link with players to take their entries into this tournament.</p>
                   </div>
                   <Button 
                     onClick={copyLink}
@@ -172,23 +173,20 @@ const TournamentDetail = () => {
                     )}
                   >
                     {copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
-                    {copied ? "Link Copied" : "Copy Registry Link"}
+                    {copied ? "Link Copied" : "Copy Entry Link"}
                   </Button>
-                  <div className="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
-                    <QrCode className="h-32 w-32" />
-                  </div>
                </div>
 
                <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 space-y-4 shadow-xl">
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Circuit Metadata</h3>
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Circuit Profile</h3>
                   <div className="space-y-3">
                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                        <span className="text-[11px] font-bold text-[#0B1F3A]">PROTOCOL</span>
+                        <span className="text-[11px] font-bold text-[#0B1F3A]">TYPE</span>
                         <Badge className="bg-[#0B1F3A] text-white font-black text-[8px] uppercase px-3 h-6 border-none">ELIMINATION</Badge>
                      </div>
                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
                         <span className="text-[11px] font-bold text-[#0B1F3A]">VERIFICATION</span>
-                        <span className="text-[10px] font-black uppercase text-sky-600">DOSSIER ACTIVE</span>
+                        <span className="text-[10px] font-black uppercase text-sky-600">ACTIVE</span>
                      </div>
                   </div>
                </div>
@@ -198,15 +196,5 @@ const TournamentDetail = () => {
     </div>
   );
 };
-
-const QrCode = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect width="5" height="5" x="3" y="3" rx="1" /><rect width="5" height="5" x="16" y="3" rx="1" />
-    <rect width="5" height="5" x="3" y="16" rx="1" /><path d="M21 16h-3a2 2 0 0 0-2 2v3" />
-    <path d="M21 21v.01" /><path d="M12 7v3a2 2 0 0 1-2 2H7" /><path d="M3 12h1" />
-    <path d="M12 3h1" /><path d="M16 12h1" /><path d="M21 12h.01" /><path d="M12 16v.01" />
-    <path d="M12 21v.01" /><path d="M7 16h.01" /><path d="M3 7h.01" /><path d="M7 3h.01" />
-  </svg>
-);
 
 export default TournamentDetail;

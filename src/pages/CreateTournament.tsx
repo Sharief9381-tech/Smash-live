@@ -5,11 +5,12 @@ import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Trophy, Check, Loader2, ChevronLeft, MapPin, Calendar, QrCode, Copy } from 'lucide-react';
+import { Trophy, Check, Loader2, ChevronLeft, MapPin, Calendar, QrCode, Copy, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, isCloudConfigured } from '@/lib/supabase';
 import { showSuccess, showError } from '@/utils/toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 const CreateTournament = () => {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ const CreateTournament = () => {
 
   const handleInitialize = async () => {
     if (!formData.name || !formData.startDate || !formData.city) {
-      showError("Please fill in all the details.");
+      showError("Please fill in all details.");
       return;
     }
 
@@ -29,8 +30,11 @@ const CreateTournament = () => {
     const generatedSlug = formData.name.trim().toLowerCase().replace(/\s+/g, '-') + '-' + Math.random().toString(36).substring(7);
 
     try {
+      const tournamentId = 'local_' + Date.now();
+      const newTourney = { ...formData, id: tournamentId, slug: generatedSlug, status: 'Accepting' };
+
       if (isCloudConfigured) {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('tournaments')
           .insert([{
             name: formData.name,
@@ -39,18 +43,20 @@ const CreateTournament = () => {
             city: formData.city,
             format: 'elimination',
             status: 'Accepting'
-          }]);
+          }])
+          .select().single();
         if (error) throw error;
+        if (data) newTourney.id = data.id;
       }
 
-      // Save locally as well for the list
+      // Save locally
       const active = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
-      active.push({ ...formData, id: 'local_' + Date.now(), slug: generatedSlug, status: 'Live' });
+      active.push(newTourney);
       localStorage.setItem('active_studio_tournaments', JSON.stringify(active));
 
       setSlug(generatedSlug);
       setShowLinkState(true);
-      showSuccess("Tournament started!");
+      showSuccess("Circuit Synchronized!");
     } catch (err: any) {
       showError(err.message);
     } finally {
@@ -59,34 +65,51 @@ const CreateTournament = () => {
   };
 
   const registrationLink = `${window.location.origin}/register/${slug}`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(registrationLink)}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(registrationLink)}`;
+
+  const downloadQR = async () => {
+    try {
+      const response = await fetch(qrUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `QR_${formData.name.replace(/\s+/g, '_')}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      showSuccess("QR Downloaded!");
+    } catch (e) {
+      showError("Download failed.");
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 pb-20">
       <Navbar />
       <main className="container max-w-lg px-4 py-6">
         <AnimatePresence mode="wait">
           {!showLinkState ? (
             <motion.div key="form" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-              {/* Top Header & Action Row */}
               <div className="flex items-center justify-between">
                 <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-slate-400 hover:text-[#0B1F3A]">
                   <ChevronLeft className="h-6 w-6" />
                 </button>
-                <h1 className="text-xl font-black text-[#0B1F3A] uppercase italic">New Tournament</h1>
+                <h1 className="text-xl font-black text-[#0B1F3A] uppercase italic">Start Circuit</h1>
                 <Button 
                   onClick={handleInitialize} 
                   disabled={isLoading}
                   className="h-10 bg-[#0B1F3A] text-white px-6 rounded-xl font-black text-[10px] uppercase tracking-widest"
                 >
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Start"}
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Init"}
                 </Button>
               </div>
 
               <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-xl space-y-6">
                 <div className="space-y-4">
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Tournament Name</Label>
+                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Name</Label>
                     <div className="relative">
                       <Trophy className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
                       <Input 
@@ -99,7 +122,7 @@ const CreateTournament = () => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Location / City</Label>
+                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">City</Label>
                     <div className="relative">
                       <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
                       <Input 
@@ -125,29 +148,34 @@ const CreateTournament = () => {
                   </div>
                 </div>
               </div>
-
-              <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4">
-                Tournament details will be public once started.
-              </p>
             </motion.div>
           ) : (
-            <motion.div key="success" initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="space-y-8 text-center pt-10">
+            <motion.div key="success" initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="space-y-8 text-center pt-6">
               <div className="bg-green-500/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto text-green-500 shadow-lg border border-green-100">
                 <Check className="h-10 w-10 stroke-[3px]" />
               </div>
               
-              <div className="space-y-2">
-                <h2 className="text-3xl font-black text-[#0B1F3A] italic uppercase leading-none">Circuit Initialized</h2>
-                <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Registrations are now open</p>
+              <div className="space-y-1">
+                <h2 className="text-3xl font-black text-[#0B1F3A] italic uppercase leading-none">Initialized</h2>
+                <p className="text-slate-400 font-bold uppercase text-[9px] tracking-widest">Entry Protocol Active</p>
               </div>
 
-              <div className="bg-white rounded-[3rem] p-8 border border-slate-100 shadow-2xl space-y-8">
+              <div className="bg-white rounded-[3rem] p-8 border border-slate-100 shadow-2xl space-y-6">
                  <div className="flex flex-col items-center gap-6">
-                    <div className="p-4 bg-white rounded-3xl border-4 border-[#0B1F3A]/5 shadow-inner">
-                       <img src={qrUrl} alt="Registration QR" className="w-40 h-40" />
+                    <div className="relative group">
+                      <div className="p-4 bg-white rounded-3xl border-4 border-[#0B1F3A]/5 shadow-inner">
+                        <img src={qrUrl} alt="QR" className="w-48 h-48" />
+                      </div>
+                      <Button 
+                        onClick={downloadQR}
+                        className="absolute -bottom-3 -right-3 h-12 w-12 bg-sky-500 text-white rounded-2xl shadow-xl hover:bg-sky-600 transition-all border-none"
+                      >
+                        <Download className="h-5 w-5" />
+                      </Button>
                     </div>
-                    <div className="space-y-2 w-full">
-                       <Label className="text-[9px] font-black uppercase text-slate-400">Direct Entry Link</Label>
+
+                    <div className="space-y-3 w-full">
+                       <Label className="text-[9px] font-black uppercase text-slate-400">Entry Link</Label>
                        <div className="flex gap-2">
                           <div className="flex-1 h-12 bg-slate-50 border border-slate-100 rounded-xl px-4 flex items-center overflow-hidden">
                              <span className="text-[10px] font-mono text-slate-500 truncate">{registrationLink}</span>
@@ -159,6 +187,7 @@ const CreateTournament = () => {
                             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                           </Button>
                        </div>
+                       <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Share this with athletes to populate the roster</p>
                     </div>
                  </div>
               </div>
