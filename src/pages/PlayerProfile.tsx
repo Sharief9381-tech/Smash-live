@@ -11,7 +11,7 @@ import AchievementSection from '@/components/profile/AchievementSection';
 import RankingSection from '@/components/profile/RankingSection';
 import { 
   Activity, BarChart3, 
-  Trophy, Users, Award, Zap, ChevronLeft, Loader2, Star, Flame
+  Trophy, Users, Award, Zap, ChevronLeft, Loader2, Star, Flame, History
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -40,7 +40,6 @@ const PlayerProfile = () => {
         const { data } = await supabase.from('profiles').select('*').eq('id', id).single();
         if (data) setProfileData(data);
         else {
-          // Check local registered users if cloud missing
           const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
           const local = registered.find((u: any) => u.id === id || u.mobile === id);
           if (local) setProfileData(local);
@@ -67,10 +66,22 @@ const PlayerProfile = () => {
       <Navbar />
       
       <main className="container max-w-lg px-4 py-6 space-y-6">
-        {/* Profile Identity Card */}
         <ProfileHero profile={profileData} isOwnProfile={isOwnProfile} />
 
-        {/* Engagement Ribbon - Now Dynamic (showing 0/empty for new users) */}
+        <div className="flex gap-2">
+           <Button 
+             onClick={() => navigate(`/smashed?player=${profileData?.name}`)}
+             className="flex-1 h-14 bg-[#0B1F3A] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest gap-2 shadow-xl active-press border-none"
+           >
+             <History className="h-4 w-4" /> View Match History
+           </Button>
+           {!isOwnProfile && (
+             <Button variant="outline" className="h-14 w-14 p-0 rounded-2xl bg-white border-slate-200">
+               <Star className="h-5 w-5 text-sky-500" />
+             </Button>
+           )}
+        </div>
+
         <div className="app-card flex divide-x divide-slate-50">
            <div className="flex-1 p-3 text-center">
               <p className="text-[10px] font-black text-slate-300 uppercase">Followers</p>
@@ -88,7 +99,6 @@ const PlayerProfile = () => {
            </div>
         </div>
 
-        {/* Horizontal Navigation */}
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {tabs.map((tab) => (
             <button
@@ -121,10 +131,6 @@ const PlayerProfile = () => {
             {activeTab === 'badges' && <AchievementSection />}
           </motion.div>
         </AnimatePresence>
-
-        <Button className="w-full h-14 bg-sky-500 text-white rounded-2xl font-black text-[12px] uppercase tracking-widest gap-2 shadow-lg active-press">
-          <Star className="h-4 w-4" /> Share Athlete Dossier
-        </Button>
       </main>
     </div>
   );
