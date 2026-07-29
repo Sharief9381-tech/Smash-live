@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, User, ArrowRight, Check, Loader2, Phone, MapPin, ChevronLeft } from 'lucide-react';
+import { Trophy, User, ArrowRight, Check, Loader2, Phone, MapPin, ChevronLeft, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -49,7 +49,7 @@ const RegisterParticipant = () => {
         } catch (err) {}
       }
 
-      // 2. Local Fallback (for testing on same browser)
+      // 2. Local Fallback (for testing on same browser/device)
       const localTourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
       const found = localTourneys.find((t: any) => t.slug === slug || t.id === slug);
       
@@ -83,13 +83,13 @@ const RegisterParticipant = () => {
         tournamentId: tournamentId
       };
 
-      // Save entry specifically to this tournament roster
+      // Save entry specifically to this tournament roster in local storage
       const storageKey = `participants_${tournamentId}`;
       const existing = JSON.parse(localStorage.getItem(storageKey) || '[]');
       existing.push(entryData);
       localStorage.setItem(storageKey, JSON.stringify(existing));
 
-      // Also update global athlete network
+      // Also update global athlete network (local)
       const network = JSON.parse(localStorage.getItem('registered_users') || '[]');
       if (!network.some((u: any) => u.phone === formData.phone)) {
         network.push({ ...entryData, onboardingComplete: true });
@@ -117,8 +117,9 @@ const RegisterParticipant = () => {
 
   if (isInitializing) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
         <Loader2 className="h-10 w-10 text-sky-500 animate-spin" />
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verifying Protocol...</p>
       </div>
     );
   }
@@ -127,9 +128,13 @@ const RegisterParticipant = () => {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center gap-6">
         <div className="bg-white p-10 rounded-[3rem] shadow-xl border border-slate-100 space-y-6 max-w-sm">
-          <Trophy className="h-12 w-12 text-slate-200 mx-auto" />
+          <div className="bg-red-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto">
+             <Trophy className="h-10 w-10 text-red-200" />
+          </div>
           <h1 className="text-2xl font-black text-[#0B1F3A] uppercase italic">Circuit Not Found</h1>
-          <p className="text-sm text-slate-400 font-medium">This registration link is invalid or the tournament hasn't been synchronized with the global network yet.</p>
+          <p className="text-sm text-slate-400 font-medium leading-relaxed">
+            This registration link is not active. If you are sharing this link with others, ensure you have **connected a database** in the Integrations tab.
+          </p>
           <Button onClick={() => navigate('/')} className="w-full h-12 bg-[#0B1F3A] text-white rounded-xl font-black uppercase tracking-widest text-[10px] border-none shadow-lg">Return Home</Button>
         </div>
       </div>
@@ -137,60 +142,89 @@ const RegisterParticipant = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20">
-      <div className="bg-[#0B1F3A] p-8 text-center text-white space-y-2">
+    <div className="min-h-screen bg-[#F8FAFC] pb-20">
+      <div className="bg-[#0B1F3A] p-8 pb-16 text-center text-white space-y-3">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full border border-white/10">
+           <Globe className="h-3 w-3 text-sky-400" />
+           <span className="text-[9px] font-black uppercase tracking-widest">Global Entry System</span>
+        </div>
         <h1 className="text-2xl font-black tracking-tight uppercase italic">{tournament?.name}</h1>
-        <p className="text-[9px] font-black text-sky-400 uppercase tracking-[0.3em]">Athlete Registry</p>
+        <p className="text-[9px] font-black text-sky-400 uppercase tracking-[0.3em]">Athlete Registry Protocol</p>
       </div>
 
-      <main className="px-4 -mt-4">
-        <div className="bg-white rounded-[2.5rem] p-6 shadow-2xl border border-slate-100 max-w-lg mx-auto space-y-8">
+      <main className="px-6 -mt-8 relative z-10">
+        <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 max-w-lg mx-auto space-y-8">
           {!isSuccess ? (
             <div className="space-y-6">
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Full Name</Label>
-                  <Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-slate-100 font-bold" placeholder="Full Name" />
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-slate-400 ml-2">Athlete Full Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
+                    <Input 
+                      value={formData.name} 
+                      onChange={e => setFormData({...formData, name: e.target.value})} 
+                      className="h-12 rounded-xl bg-slate-50 border-slate-100 font-bold text-sm pl-12" 
+                      placeholder="Enter Full Name" 
+                    />
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Gender</Label>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-2">Gender</Label>
                     <Select onValueChange={v => setFormData({...formData, gender: v})}>
-                      <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-slate-100 font-bold"><SelectValue placeholder="Select" /></SelectTrigger>
-                      <SelectContent className="rounded-xl"><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
+                      <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-slate-100 font-bold text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
+                      <SelectContent className="rounded-xl">
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                      </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Category</Label>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-2">Category</Label>
                     <Select onValueChange={v => setFormData({...formData, category: v})}>
-                      <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-slate-100 font-bold"><SelectValue placeholder="Select" /></SelectTrigger>
+                      <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-slate-100 font-bold text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
                       <SelectContent className="rounded-xl">
                         <SelectItem value="MS">Men's Singles</SelectItem>
                         <SelectItem value="WS">Women's Singles</SelectItem>
                         <SelectItem value="MD">Men's Doubles</SelectItem>
                         <SelectItem value="WD">Women's Doubles</SelectItem>
+                        <SelectItem value="XD">Mixed Doubles</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Phone Number</Label>
-                  <Input value={formData.phone} onChange={e => setPhone(e.target.value)} className="h-12 rounded-xl bg-slate-50 border-slate-100 font-bold" placeholder="Mobile" />
+
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-slate-400 ml-2">Contact Number</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
+                    <div className="absolute left-10 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-xs">+91</div>
+                    <Input 
+                      value={formData.phone} 
+                      onChange={e => setFormData({...formData, phone: e.target.value.replace(/\D/g, "")})} 
+                      className="h-12 rounded-xl bg-slate-50 border-slate-100 font-bold text-sm pl-16" 
+                      placeholder="10-digit Mobile" 
+                      maxLength={10}
+                    />
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">State</Label>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-2">State</Label>
                     <Select value={formData.state} onValueChange={v => setFormData({...formData, state: v, district: ""})}>
-                      <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-slate-100 font-bold"><SelectValue placeholder="State" /></SelectTrigger>
+                      <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-slate-100 font-bold text-sm"><SelectValue placeholder="State" /></SelectTrigger>
                       <SelectContent className="rounded-xl max-h-60">
                         {INDIAN_STATES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">District</Label>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-2">District</Label>
                     <Select value={formData.district} onValueChange={v => setFormData({...formData, district: v})} disabled={!formData.state}>
-                      <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-slate-100 font-bold"><SelectValue placeholder="District" /></SelectTrigger>
+                      <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-slate-100 font-bold text-sm"><SelectValue placeholder="District" /></SelectTrigger>
                       <SelectContent className="rounded-xl max-h-60">
                         {formData.state && STATE_DISTRICTS[formData.state]?.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
                       </SelectContent>
@@ -198,28 +232,33 @@ const RegisterParticipant = () => {
                   </div>
                 </div>
               </div>
-              <Button onClick={handleRegister} disabled={isLoading} className="w-full h-14 bg-sky-500 hover:bg-sky-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-lg transition-all border-none">
-                {isLoading ? <Loader2 className="animate-spin" /> : "Submit Entry Protocol"}
+
+              <Button 
+                onClick={handleRegister} 
+                disabled={isLoading} 
+                className="w-full h-14 bg-sky-500 hover:bg-sky-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-xl transition-all border-none"
+              >
+                {isLoading ? <Loader2 className="animate-spin" /> : "Verify & Submit Entry"}
               </Button>
             </div>
           ) : (
-            <div className="text-center space-y-6 py-6">
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="text-center space-y-6 py-6">
               <div className="h-20 w-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto text-green-500 border-2 border-green-500/20 shadow-lg">
                 <Check className="h-10 w-10 stroke-[3px]" />
               </div>
               <div className="space-y-2">
                 <h2 className="text-2xl font-black text-[#0B1F3A] uppercase italic">Entry Secured</h2>
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">You have been successfully registered for this circuit.</p>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
+                  You have been successfully synchronized with the tournament roster.
+                </p>
               </div>
               <Button onClick={() => navigate('/')} className="w-full h-14 bg-[#0B1F3A] text-white font-black rounded-xl uppercase tracking-widest text-[10px] border-none shadow-xl">Return to Dashboard</Button>
-            </div>
+            </motion.div>
           )}
         </div>
       </main>
     </div>
   );
 };
-
-const setPhone = (val: string) => { /* Helper for state setter in register page */ };
 
 export default RegisterParticipant;
