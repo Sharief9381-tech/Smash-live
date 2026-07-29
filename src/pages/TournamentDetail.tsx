@@ -30,7 +30,6 @@ const TournamentDetail = () => {
       
       if (localMatch) {
         setTournament(localMatch);
-        // Load participants specifically for this tournament
         const tournamentId = localMatch.id || localMatch.slug;
         const storageKey = `participants_${tournamentId}`;
         const tournamentEntries = JSON.parse(localStorage.getItem(storageKey) || '[]');
@@ -87,111 +86,87 @@ const TournamentDetail = () => {
     <div className="min-h-screen bg-[#F8FAFC] text-[#0B1F3A] pb-32">
       <Navbar />
       
-      <div className="relative h-[320px] w-full overflow-hidden bg-[#0B1F3A]">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0B1F3A] to-sky-500 opacity-60 z-10" />
-        <img 
-          src="https://images.unsplash.com/photo-1626224580175-340ad0e3a242?q=80&w=2070&auto=format&fit=crop" 
-          className="w-full h-full object-cover mix-blend-overlay opacity-30"
-          alt=""
-        />
-        
-        <div className="absolute top-6 left-6 z-30">
-          <Button 
-            onClick={() => navigate('/tournaments')}
-            variant="ghost" 
-            className="bg-white/10 backdrop-blur-md text-white rounded-xl px-4 h-10 hover:bg-white hover:text-[#0B1F3A] transition-all border border-white/10 font-black uppercase tracking-widest text-[9px]"
-          >
-            <ChevronLeft className="mr-1 h-4 w-4" /> Circuit Hub
-          </Button>
-        </div>
+      <main className="container px-4 py-8 space-y-8">
+        {/* Simplified Header */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <button 
+              onClick={() => navigate('/tournaments')}
+              className="p-2 -ml-2 text-slate-400 hover:text-[#0B1F3A] transition-colors"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <div className="flex items-center gap-2">
+              <Globe className="h-3.5 w-3.5 text-sky-500" />
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Registry Active</span>
+            </div>
+          </div>
 
-        <div className="container relative z-20 h-full flex flex-col justify-end pb-10 px-6">
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-3">
-              <Badge className="bg-sky-400 text-white font-black px-4 h-7 rounded-full border-none shadow-lg">{tournament.status?.toUpperCase() || "ACTIVE"}</Badge>
-              <div className="flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-                <Globe className="h-3 w-3 text-sky-300" />
-                <span className="text-[9px] font-black text-white uppercase tracking-widest">Registry Sync Active</span>
-              </div>
+              <Badge className="bg-sky-500 text-white border-none font-black px-4 h-6 text-[8px] uppercase rounded-full">{tournament.status?.toUpperCase() || "ACTIVE"}</Badge>
+              <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">ID: {String(tournament.id).slice(-6).toUpperCase()}</span>
             </div>
             
             <div className="space-y-1">
-              <h1 className="text-4xl md:text-5xl font-black tracking-tighter uppercase italic text-white leading-none">
-                {tournament.name}
-              </h1>
-              <div className="h-1 w-20 bg-sky-400 rounded-full mt-4" />
-            </div>
-            
-            <div className="flex flex-wrap items-center gap-6 text-[10px] text-white/70 font-black uppercase tracking-widest">
-              <span className="flex items-center gap-2"><Calendar className="h-4 w-4 text-sky-400" /> {tournament.start_date || tournament.startDate}</span>
-              <span className="flex items-center gap-2"><MapPin className="h-4 w-4 text-sky-400" /> {tournament.city}</span>
-              <span className="flex items-center gap-2"><Users className="h-4 w-4 text-sky-400" /> {participants.length} Entries</span>
+              <h1 className="text-3xl font-black tracking-tight uppercase italic leading-none">{tournament.name}</h1>
+              <div className="flex flex-wrap items-center gap-4 text-[10px] text-slate-400 font-black uppercase tracking-widest mt-2">
+                <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-sky-500" /> {tournament.city}</span>
+                <span className="h-1 w-1 bg-slate-200 rounded-full" />
+                <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-sky-500" /> {tournament.start_date || tournament.startDate}</span>
+                <span className="h-1 w-1 bg-slate-200 rounded-full" />
+                <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5 text-sky-500" /> {participants.length} Entries</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <main className="container px-4 -mt-10 relative z-30">
-         <div className="grid lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-8 space-y-8">
-               <div className="bg-white rounded-[2.5rem] border border-slate-100 p-8 space-y-8 shadow-2xl">
-                  <div className="flex items-center justify-between border-b border-slate-50 pb-6">
-                     <h3 className="text-lg font-black uppercase italic text-[#0B1F3A]">Entry Roster</h3>
-                     <Activity className="h-5 w-5 text-sky-500" />
+        <div className="grid lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8 space-y-6">
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 p-8 space-y-6 shadow-sm">
+              <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                <h3 className="text-sm font-black uppercase italic text-[#0B1F3A]">Entry Roster</h3>
+                <Activity className="h-4 w-4 text-sky-500" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {participants.length > 0 ? participants.map((p: any, idx: number) => (
+                  <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-4">
+                    <div className="h-9 w-9 rounded-full bg-[#0B1F3A] flex items-center justify-center text-sky-400 font-black text-[10px] uppercase shadow-inner">{p.name[0]}</div>
+                    <div className="overflow-hidden">
+                      <p className="font-black text-[#0B1F3A] uppercase text-xs truncate">{p.name}</p>
+                      <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest truncate">{p.smash_id || p.smashId || "Dossier Active"}</p>
+                    </div>
                   </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {participants.length > 0 ? participants.map((p: any, idx: number) => (
-                      <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-4 hover:border-sky-500 transition-colors">
-                         <div className="h-10 w-10 rounded-full bg-[#0B1F3A] flex items-center justify-center text-sky-400 font-black text-xs uppercase shadow-inner">{p.name[0]}</div>
-                         <div className="overflow-hidden">
-                            <p className="font-black text-[#0B1F3A] uppercase text-xs truncate">{p.name}</p>
-                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest truncate">{p.smash_id || p.smashId || "Dossier Active"}</p>
-                         </div>
-                      </div>
-                    )) : (
-                      <div className="col-span-full py-20 text-center space-y-3 opacity-40">
-                         <Users className="h-10 w-10 mx-auto text-slate-300" />
-                         <p className="font-black text-slate-400 uppercase text-[10px] tracking-widest">No entries synchronized yet.</p>
-                      </div>
-                    )}
+                )) : (
+                  <div className="col-span-full py-20 text-center opacity-40">
+                    <Users className="h-10 w-10 mx-auto text-slate-200 mb-3" />
+                    <p className="font-black text-slate-400 uppercase text-[9px] tracking-widest italic">No entries synchronized yet</p>
                   </div>
-               </div>
+                )}
+              </div>
             </div>
+          </div>
 
-            <div className="lg:col-span-4 space-y-6">
-               <div className="bg-[#0B1F3A] p-8 rounded-[2.5rem] text-white space-y-6 shadow-2xl relative overflow-hidden group">
-                  <Trophy className="h-12 w-12 text-sky-400 drop-shadow-[0_0_15px_rgba(56,189,248,0.5)]" />
-                  <div className="space-y-2 relative z-10">
-                    <h3 className="text-2xl font-black italic tracking-tighter uppercase leading-tight">Athlete <br /> Entry Link</h3>
-                    <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest leading-relaxed">Share this link with players to take their entries into this tournament.</p>
-                  </div>
-                  <Button 
-                    onClick={copyLink}
-                    className={cn(
-                      "w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl transition-all border-none active:scale-95",
-                      copied ? "bg-green-500 hover:bg-green-600" : "bg-sky-500 hover:bg-sky-400"
-                    )}
-                  >
-                    {copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
-                    {copied ? "Link Copied" : "Copy Entry Link"}
-                  </Button>
-               </div>
-
-               <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 space-y-4 shadow-xl">
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Circuit Profile</h3>
-                  <div className="space-y-3">
-                     <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                        <span className="text-[11px] font-bold text-[#0B1F3A]">TYPE</span>
-                        <Badge className="bg-[#0B1F3A] text-white font-black text-[8px] uppercase px-3 h-6 border-none">ELIMINATION</Badge>
-                     </div>
-                     <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                        <span className="text-[11px] font-bold text-[#0B1F3A]">VERIFICATION</span>
-                        <span className="text-[10px] font-black uppercase text-sky-600">ACTIVE</span>
-                     </div>
-                  </div>
-               </div>
+          <div className="lg:col-span-4 space-y-6">
+            <div className="bg-[#0B1F3A] p-8 rounded-[2.5rem] text-white space-y-6 shadow-xl relative overflow-hidden group">
+              <Trophy className="h-10 w-10 text-sky-400" />
+              <div className="space-y-2 relative z-10">
+                <h3 className="text-xl font-black italic tracking-tighter uppercase leading-tight">Athlete <br /> Entry Link</h3>
+                <p className="text-[9px] text-white/50 font-bold uppercase tracking-widest leading-relaxed">Share this link with players to synchronize the roster.</p>
+              </div>
+              <Button 
+                onClick={copyLink}
+                className={cn(
+                  "w-full h-12 rounded-xl font-black uppercase tracking-widest text-[9px] transition-all border-none active:scale-95",
+                  copied ? "bg-green-500 hover:bg-green-600" : "bg-sky-500 hover:bg-sky-400"
+                )}
+              >
+                {copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
+                {copied ? "Link Copied" : "Copy Link"}
+              </Button>
             </div>
-         </div>
+          </div>
+        </div>
       </main>
     </div>
   );
