@@ -32,16 +32,18 @@ const RegisterParticipant = () => {
 
   useEffect(() => {
     const fetchTournament = async () => {
-      // 1. Try Cloud Lookup
+      if (!slug) return;
+      
+      // 1. Try Cloud Lookup first if configured
       if (isCloudConfigured) {
         try {
-          const { data } = await supabase
+          const { data, error } = await supabase
             .from('tournaments')
             .select('*')
             .eq('slug', slug)
             .single();
 
-          if (data) {
+          if (data && !error) {
             setTournament(data);
             setIsInitializing(false);
             return;
@@ -49,9 +51,14 @@ const RegisterParticipant = () => {
         } catch (err) {}
       }
 
-      // 2. Local Fallback (for testing on same browser/device)
+      // 2. Local Fallback (Only works on the same browser/device)
       const localTourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
-      const found = localTourneys.find((t: any) => t.slug === slug || t.id === slug);
+      // Search by slug or ID to be safe
+      const found = localTourneys.find((t: any) => 
+        String(t.slug) === slug || 
+        String(t.id) === slug || 
+        String(t.name).toLowerCase().replace(/\s+/g, '-') === slug
+      );
       
       if (found) {
         setTournament(found);
@@ -60,7 +67,7 @@ const RegisterParticipant = () => {
       setIsInitializing(false);
     };
 
-    if (slug) fetchTournament();
+    fetchTournament();
   }, [slug]);
 
   const handleRegister = async () => {
@@ -83,33 +90,38 @@ const RegisterParticipant = () => {
         tournamentId: tournamentId
       };
 
-      // Save entry specifically to this tournament roster in local storage
+      // Save entry to local storage for this tournament roster
       const storageKey = `participants_${tournamentId}`;
-      const existing = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      existing.push(entryData);
-      localStorage.setItem(storageKey, JSON.stringify(existing));
+      const existingEntries = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      existingEntries.push(entryData);
+      localStorage.setItem(storageKey, JSON.stringify(existingEntries));
 
-      // Also update global athlete network (local)
-      const network = JSON.parse(localStorage.getItem('registered_users') || '[]');
-      if (!network.some((u: any) => u.phone === formData.phone)) {
-        network.push({ ...entryData, onboardingComplete: true });
-        localStorage.setItem('registered_users', JSON.stringify(network));
+      // Add to global local registry for the athlete network
+      const globalNetwork = JSON.parse(localStorage.getItem('registered_users') || '[]');
+      if (!globalNetwork.some((u: any) => u.phone === formData.phone)) {
+        globalNetwork.push({ ...entryData, onboardingComplete: true });
+        localStorage.setItem('registered_users', JSON.stringify(globalNetwork));
       }
 
       // Sync to cloud if database is active
       if (isCloudConfigured && !String(tournamentId).startsWith('local_')) {
         await supabase.from('participants').insert([{
           tournament_id: tournament.id,
-          ...formData,
+          name: formData.name,
+          phone: formData.phone,
+          gender: formData.gender,
+          category: formData.category,
+          state: formData.state,
+          district: formData.district,
           smash_id: entryData.smashId
         }]);
       }
 
       setIsSuccess(true);
-      showSuccess("Registration Confirmed!");
+      showSuccess("Entry Registered!");
       window.dispatchEvent(new Event('storage'));
     } catch (err) {
-      showError("Submission error. Please try again.");
+      showError("Submission failed. Check connection.");
     } finally {
       setIsLoading(false);
     }
@@ -117,9 +129,11 @@ const RegisterParticipant = () => {
 
   if (isInitializing) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
-        <Loader2 className="h-10 w-10 text-sky-500 animate-spin" />
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verifying Protocol...</p>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 text-sky-500 animate-spin" />
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Accessing Registry...</p>
+        </div>
       </div>
     );
   }
@@ -128,12 +142,14 @@ const RegisterParticipant = () => {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center gap-6">
         <div className="bg-white p-10 rounded-[3rem] shadow-xl border border-slate-100 space-y-6 max-w-sm">
-          <div className="bg-red-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto">
-             <Trophy className="h-10 w-10 text-red-200" />
+          <div className="bg-red-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto">
+             <Trophy className="h-8 w-8 text-red-300" />
           </div>
           <h1 className="text-2xl font-black text-[#0B1F3A] uppercase italic">Circuit Not Found</h1>
           <p className="text-sm text-slate-400 font-medium leading-relaxed">
-            This registration link is not active. If you are sharing this link with others, ensure you have **connected a database** in the Integrations tab.
+            This registration link is currently only active on the device where it was created. 
+            <br/><br/>
+            <span className="text-sky-600 font-bold">To share this link with others, please connect a database in the Integrations tab.</span>
           </p>
           <Button onClick={() => navigate('/')} className="w-full h-12 bg-[#0B1F3A] text-white rounded-xl font-black uppercase tracking-widest text-[10px] border-none shadow-lg">Return Home</Button>
         </div>
@@ -143,16 +159,20 @@ const RegisterParticipant = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] pb-20">
-      <div className="bg-[#0B1F3A] p-8 pb-16 text-center text-white space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full border border-white/10">
+      <div className="bg-[#0B1F3A] p-8 pb-16 text-center text-white space-y-3 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-sky-500/10 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2" />
+        <button onClick={() => navigate('/')} className="absolute top-6 left-6 text-white/40 hover:text-white transition-colors z-20">
+          <ChevronLeft className="h-6 w-6" />
+        </button>
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full border border-white/10 relative z-10">
            <Globe className="h-3 w-3 text-sky-400" />
-           <span className="text-[9px] font-black uppercase tracking-widest">Global Entry System</span>
+           <span className="text-[9px] font-black uppercase tracking-widest">Tournament Registry</span>
         </div>
-        <h1 className="text-2xl font-black tracking-tight uppercase italic">{tournament?.name}</h1>
-        <p className="text-[9px] font-black text-sky-400 uppercase tracking-[0.3em]">Athlete Registry Protocol</p>
+        <h1 className="text-2xl font-black tracking-tight uppercase italic relative z-10">{tournament?.name}</h1>
+        <p className="text-[9px] font-black text-sky-400 uppercase tracking-[0.3em] relative z-10">Athlete Protocol Entry</p>
       </div>
 
-      <main className="px-6 -mt-8 relative z-10">
+      <main className="px-6 -mt-8 relative z-30">
         <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 max-w-lg mx-auto space-y-8">
           {!isSuccess ? (
             <div className="space-y-6">
@@ -236,7 +256,7 @@ const RegisterParticipant = () => {
               <Button 
                 onClick={handleRegister} 
                 disabled={isLoading} 
-                className="w-full h-14 bg-sky-500 hover:bg-sky-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-xl transition-all border-none"
+                className="w-full h-14 bg-sky-500 hover:bg-sky-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-xl transition-all border-none active:scale-95"
               >
                 {isLoading ? <Loader2 className="animate-spin" /> : "Verify & Submit Entry"}
               </Button>
@@ -252,7 +272,7 @@ const RegisterParticipant = () => {
                   You have been successfully synchronized with the tournament roster.
                 </p>
               </div>
-              <Button onClick={() => navigate('/')} className="w-full h-14 bg-[#0B1F3A] text-white font-black rounded-xl uppercase tracking-widest text-[10px] border-none shadow-xl">Return to Dashboard</Button>
+              <Button onClick={() => navigate('/')} className="w-full h-14 bg-[#0B1F3A] text-white font-black rounded-xl uppercase tracking-widest text-[10px] border-none shadow-xl active:scale-95 transition-all">Return to Dashboard</Button>
             </motion.div>
           )}
         </div>
