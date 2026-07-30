@@ -1,16 +1,33 @@
-import { playersDatabase, Player as StaticPlayer } from '@/data/players';
+import { Player } from '../models/Player';
 
 export const PlayerService = {
-  async getPlayerBySmashId(smashId: string) {
-    // In production, this would be a Supabase query
-    return playersDatabase.find(p => p.name.toLowerCase().includes(smashId.toLowerCase()));
+  async getPlayers() {
+    return await Player.find().sort({ ranking: 1 }).lean();
   },
 
-  async updateStats(playerId: string, stats: any) {
-    showSuccess("Stats updated successfully");
+  async getPlayerById(id: string) {
+    const player = await Player.findById(id).lean();
+    if (!player) throw new Error('Player not found');
+    return player;
   },
 
-  async getMatchHistory(playerId: string) {
-    return []; // Mock history
+  async createPlayer(data: any) {
+    const player = new Player(data);
+    return await player.save();
+  },
+
+  async updatePlayer(id: string, data: any) {
+    const player = await Player.findByIdAndUpdate(id, data, {
+      new: true,
+      runValidators: true
+    }).lean();
+    if (!player) throw new Error('Player not found');
+    return player;
+  },
+
+  async deletePlayer(id: string) {
+    const player = await Player.findByIdAndDelete(id);
+    if (!player) throw new Error('Player not found');
+    return player;
   }
 };

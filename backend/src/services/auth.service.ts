@@ -1,96 +1,58 @@
-"use client";
+import jwt from 'jsonwebtoken';
+import { User } from '../models/User';
+import { config } from '../config';
 
-import { supabase, isCloudConfigured } from '@/lib/supabase';
+const generateToken = (id: string) => {
+  return jwt.sign({ id }, config.jwtSecret, { expiresIn: config.jwtExpire });
+};
 
 export const AuthService = {
-  // Normalize mobile to string and remove any whitespace/dashes
-  normalizeMobile(mobile: string | number): string {
-    return String(mobile).replace(/\D/g, "");
-  },
-
-  async checkUserExists(mobile: string) {
-    const cleanMobile = this.normalizeMobile(mobile);
-
-    // 1. Local Check First (Instant)
-    const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
-    const localExists = registered.some((u: any) => this.normalizeMobile(u.mobile) === cleanMobile);
-    if (localExists) return true;
-
-    // 2. Cloud Check (Fallback)
-    if (isCloudConfigured) {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('mobile', cleanMobile)
-          .single();
-        if (data && !error) return true;
-      } catch (err) {}
+  async register({ name, email, password, role }: { name: string; email: string; password: string; role?: 'admin' | 'referee' | 'player' | 'viewer' }) {
+    const normalizedEmail = email.trim().toLowerCase();
+    const existingUser = await User.findOne({ email: normalizedEmail });
+    if (existingUser) {
+      throw new Error('User already exists');
     }
 
-    return false;
-  },
+    const user = new User({ name, email: normalizedEmail, password, role });
+    await user.save();
 
-  async getProfileByMobile(mobile: string) {
-    const cleanMobile = this.normalizeMobile(mobile);
-    
-    // 1. Check local first
-    const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
-    const local = registered.find((u: any) => this.normalizeMobile(u.mobile) === cleanMobile);
-    if (local) return local;
-
-    // 2. Check cloud
-    if (isCloudConfigured) {
-      try {
-        const { data } = await supabase.from('profiles').select('*').eq('mobile', cleanMobile).single();
-        if (data) return { ...data, onboardingComplete: true };
-      } catch (err) {}
-    }
-
-    return { name: "Athlete", mobile: cleanMobile, onboardingComplete: false };
-  },
-
-  async registerAthlete(profileData: { name: string; gender: string; state: string; district: string; mobile: string }) {
-    const cleanMobile = this.normalizeMobile(profileData.mobile);
-    const smashId = 'SMASH#' + Math.floor(1000 + Math.random() * 9000);
-
-    const finalProfile = {
-      ...profileData,
-      mobile: cleanMobile,
-      country: 'India',
-      onboardingComplete: true,
-      smashId: smashId,
-      id: 'athlete_' + Date.now()
+    return {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id.toString())
     };
-    
-    // ALWAYS save locally first
-    const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
-    registered.push(finalProfile);
-    localStorage.setItem('registered_users', JSON.stringify(registered));
+  },
 
-    // Async cloud sync
-    if (isCloudConfigured) {
-      supabase.from('profiles').upsert([{ 
-        ...profileData, 
-        mobile: cleanMobile, 
-        smash_id: smashId, 
-        onboarding_complete: true 
-      }], { onConflict: 'mobile' }).then(() => {});
+  async login({ email, password }: { email: string; password: string }) {
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
+
+    if (!user) {
+      throw new Error('Invalid credentials');
     }
 
-    return finalProfile;
+    const passwordMatch = await user.matchPassword(password);
+    if (!passwordMatch) {
+      throw new Error('Invalid credentials');
+    }
+
+    return {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id.toString())
+    };
   },
 
-  setLocalSession(profile: any) {
-    if (!profile) return;
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userProfile', JSON.stringify(profile));
-    window.dispatchEvent(new Event('storage'));
-  },
-
-  logout() {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userProfile');
-    window.dispatchEvent(new Event('storage'));
+  async getProfile(userId: string) {
+    const user = await User.findById(userId).select('-password').lean();
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return user;
   }
 };

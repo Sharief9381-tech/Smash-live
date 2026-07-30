@@ -1,13 +1,15 @@
 import mongoose from 'mongoose';
+import { config } from '../config';
 
 const connectDB = async () => {
   try {
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/smashlive';
-    const conn = await mongoose.connect(mongoUri);
+    const conn = await mongoose.connect(config.mongoUri, {
+      autoIndex: true
+    });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
-    console.error('MongoDB connection error. Please ensure MongoDB is running or check your MONGODB_URI environment variable:', error);
-    // Removed process.exit(1) to prevent the entire app server from hanging/looping in preview mode
+    console.error('MongoDB connection error:', error);
+    process.exit(1);
   }
 };
 

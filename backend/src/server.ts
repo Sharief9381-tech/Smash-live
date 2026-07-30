@@ -1,13 +1,18 @@
+
+import 'dotenv/config';
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import helmet from 'helmet';
 import connectDB from './database/connection';
-import matchRoutes from './routes/match.routes';
 import authRoutes from './routes/auth.routes';
-import { config } from './config';
+import playerRoutes from './routes/player.routes';
+import tournamentRoutes from './routes/tournament.routes';
+import matchRoutes from './routes/match.routes';
+import { notFound, errorHandler } from './middlewares/error.middleware';
 import { initMatchSockets } from './sockets/match.socket';
+import { config } from './config';
 
 const app = express();
 const httpServer = createServer(app);
@@ -25,12 +30,17 @@ connectDB();
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/players', playerRoutes);
+app.use('/api/tournaments', tournamentRoutes);
 app.use('/api/matches', matchRoutes);
+
+app.set('io', io);
 
 // Socket Logic
 initMatchSockets(io);
 
-app.set('io', io);
+app.use(notFound);
+app.use(errorHandler);
 
 httpServer.listen(config.port, () => {
   console.log(`🚀 SmashLive Backend running on port ${config.port}`);
