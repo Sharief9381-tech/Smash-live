@@ -32,7 +32,7 @@ const BottomNav = () => {
                 "p-2 rounded-xl transition-all duration-300",
                 isActive 
                   ? "bg-[#0B1F3A] text-sky-400 scale-110 shadow-lg" 
-                  : "bg-slate-100 text-slate-400"
+                  : "bg-[#0B1F3A] text-slate-500"
               )}>
                 <item.icon className={cn("h-5 w-5", isActive ? "stroke-[2.5px]" : "stroke-[2px]")} />
               </div>
