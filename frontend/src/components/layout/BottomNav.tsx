@@ -30,13 +30,15 @@ const BottomNav = () => {
             >
               <div className={cn(
                 "p-2 rounded-xl transition-all duration-300",
-                isActive ? "bg-[#0B1F3A] text-sky-400 scale-110 shadow-lg" : "text-slate-300"
+                isActive 
+                  ? "bg-[#0B1F3A] text-sky-400 scale-110 shadow-lg" 
+                  : "bg-slate-100 text-slate-400"
               )}>
                 <item.icon className={cn("h-5 w-5", isActive ? "stroke-[2.5px]" : "stroke-[2px]")} />
               </div>
               <span className={cn(
                 "text-[9px] font-black uppercase tracking-widest",
-                isActive ? "text-[#0B1F3A]" : "text-slate-300"
+                isActive ? "text-[#0B1F3A]" : "text-slate-400"
               )}>
                 {item.name}
               </span>
