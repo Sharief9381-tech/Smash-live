@@ -38,7 +38,8 @@ const Onboarding = () => {
         name: tempData.name,
         gender: tempData.gender,
         mobile: tempData.mobile,
-        state: state
+        state: state,
+        district: tempData.district || state
       });
 
       AuthService.setLocalSession(profile);

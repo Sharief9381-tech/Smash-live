@@ -1,5 +1,3 @@
-"use client";
-
 export interface Player {
   id: number;
   rank?: number;
