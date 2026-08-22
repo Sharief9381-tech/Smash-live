@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Search, Loader2, Minus, Trophy, Zap, ChevronRight } from 'lucide-react';

@@ -1,5 +1,3 @@
-"use client";
-
 import React from 'react';
 import { Zap, Trophy, TrendingUp } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';

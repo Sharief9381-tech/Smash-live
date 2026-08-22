@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Globe, Flag, MapPin, Zap, Trophy } from 'lucide-react';
 import { Input } from '@/components/ui/input';

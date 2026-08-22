@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';

@@ -1,5 +1,3 @@
-"use client";
-
 import { supabase } from '@/lib/supabase';
 import { Match } from '@/types/database';
 

@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useMemo } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { motion } from 'framer-motion';

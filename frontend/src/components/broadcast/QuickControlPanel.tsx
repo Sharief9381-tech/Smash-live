@@ -1,5 +1,3 @@
-"use client";
-
 import React from 'react';
 import { Play, Pause, Square, Zap, Bell, RefreshCw, Trophy, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';

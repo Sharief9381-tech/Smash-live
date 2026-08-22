@@ -1,5 +1,3 @@
-"use client";
-
 import { supabase, isCloudConfigured } from '@/lib/supabase';
 
 export const AuthService = {

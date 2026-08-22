@@ -1,5 +1,3 @@
-"use client";
-
 import React from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';

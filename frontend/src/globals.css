@@ -43,6 +43,14 @@
   }
 }
 
+.app-card {
+  @apply bg-white rounded-2xl border border-slate-100 shadow-sm;
+}
+
+.active-press {
+  @apply active:scale-[0.97] transition-transform duration-100;
+}
+
 .glass-panel {
   @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-xl shadow-slate-900/5;
 }

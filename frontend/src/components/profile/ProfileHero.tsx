@@ -1,5 +1,3 @@
-"use client";
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Share2, Edit3, LogOut, Flag, MapPin } from 'lucide-react';

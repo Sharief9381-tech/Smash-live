@@ -1,5 +1,3 @@
-"use client";
-
 import React from 'react';
 import { Target, Zap, Activity, Shield, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';

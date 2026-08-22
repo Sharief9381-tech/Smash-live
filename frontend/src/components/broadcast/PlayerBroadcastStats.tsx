@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState } from 'react';
 import { Target, Trophy, Zap, User } from 'lucide-react';
 import { motion } from 'framer-motion';

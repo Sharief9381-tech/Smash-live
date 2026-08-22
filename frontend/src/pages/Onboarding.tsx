@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Zap, MapPin, ArrowRight, Loader2, Lock, ChevronLeft } from 'lucide-react';

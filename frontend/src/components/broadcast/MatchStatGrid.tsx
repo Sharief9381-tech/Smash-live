@@ -1,5 +1,3 @@
-"use client";
-
 import React from 'react';
 import { Activity, Zap, Target, Timer, Flame, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
