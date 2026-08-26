@@ -1,7 +1,6 @@
 
 import 'dotenv/config';
 import express from 'express';
-import { initFirebase } from './services/firebase.service';
 import { initWhatsApp } from './services/whatsapp.service';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -30,10 +29,7 @@ app.use(express.json());
 // Database
 connectDB();
 
-// Firebase Admin
-initFirebase();
-
-// WhatsApp OTP sender
+// OTP sender
 initWhatsApp();
 
 // API Routes
