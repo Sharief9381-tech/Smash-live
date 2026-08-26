@@ -1,94 +1,109 @@
-import { supabase, isCloudConfigured } from '@/lib/supabase';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+
+export interface UserProfile {
+  _id: string;
+  name: string;
+  mobile: string;
+  gender?: string;
+  state?: string;
+  district?: string;
+  role: string;
+  smashId?: string;
+  onboardingComplete: boolean;
+  token: string;
+}
+
+const normalizeMobile = (mobile: string | number): string =>
+  String(mobile).replace(/\D/g, '');
 
 export const AuthService = {
-  // Normalize mobile to string and remove any whitespace/dashes
-  normalizeMobile(mobile: string | number): string {
-    return String(mobile).replace(/\D/g, "");
+  normalizeMobile,
+
+  /**
+   * Send OTP to mobile number via WhatsApp (backend handles delivery).
+   */
+  async sendOtp(mobile: string): Promise<void> {
+    const res = await fetch(`${API_URL}/auth/send-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobile: normalizeMobile(mobile) }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to send OTP');
   },
 
-  async checkUserExists(mobile: string) {
-    const cleanMobile = this.normalizeMobile(mobile);
+  /**
+   * Register new athlete — OTP verified on backend.
+   */
+  async registerAthlete(profileData: {
+    name: string;
+    gender: string;
+    state: string;
+    district: string;
+    mobile: string;
+    otp: string;
+  }): Promise<UserProfile> {
+    const res = await fetch(`${API_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...profileData,
+        mobile: normalizeMobile(profileData.mobile),
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Registration failed');
+    return data as UserProfile;
+  },
 
-    // 1. Local Check First (Instant)
-    const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
-    const localExists = registered.some((u: any) => this.normalizeMobile(u.mobile) === cleanMobile);
-    if (localExists) return true;
+  /**
+   * Login existing user — OTP verified on backend.
+   */
+  async loginWithOtp(mobile: string, otp: string): Promise<UserProfile> {
+    const res = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobile: normalizeMobile(mobile), otp }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Login failed');
+    return data as UserProfile;
+  },
 
-    // 2. Cloud Check (Fallback)
-    if (isCloudConfigured) {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('mobile', cleanMobile)
-          .single();
-        if (data && !error) return true;
-      } catch (err) {}
+  async getProfile(): Promise<UserProfile | null> {
+    const token = this.getToken();
+    if (!token) return null;
+    try {
+      const res = await fetch(`${API_URL}/auth/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
     }
-
-    return false;
   },
 
-  async getProfileByMobile(mobile: string) {
-    const cleanMobile = this.normalizeMobile(mobile);
-    
-    // 1. Check local first
-    const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
-    const local = registered.find((u: any) => this.normalizeMobile(u.mobile) === cleanMobile);
-    if (local) return local;
-
-    // 2. Check cloud
-    if (isCloudConfigured) {
-      try {
-        const { data } = await supabase.from('profiles').select('*').eq('mobile', cleanMobile).single();
-        if (data) return { ...data, onboardingComplete: true };
-      } catch (err) {}
-    }
-
-    return { name: "Athlete", mobile: cleanMobile, onboardingComplete: false };
-  },
-
-  async registerAthlete(profileData: { name: string; gender: string; state: string; district: string; mobile: string }) {
-    const cleanMobile = this.normalizeMobile(profileData.mobile);
-    const smashId = 'SMASH#' + Math.floor(1000 + Math.random() * 9000);
-
-    const finalProfile = {
-      ...profileData,
-      mobile: cleanMobile,
-      country: 'India',
-      onboardingComplete: true,
-      smashId: smashId,
-      id: 'athlete_' + Date.now()
-    };
-    
-    // ALWAYS save locally first
-    const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
-    registered.push(finalProfile);
-    localStorage.setItem('registered_users', JSON.stringify(registered));
-
-    // Async cloud sync
-    if (isCloudConfigured) {
-      supabase.from('profiles').upsert([{ 
-        ...profileData, 
-        mobile: cleanMobile, 
-        smash_id: smashId, 
-        onboarding_complete: true 
-      }], { onConflict: 'mobile' }).then(() => {});
-    }
-
-    return finalProfile;
-  },
-
-  setLocalSession(profile: any) {
+  setLocalSession(profile: UserProfile) {
     if (!profile) return;
     localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('authToken', profile.token);
     localStorage.setItem('userProfile', JSON.stringify(profile));
     window.dispatchEvent(new Event('storage'));
   },
 
   logout() {
     localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('authToken');
     localStorage.removeItem('userProfile');
     window.dispatchEvent(new Event('storage'));
-  }
+  },
+
+  getToken(): string | null {
+    return localStorage.getItem('authToken');
+  },
+
+  isLoggedIn(): boolean {
+    return localStorage.getItem('isLoggedIn') === 'true';
+  },
 };
