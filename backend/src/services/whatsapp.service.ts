@@ -10,7 +10,7 @@ const normalizeMobile = (mobile: string): string =>
  */
 const sendSms = (mobile: string, otp: string): Promise<void> => {
   return new Promise((resolve, reject) => {
-    const apiKey = process.env.FAST2SMS_API_KEY;
+    const apiKey = (process.env.FAST2SMS_API_KEY || '').trim();
     if (!apiKey) {
       console.log(`[DEV] OTP for ${mobile}: ${otp}`);
       return resolve();
