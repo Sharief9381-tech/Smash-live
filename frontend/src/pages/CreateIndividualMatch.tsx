@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { showSuccess, showError } from '@/utils/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { supabase, isCloudConfigured } from '@/lib/supabase';
+import { MatchAPI, UserAPI } from '@/services/api';
 
 const PlayerSlot = ({ 
   label, 
@@ -136,17 +136,12 @@ const CreateIndividualMatch = () => {
 
   useEffect(() => {
     const fetchAthletes = async () => {
-      // Direct local fetch for speed
       const local = JSON.parse(localStorage.getItem('registered_users') || '[]');
       setRegisteredAthletes(local);
-
-      // Async cloud fetch in background
-      if (isCloudConfigured) {
-        try {
-          const { data } = await supabase.from('profiles').select('*');
-          if (data) setRegisteredAthletes(prev => [...data, ...local]);
-        } catch (e) {}
-      }
+      try {
+        const data = await UserAPI.getAll();
+        if (data.length > 0) setRegisteredAthletes(data);
+      } catch (e) {}
     };
     fetchAthletes();
   }, []);
@@ -185,40 +180,32 @@ const CreateIndividualMatch = () => {
       serving: 1 
     };
 
-    // Always save locally first for instant redirect
+    // Save locally first for instant redirect
     localStorage.setItem(matchId, JSON.stringify(localMatch));
     const active = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
     active.push(localMatch);
     localStorage.setItem('active_studio_matches', JSON.stringify(active));
 
-    // Try cloud sync in background
-    if (isCloudConfigured) {
-      try {
-        const { data, error } = await supabase
-          .from('matches')
-          .insert([{
-            id: matchId,
-            name: formData.name,
-            players: finalPlayers,
-            match_type: matchType,
-            status: 'live',
-            current_score: [0, 0],
-            sets_won: [0, 0],
-            total_sets: parseInt(formData.sets),
-            serving: 1
-          }])
-          .select().single();
-        
-        if (data) {
-          // Update local ID if cloud provides one
-          localStorage.removeItem(matchId);
-          localStorage.setItem(data.id, JSON.stringify({...localMatch, id: data.id}));
-          navigate(`/scoring/${data.id}`, { replace: true });
-          return;
-        }
-      } catch (err) {
-        console.warn("Cloud sync failed, using local node.");
+    // Sync to MongoDB in background
+    try {
+      const data = await MatchAPI.create({
+        name: formData.name,
+        players: finalPlayers,
+        match_type: matchType,
+        status: 'live',
+        current_score: [0, 0],
+        sets_won: [0, 0],
+        total_sets: parseInt(formData.sets),
+        serving: 1,
+      });
+      if (data._id || data.id) {
+        const cloudId = data._id || data.id;
+        localStorage.setItem(cloudId, JSON.stringify({ ...localMatch, id: cloudId }));
+        navigate(`/scoring/${cloudId}`, { replace: true });
+        return;
       }
+    } catch (err) {
+      console.warn("Cloud sync failed, using local.");
     }
 
     showSuccess("Match Initialized");

@@ -11,6 +11,8 @@ import authRoutes from './routes/auth.routes';
 import playerRoutes from './routes/player.routes';
 import tournamentRoutes from './routes/tournament.routes';
 import matchRoutes from './routes/match.routes';
+import userRoutes from './routes/user.routes';
+import analyticsRoutes from './routes/analytics.routes';
 import { notFound, errorHandler } from './middlewares/error.middleware';
 import { initMatchSockets } from './sockets/match.socket';
 import { config } from './config';
@@ -37,6 +39,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/players', playerRoutes);
 app.use('/api/tournaments', tournamentRoutes);
 app.use('/api/matches', matchRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 app.set('io', io);
 

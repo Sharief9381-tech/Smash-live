@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Search, Loader2, Minus, Trophy, Zap, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
+import { UserAPI } from '@/services/api';
 import { cn } from '@/lib/utils';
 
 const Rankings = () => {
@@ -15,9 +15,8 @@ const Rankings = () => {
   useEffect(() => {
     const fetchAthletes = async () => {
       try {
-        const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
-        if (error) throw error;
-        setAthletes(data || []);
+        const data = await UserAPI.getAll();
+        setAthletes(data);
       } catch (err) {
         setAthletes(JSON.parse(localStorage.getItem('registered_users') || '[]'));
       } finally {

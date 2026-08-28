@@ -6,7 +6,7 @@ import { Trophy, MapPin, Calendar, Search, Plus, ChevronRight, Trash2, Users, Ac
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { supabase, isCloudConfigured } from '@/lib/supabase';
+import { TournamentAPI } from '@/services/api';
 import { showSuccess, showError } from '@/utils/toast';
 
 const Tournaments = () => {
@@ -18,40 +18,29 @@ const Tournaments = () => {
 
   const loadTourneys = async () => {
     setLoading(true);
-    const local = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
-    let allTourneys = [...local];
-
-    if (isCloudConfigured) {
-      try {
-        const { data } = await supabase.from('tournaments').select('*').order('created_at', { ascending: false });
-        if (data) {
-          const cloudSlugs = new Set(data.map(t => t.slug));
-          allTourneys = [...data, ...local.filter((t: any) => !cloudSlugs.has(t.slug))];
-        }
-      } catch (e) {
-        console.warn("Sync restricted.");
-      }
+    try {
+      const data = await TournamentAPI.getAll();
+      const enriched = data.map(t => {
+        const tournamentId = t._id || t.id || t.slug;
+        const localParticipants = JSON.parse(localStorage.getItem(`participants_${tournamentId}`) || '[]');
+        const localMatches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]')
+          .filter((m: any) => m.tournamentId === tournamentId);
+        return {
+          ...t,
+          id: t._id || t.id,
+          participantCount: t.participantCount ?? localParticipants.length,
+          matchCount: t.matchCount ?? localMatches.length,
+          organizer: t.organizer || 'Active Athlete',
+        };
+      });
+      setTourneys(enriched);
+    } catch (e) {
+      // Fallback to localStorage
+      const local = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
+      setTourneys(local);
+    } finally {
+      setLoading(false);
     }
-    
-    // Enrich with local counts
-    const enriched = allTourneys.map(t => {
-      const tournamentId = t.id || t.slug;
-      const participants = JSON.parse(localStorage.getItem(`participants_${tournamentId}`) || '[]');
-      const matches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]').filter((m: any) => m.tournamentId === tournamentId);
-      
-      // Simulate an organizer if not present (usually the person who created it)
-      const organizer = t.organizer || "Active Athlete";
-
-      return {
-        ...t,
-        participantCount: participants.length,
-        matchCount: matches.length,
-        organizer
-      };
-    });
-
-    setTourneys(enriched);
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -63,12 +52,7 @@ const Tournaments = () => {
   const handleDelete = async (id: string, slug: string) => {
     if (!confirm("Are you sure? This will remove the circuit protocol.")) return;
     try {
-      const local = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
-      const filtered = local.filter((t: any) => t.id !== id && t.slug !== slug);
-      localStorage.setItem('active_studio_tournaments', JSON.stringify(filtered));
-      if (isCloudConfigured && !String(id).startsWith('local_')) {
-        await supabase.from('tournaments').delete().eq('id', id);
-      }
+      await TournamentAPI.delete(id);
       showSuccess("Circuit Removed");
       loadTourneys();
     } catch (err) {

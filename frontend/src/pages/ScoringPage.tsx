@@ -6,7 +6,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { showSuccess, showError } from '@/utils/toast';
-import { supabase, isCloudConfigured } from '@/lib/supabase';
+import { MatchAPI } from '@/services/api';
 
 const ScoringPage = () => {
   const { matchId } = useParams();
@@ -20,7 +20,7 @@ const ScoringPage = () => {
 
   useEffect(() => {
     const initMatch = async () => {
-      // 1. Immediate Local Load
+      // 1. Try local first for instant load
       const local = localStorage.getItem(matchId || "");
       if (local) {
         const data = JSON.parse(local);
@@ -28,25 +28,19 @@ const ScoringPage = () => {
         if (data.current_score || data.currentScore) setScore(data.current_score || data.currentScore);
         if (data.sets_won || data.setsWon) setSetsWon(data.sets_won || data.setsWon);
         if (data.serving) setServing(data.serving as 1 | 2);
-        setLoading(false);
       }
 
-      // 2. Cloud Sync in Background
-      if (isCloudConfigured) {
-        try {
-          const { data } = await supabase.from('matches').select('*').eq('id', matchId).single();
-          if (data) {
-            setMatchData(prev => ({ ...prev, ...data }));
-            if (data.current_score) setScore(data.current_score);
-            if (data.sets_won) setSetsWon(data.sets_won);
-            if (data.serving) setServing(data.serving as 1 | 2);
-          }
-        } catch (err) {}
+      // 2. Fetch from MongoDB
+      try {
+        const data = await MatchAPI.getById(matchId!);
+        setMatchData((prev: any) => ({ ...prev, ...data }));
+        if (data.current_score) setScore(data.current_score);
+        if (data.sets_won) setSetsWon(data.sets_won);
+        if (data.serving) setServing(data.serving as 1 | 2);
+      } catch (err) {
+        if (!local) navigate('/broadcast/center');
       }
 
-      if (!local && !isCloudConfigured) {
-        navigate('/broadcast/center');
-      }
       setLoading(false);
     };
     initMatch();
@@ -74,10 +68,8 @@ const ScoringPage = () => {
     const updated = { ...matchData, current_score: finalScore, sets_won: finalSets, serving: side };
     localStorage.setItem(matchId!, JSON.stringify(updated));
 
-    // Async sync
-    if (isCloudConfigured) {
-      supabase.from('matches').update({ current_score: finalScore, sets_won: finalSets, serving: side, last_update: new Date().toISOString() }).eq('id', matchId).then(() => {});
-    }
+    // Async sync to MongoDB
+    MatchAPI.update(matchId!, { current_score: finalScore, sets_won: finalSets, serving: side }).catch(() => {});
   };
 
   const getSideNames = (side: 1 | 2) => {

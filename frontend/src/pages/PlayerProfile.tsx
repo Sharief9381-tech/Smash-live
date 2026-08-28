@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/lib/supabase';
+import { UserAPI } from '@/services/api';
 
 const PlayerProfile = () => {
   const { id } = useParams();
@@ -35,15 +35,13 @@ const PlayerProfile = () => {
       }
 
       try {
-        const { data } = await supabase.from('profiles').select('*').eq('id', id).single();
+        const data = await UserAPI.getById(id);
         if (data) setProfileData(data);
-        else {
-          const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
-          const local = registered.find((u: any) => u.id === id || u.mobile === id);
-          if (local) setProfileData(local);
-        }
-      } catch (e) { console.warn("Sync issue."); }
-      finally { setLoading(false); }
+      } catch (e) {
+        const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
+        const local = registered.find((u: any) => u.id === id || u.mobile === id);
+        if (local) setProfileData(local);
+      } finally { setLoading(false); }
     };
     fetchAthlete();
   }, [id]);

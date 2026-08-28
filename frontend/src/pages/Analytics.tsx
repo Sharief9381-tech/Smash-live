@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { motion } from 'framer-motion';
 import { BarChart3, Activity, Zap, ShieldCheck, Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { AnalyticsAPI } from '@/services/api';
 
 const Analytics = () => {
   const [stats, setStats] = useState({
@@ -15,15 +15,8 @@ const Analytics = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const { count: athletesCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
-        const { count: tourneysCount } = await supabase.from('tournaments').select('*', { count: 'exact', head: true });
-        const { count: participantsCount } = await supabase.from('participants').select('*', { count: 'exact', head: true });
-        
-        setStats({
-          athletes: athletesCount || 0,
-          tourneys: tourneysCount || 0,
-          participants: participantsCount || 0
-        });
+        const data = await AnalyticsAPI.getStats();
+        setStats({ athletes: data.athletes, tourneys: data.tourneys, participants: data.participants });
       } catch (err) {
         console.warn("Cloud stats restricted.");
       } finally {

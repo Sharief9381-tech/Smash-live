@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase, isCloudConfigured } from '@/lib/supabase';
+import { MatchAPI, TournamentAPI } from '@/services/api';
 
 const LiveMatch = () => {
   const navigate = useNavigate();
@@ -21,21 +21,16 @@ const LiveMatch = () => {
 
   useEffect(() => {
     const fetchLiveData = async () => {
-      const localMatches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
-      const localTourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
-
-      if (isCloudConfigured) {
-        try {
-          const { data: matches } = await supabase.from('matches').select('*').eq('status', 'live');
-          const { data: tourneys } = await supabase.from('tournaments').select('*').neq('status', 'Completed');
-
-          if (matches) setLiveMatches([...matches, ...localMatches]);
-          if (tourneys) setLiveTournaments([...tourneys, ...localTourneys]);
-        } catch (err) {
-          setLiveMatches(localMatches);
-          setLiveTournaments(localTourneys);
-        }
-      } else {
+      try {
+        const [matches, tourneys] = await Promise.all([
+          MatchAPI.getAll('live'),
+          TournamentAPI.getAll(),
+        ]);
+        setLiveMatches(matches.map((m: any) => ({ ...m, id: m._id || m.id })));
+        setLiveTournaments(tourneys.map((t: any) => ({ ...t, id: t._id || t.id })));
+      } catch (err) {
+        const localMatches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
+        const localTourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
         setLiveMatches(localMatches);
         setLiveTournaments(localTourneys);
       }

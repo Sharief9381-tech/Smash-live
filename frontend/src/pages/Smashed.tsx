@@ -5,7 +5,7 @@ import { Trophy, Trash2, ChevronRight, Zap, Activity, Loader2, MapPin, Search } 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
+import { MatchAPI, TournamentAPI } from '@/services/api';
 import { showSuccess } from '@/utils/toast';
 import { cn } from '@/lib/utils';
 
@@ -21,25 +21,19 @@ const Smashed = () => {
   const fetchMatches = async () => {
     setLoading(true);
     try {
-      const { data: tourneys } = await supabase.from('tournaments').select('*').order('created_at', { ascending: false });
-      const { data: matches } = await supabase.from('matches').select('*').order('created_at', { ascending: false });
-
+      const [tourneys, matches] = await Promise.all([
+        TournamentAPI.getAll(),
+        MatchAPI.getAll(),
+      ]);
       const unified = [
-        ...(tourneys || []).map(t => ({ ...t, type: 'tournament' })),
-        ...(matches || []).map(m => ({ ...m, type: 'match' }))
+        ...tourneys.map((t: any) => ({ ...t, id: t._id || t.id, type: 'tournament' })),
+        ...matches.map((m: any) => ({ ...m, id: m._id || m.id, type: 'match' })),
       ];
-
-      // Merge local matches if cloud sync failed or is empty
+      const unique = Array.from(new Set(unified.map(a => a.id))).map(id => unified.find(a => a.id === id));
+      setItems(unique.sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()));
+    } catch (err) {
       const localMatches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
-      const all = [...unified, ...localMatches.map(m => ({ ...m, type: 'match' }))];
-      
-      // Filter by unique IDs
-      const unique = Array.from(new Set(all.map(a => a.id))).map(id => all.find(a => a.id === id));
-      
-      setItems(unique.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()));
-    } catch (err: any) {
-      const localMatches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
-      setItems(localMatches.map(m => ({ ...m, type: 'match' })));
+      setItems(localMatches.map((m: any) => ({ ...m, type: 'match' })));
     } finally {
       setLoading(false);
     }
@@ -71,15 +65,11 @@ const Smashed = () => {
   const deleteItem = async (id: string, type: 'match' | 'tournament') => {
     if (!confirm(`Delete this ${type}?`)) return;
     try {
-      const local = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
-      localStorage.setItem('active_studio_matches', JSON.stringify(local.filter((m: any) => m.id !== id)));
-      
       if (type === 'tournament') {
-        const localTourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
-        localStorage.setItem('active_studio_tournaments', JSON.stringify(localTourneys.filter((t: any) => t.id !== id)));
+        await TournamentAPI.delete(id);
+      } else {
+        await MatchAPI.delete(id);
       }
-
-      await supabase.from(type === 'tournament' ? 'tournaments' : 'matches').delete().eq('id', id);
       showSuccess("Protocol Cleared");
       fetchMatches();
     } catch (err) {

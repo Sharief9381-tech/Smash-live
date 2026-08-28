@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
-import { supabase, isCloudConfigured } from '@/lib/supabase';
+import { MatchAPI, TournamentAPI } from '@/services/api';
 import { cn } from '@/lib/utils';
 
 const MyCircuits = () => {
@@ -25,44 +25,20 @@ const MyCircuits = () => {
       const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
       setUserProfile(profile);
 
-      if (!isCloudConfigured) {
-        setLoading(false);
-        return;
-      }
-
       try {
         const smashId = profile.smashId || profile.smash_id;
+        const [allMatches, allTourneys] = await Promise.all([
+          MatchAPI.getAll('live'),
+          TournamentAPI.getAll(),
+        ]);
 
-        // 1. Fetch tournaments where user is a participant
-        const { data: participations } = await supabase
-          .from('participants')
-          .select('tournament_id')
-          .eq('smash_id', smashId);
-
-        if (participations && participations.length > 0) {
-          const tIds = participations.map(p => p.tournament_id);
-          const { data: tourneys } = await supabase
-            .from('tournaments')
-            .select('*')
-            .in('id', tIds)
-            .neq('status', 'Completed');
-          setRegisteredTourneys(tourneys || []);
-        }
-
-        // 2. Fetch scheduled matches for this user
-        const { data: matches } = await supabase
-          .from('matches')
-          .select('*')
-          .eq('status', 'live'); 
-
-        const userMatches = matches?.filter(m => {
-          const p = m.players;
-          if (!p) return false;
-          const search = smashId.toLowerCase();
-          return JSON.stringify(p).toLowerCase().includes(search);
+        // Filter matches involving this user
+        const userMatches = allMatches.filter((m: any) => {
+          if (!m.players || !smashId) return false;
+          return JSON.stringify(m.players).toLowerCase().includes(smashId.toLowerCase());
         });
-
-        setUpcomingMatches(userMatches || []);
+        setUpcomingMatches(userMatches);
+        setRegisteredTourneys(allTourneys.filter((t: any) => t.status !== 'Completed'));
       } catch (err) {
         console.warn("Personal sync limited.");
       } finally {

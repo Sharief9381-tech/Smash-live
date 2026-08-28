@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { supabase, isCloudConfigured } from '@/lib/supabase';
+import { TournamentAPI } from '@/services/api';
 import { showSuccess, showError } from '@/utils/toast';
 import { INDIAN_STATES, STATE_DISTRICTS } from '@/data/locations';
 
@@ -31,40 +31,19 @@ const RegisterParticipant = () => {
   useEffect(() => {
     const fetchTournament = async () => {
       if (!slug) return;
-      
-      // 1. Try Cloud Lookup first if configured
-      if (isCloudConfigured) {
-        try {
-          const { data, error } = await supabase
-            .from('tournaments')
-            .select('*')
-            .eq('slug', slug)
-            .single();
-
-          if (data && !error) {
-            setTournament(data);
-            setIsInitializing(false);
-            return;
-          }
-        } catch (err) {}
+      try {
+        const data = await TournamentAPI.getById(slug);
+        setTournament({ ...data, id: data._id || data.id });
+      } catch (err) {
+        const localTourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
+        const found = localTourneys.find((t: any) =>
+          String(t.slug) === slug || String(t.id) === slug
+        );
+        if (found) setTournament(found);
+      } finally {
+        setIsInitializing(false);
       }
-
-      // 2. Local Fallback (Only works on the same browser/device)
-      const localTourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
-      // Search by slug or ID to be safe
-      const found = localTourneys.find((t: any) => 
-        String(t.slug) === slug || 
-        String(t.id) === slug || 
-        String(t.name).toLowerCase().replace(/\s+/g, '-') === slug
-      );
-      
-      if (found) {
-        setTournament(found);
-      }
-      
-      setIsInitializing(false);
     };
-
     fetchTournament();
   }, [slug]);
 
@@ -77,47 +56,21 @@ const RegisterParticipant = () => {
     setIsLoading(true);
     
     try {
-      const tournamentId = tournament.id || tournament.slug;
-      const entryId = 'entry_' + Date.now();
-      
-      const entryData = {
-        ...formData,
-        id: entryId,
-        smashId: formData.smashId || `ATHLETE_${Date.now().toString().slice(-4)}`,
-        registeredAt: new Date().toISOString(),
-        tournamentId: tournamentId
-      };
+      const tournamentId = tournament._id || tournament.id;
+      const smashId = formData.smashId || `ATHLETE_${Date.now().toString().slice(-4)}`;
 
-      // Save entry to local storage for this tournament roster
-      const storageKey = `participants_${tournamentId}`;
-      const existingEntries = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      existingEntries.push(entryData);
-      localStorage.setItem(storageKey, JSON.stringify(existingEntries));
-
-      // Add to global local registry for the athlete network
-      const globalNetwork = JSON.parse(localStorage.getItem('registered_users') || '[]');
-      if (!globalNetwork.some((u: any) => u.phone === formData.phone)) {
-        globalNetwork.push({ ...entryData, onboardingComplete: true });
-        localStorage.setItem('registered_users', JSON.stringify(globalNetwork));
-      }
-
-      // Sync to cloud if database is active
-      if (isCloudConfigured && !String(tournamentId).startsWith('local_')) {
-        await supabase.from('participants').insert([{
-          tournament_id: tournament.id,
-          name: formData.name,
-          phone: formData.phone,
-          gender: formData.gender,
-          category: formData.category,
-          state: formData.state,
-          district: formData.district,
-          smash_id: entryData.smashId
-        }]);
-      }
+      await TournamentAPI.addParticipant(tournamentId, {
+        name: formData.name,
+        phone: formData.phone,
+        gender: formData.gender,
+        category: formData.category,
+        state: formData.state,
+        district: formData.district,
+        smash_id: smashId,
+      });
 
       setIsSuccess(true);
       showSuccess("Entry Registered!");
-      window.dispatchEvent(new Event('storage'));
     } catch (err) {
       showError("Submission failed. Check connection.");
     } finally {

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { supabase, isCloudConfigured } from '@/lib/supabase';
+import { UserAPI } from '@/services/api';
 
 const Social = () => {
   const navigate = useNavigate();
@@ -26,23 +26,12 @@ const Social = () => {
       const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
       setUserProfile(profile);
 
-      // Local Fallback
-      const local = JSON.parse(localStorage.getItem('registered_users') || '[]');
-      
-      if (isCloudConfigured) {
-        try {
-          const { data } = await supabase.from('profiles').select('*');
-          if (data) {
-            // Filter out self
-            const filtered = data.filter((p: any) => p.mobile !== profile.mobile);
-            setAthletes(filtered);
-          } else {
-            setAthletes(local.filter((p: any) => p.mobile !== profile.mobile));
-          }
-        } catch (e) {
-          setAthletes(local.filter((p: any) => p.mobile !== profile.mobile));
-        }
-      } else {
+      try {
+        const data = await UserAPI.getAll();
+        const filtered = data.filter((p: any) => p.mobile !== profile.mobile);
+        setAthletes(filtered);
+      } catch (e) {
+        const local = JSON.parse(localStorage.getItem('registered_users') || '[]');
         setAthletes(local.filter((p: any) => p.mobile !== profile.mobile));
       }
       setLoading(false);

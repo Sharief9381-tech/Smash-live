@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
+import { MatchAPI, TournamentAPI } from '@/services/api';
 import { cn } from '@/lib/utils';
 
 const Court = () => {
@@ -26,12 +26,13 @@ const Court = () => {
       if (saved) setProfile(JSON.parse(saved));
 
       try {
-        const { data: activeMatches } = await supabase.from('matches').select('*').eq('status', 'live').limit(2);
-        const { data: activeTourneys } = await supabase.from('tournaments').select('*').neq('status', 'Completed').limit(2);
-        
+        const [activeMatches, activeTourneys] = await Promise.all([
+          MatchAPI.getAll('live'),
+          TournamentAPI.getAll(),
+        ]);
         const localMatches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
-        setMatches([...(activeMatches || []), ...localMatches]);
-        setTournaments(activeTourneys || []);
+        setMatches([...activeMatches.slice(0, 2), ...localMatches].slice(0, 4));
+        setTournaments(activeTourneys.slice(0, 2));
       } catch (err) { console.warn("Sync limited."); }
       finally { setLoading(false); }
     };

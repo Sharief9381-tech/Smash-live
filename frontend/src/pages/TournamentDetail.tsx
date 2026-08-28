@@ -7,7 +7,7 @@ import {
   ChevronLeft, Activity, Globe, Loader2, Copy, Check, QrCode, Download
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase, isCloudConfigured } from '@/lib/supabase';
+import { TournamentAPI } from '@/services/api';
 import { showSuccess, showError } from '@/utils/toast';
 import { cn } from '@/lib/utils';
 
@@ -22,34 +22,24 @@ const TournamentDetail = () => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      
-      const localTourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
-      const localMatch = localTourneys.find((t: any) => t.id === id || t.slug === id);
-      
-      if (localMatch) {
-        setTournament(localMatch);
-        const tournamentId = localMatch.id || localMatch.slug;
-        const storageKey = `participants_${tournamentId}`;
-        const tournamentEntries = JSON.parse(localStorage.getItem(storageKey) || '[]');
-        setParticipants(tournamentEntries);
+      try {
+        const tourney = await TournamentAPI.getById(id!);
+        setTournament({ ...tourney, id: tourney._id || tourney.id });
+        const athletes = await TournamentAPI.getParticipants(tourney._id || tourney.id);
+        setParticipants(athletes);
+      } catch (err) {
+        // fallback to localStorage
+        const localTourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
+        const localMatch = localTourneys.find((t: any) => t.id === id || t.slug === id);
+        if (localMatch) {
+          setTournament(localMatch);
+          const storageKey = `participants_${localMatch.id || localMatch.slug}`;
+          setParticipants(JSON.parse(localStorage.getItem(storageKey) || '[]'));
+        }
+      } finally {
         setLoading(false);
-        return;
       }
-
-      if (isCloudConfigured) {
-        try {
-          const { data: tourney } = await supabase.from('tournaments').select('*').or(`id.eq.${id},slug.eq.${id}`).single();
-          if (tourney) {
-            setTournament(tourney);
-            const { data: athletes } = await supabase.from('participants').select('*').eq('tournament_id', tourney.id);
-            setParticipants(athletes || []);
-          }
-        } catch (err) {}
-      }
-
-      setLoading(false);
     };
-
     if (id) loadData();
   }, [id]);
 

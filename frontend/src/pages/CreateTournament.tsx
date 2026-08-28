@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Trophy, Check, Loader2, ChevronLeft, MapPin, Calendar, QrCode, Copy, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { supabase, isCloudConfigured } from '@/lib/supabase';
+import { TournamentAPI } from '@/services/api';
 import { showSuccess, showError } from '@/utils/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -28,31 +28,16 @@ const CreateTournament = () => {
     const generatedSlug = formData.name.trim().toLowerCase().replace(/\s+/g, '-') + '-' + Math.random().toString(36).substring(7);
 
     try {
-      const tournamentId = 'local_' + Date.now();
-      const newTourney = { ...formData, id: tournamentId, slug: generatedSlug, status: 'Accepting' };
-
-      if (isCloudConfigured) {
-        const { data, error } = await supabase
-          .from('tournaments')
-          .insert([{
-            name: formData.name,
-            slug: generatedSlug,
-            start_date: formData.startDate,
-            city: formData.city,
-            format: 'elimination',
-            status: 'Accepting'
-          }])
-          .select().single();
-        if (error) throw error;
-        if (data) newTourney.id = data.id;
-      }
-
-      // Save locally
-      const active = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
-      active.push(newTourney);
-      localStorage.setItem('active_studio_tournaments', JSON.stringify(active));
-
-      setSlug(generatedSlug);
+      const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+      const tourney = await TournamentAPI.create({
+        name: formData.name,
+        slug: generatedSlug,
+        start_date: formData.startDate,
+        city: formData.city,
+        status: 'Accepting',
+        organizer: profile.name || 'Active Athlete',
+      });
+      setSlug(tourney.slug || generatedSlug);
       setShowLinkState(true);
       showSuccess("Circuit Synchronized!");
     } catch (err: any) {
