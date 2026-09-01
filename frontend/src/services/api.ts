@@ -112,6 +112,9 @@ export const MatchAPI = {
 export const UserAPI = {
   getAll: () => request<any[]>('/users'),
   getById: (id: string) => request<any>(`/users/${id}`),
+  getStats: (id: string) => request<any>(`/users/${id}/stats`),
+  getRankings: (scope: 'world' | 'state' = 'world', state?: string) =>
+    request<any[]>(`/users/rankings?scope=${scope}${state ? `&state=${encodeURIComponent(state)}` : ''}`),
 };
 
 // ── Analytics ────────────────────────────────────────────────────────────────

@@ -60,9 +60,9 @@ const ProfileHero = ({ profile, isOwnProfile }: ProfileHeroProps) => {
 
       <div className="grid grid-cols-3 gap-2 border-y border-slate-50 py-4">
         {[
-          { label: 'Rank', val: profile?.rank || '--', color: 'text-[#0B1F3A]' },
-          { label: 'Win Rate', val: '0%', color: 'text-sky-600' },
-          { label: 'Points', val: profile?.points || '0', color: 'text-[#0B1F3A]' },
+          { label: 'Rank',     val: profile?.rank     ?? profile?.rankingPoints ?? '—',  color: 'text-[#0B1F3A]' },
+          { label: 'Win Rate', val: profile?.winRate  ?? (profile?.matchesPlayed > 0 ? `${Math.round((profile.matchesWon / profile.matchesPlayed) * 100)}%` : '0%'), color: 'text-sky-600' },
+          { label: 'Points',   val: profile?.rankingPoints ?? profile?.points ?? 0, color: 'text-[#0B1F3A]' },
         ].map((s, i) => (
           <div key={i} className="text-center">
             <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-0.5">{s.label}</p>

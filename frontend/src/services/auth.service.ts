@@ -118,6 +118,19 @@ export const AuthService = {
     }
   },
 
+  async updateProfile(data: object): Promise<UserProfile | null> {
+    const token = this.getToken();
+    if (!token) return null;
+    const res = await fetch(`${API_URL}/auth/profile`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(data),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || 'Update failed');
+    return json;
+  },
+
   setLocalSession(profile: UserProfile) {
     if (!profile) return;
     localStorage.setItem('isLoggedIn', 'true');

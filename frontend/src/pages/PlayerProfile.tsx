@@ -3,14 +3,9 @@ import Navbar from '@/components/layout/Navbar';
 import ProfileHero from '@/components/profile/ProfileHero';
 import PerformanceStats from '@/components/profile/PerformanceStats';
 import TournamentSection from '@/components/profile/TournamentSection';
-import TeamSection from '@/components/profile/TeamSection';
 import AnalyticsSection from '@/components/profile/AnalyticsSection';
 import AchievementSection from '@/components/profile/AchievementSection';
-import RankingSection from '@/components/profile/RankingSection';
-import { 
-  Activity, BarChart3, 
-  Trophy, Users, Award, Zap, ChevronLeft, Loader2, Star, Flame, History
-} from 'lucide-react';
+import { Activity, BarChart3, Trophy, Award, Loader2, Star, Flame, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -19,106 +14,147 @@ import { UserAPI } from '@/services/api';
 import { useSocketEvent } from '@/hooks/use-socket';
 
 const PlayerProfile = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('performance');
-  const [loading, setLoading] = useState(true);
+  const { id }       = useParams<{ id: string }>();
+  const navigate     = useNavigate();
+  const [activeTab, setActiveTab]     = useState('performance');
+  const [loading, setLoading]         = useState(true);
   const [profileData, setProfileData] = useState<any>(null);
+  const [stats, setStats]             = useState<any>(null);
+  const [matchHistory, setMatchHistory] = useState<any[]>([]);
+  const [tournaments, setTournaments]   = useState<any[]>([]);
 
-  const fetchAthlete = useCallback(async () => {
+  const savedProfile = JSON.parse(localStorage.getItem('userProfile') || 'null');
+  const isMe = !id || id === 'me';
+
+  const fetchProfile = useCallback(async () => {
     setLoading(true);
-    if (!id || id === 'me') {
-      const saved = localStorage.getItem('userProfile');
-      if (saved) setProfileData(JSON.parse(saved));
-      setLoading(false);
-      return;
-    }
     try {
-      const data = await UserAPI.getById(id);
-      if (data) setProfileData(data);
+      const profileId = isMe ? (savedProfile?._id || savedProfile?.id) : id;
+
+      if (!profileId) {
+        // Not logged in or no id — show local profile only
+        if (savedProfile) setProfileData(savedProfile);
+        setLoading(false);
+        return;
+      }
+
+      const result = await UserAPI.getStats(profileId);
+      setProfileData(result.user);
+      setStats(result.stats);
+      setMatchHistory(result.matchHistory || []);
+      setTournaments(result.tournaments || []);
     } catch {
-      const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
-      const local = registered.find((u: any) => u.id === id || u.mobile === id);
-      if (local) setProfileData(local);
+      // Fallback to basic user fetch
+      try {
+        const uid = isMe ? (savedProfile?._id || savedProfile?.id) : id;
+        if (uid) {
+          const u = await UserAPI.getById(uid!);
+          setProfileData(u);
+        } else if (savedProfile) {
+          setProfileData(savedProfile);
+        }
+      } catch {
+        if (savedProfile && isMe) setProfileData(savedProfile);
+      }
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, isMe]);
 
-  useEffect(() => { fetchAthlete(); }, [fetchAthlete]);
+  useEffect(() => { fetchProfile(); }, [fetchProfile]);
 
-  // Re-fetch profile when a match involving this player completes
+  // Re-fetch when a match involving this player completes
   useSocketEvent('feed:match_completed', (match) => {
-    const playersStr = JSON.stringify(match.players || '');
-    const profileName = profileData?.name || '';
-    const profileId   = profileData?._id || profileData?.id || id;
-    if (
-      playersStr.includes(profileId) ||
-      (profileName && playersStr.toLowerCase().includes(profileName.toLowerCase()))
-    ) {
-      fetchAthlete();
+    const str  = JSON.stringify(match.players || '').toLowerCase();
+    const myId = profileData?._id || profileData?.id || id;
+    const myName = (profileData?.name || '').toLowerCase();
+    if (myId && (str.includes(String(myId)) || (myName && str.includes(myName)))) {
+      fetchProfile();
     }
   });
 
   const tabs = [
-    { id: 'performance', label: 'Stats', icon: Activity },
-    { id: 'analytics', label: 'Tech', icon: BarChart3 },
-    { id: 'history', label: 'Matches', icon: Trophy },
-    { id: 'badges', label: 'Awards', icon: Award },
+    { id: 'performance', label: 'Stats',    icon: Activity },
+    { id: 'history',     label: 'Matches',  icon: Trophy },
+    { id: 'analytics',   label: 'Tech',     icon: BarChart3 },
+    { id: 'badges',      label: 'Awards',   icon: Award },
   ];
 
-  if (loading) return <div className="h-screen flex items-center justify-center bg-slate-50"><Loader2 className="animate-spin text-sky-500 h-10 w-10" /></div>;
+  if (loading) return (
+    <div className="h-screen flex items-center justify-center bg-slate-50">
+      <Loader2 className="animate-spin text-sky-500 h-10 w-10" />
+    </div>
+  );
 
-  const isOwnProfile = !id || id === 'me' || profileData?.mobile === JSON.parse(localStorage.getItem('userProfile') || '{}').mobile;
+  if (!profileData) return (
+    <div className="h-screen flex flex-col items-center justify-center bg-slate-50 gap-4">
+      <p className="font-black text-slate-400 uppercase text-[10px] tracking-widest">Profile not found</p>
+      <Button onClick={() => navigate('/')} className="bg-[#0B1F3A] text-white rounded-xl font-black uppercase text-[10px]">
+        Home
+      </Button>
+    </div>
+  );
+
+  const isOwnProfile = isMe || profileData?.mobile === savedProfile?.mobile;
+  const winRate = stats?.winRate ?? (
+    (profileData?.matchesPlayed > 0)
+      ? `${Math.round((profileData.matchesWon / profileData.matchesPlayed) * 100)}%`
+      : '0%'
+  );
+  const streak = stats?.currentStreak ?? profileData?.currentStreak ?? 0;
 
   return (
     <div className="min-h-screen bg-slate-50 text-[#0B1F3A] pb-32">
       <Navbar />
-      
       <main className="container max-w-lg px-4 py-6 space-y-6">
-        <ProfileHero profile={profileData} isOwnProfile={isOwnProfile} />
 
+        <ProfileHero profile={{ ...profileData, winRate }} isOwnProfile={isOwnProfile} />
+
+        {/* Quick action */}
         <div className="flex gap-2">
-           <Button 
-             onClick={() => navigate(`/smashed?player=${profileData?.name}`)}
-             className="flex-1 h-14 bg-[#0B1F3A] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest gap-2 shadow-xl active-press border-none"
-           >
-             <History className="h-4 w-4" /> View Match History
-           </Button>
-           {!isOwnProfile && (
-             <Button variant="outline" className="h-14 w-14 p-0 rounded-2xl bg-white border-slate-200">
-               <Star className="h-5 w-5 text-sky-500" />
-             </Button>
-           )}
+          <Button
+            onClick={() => navigate(`/smashed?player=${profileData?.name}`)}
+            className="flex-1 h-14 bg-[#0B1F3A] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest gap-2 shadow-xl border-none"
+          >
+            <History className="h-4 w-4" /> Match History
+          </Button>
+          {!isOwnProfile && (
+            <Button variant="outline" className="h-14 w-14 p-0 rounded-2xl bg-white border-slate-200">
+              <Star className="h-5 w-5 text-sky-500" />
+            </Button>
+          )}
         </div>
 
+        {/* Quick stats bar */}
         <div className="app-card flex divide-x divide-slate-50">
-           <div className="flex-1 p-3 text-center">
-              <p className="text-[10px] font-black text-slate-300 uppercase">Followers</p>
-              <p className="text-sm font-black">{profileData?.stats?.followers || 0}</p>
-           </div>
-           <div className="flex-1 p-3 text-center">
-              <p className="text-[10px] font-black text-slate-300 uppercase">Streak</p>
-              <p className="text-sm font-black text-orange-500 flex items-center justify-center gap-1">
-                <Flame className="h-3 w-3" /> {profileData?.stats?.streak || 0}
-              </p>
-           </div>
-           <div className="flex-1 p-3 text-center">
-              <p className="text-[10px] font-black text-slate-300 uppercase">Win Rate</p>
-              <p className="text-sm font-black text-sky-600">{profileData?.stats?.winRate || "0%"}</p>
-           </div>
+          <div className="flex-1 p-3 text-center">
+            <p className="text-[10px] font-black text-slate-300 uppercase">Matches</p>
+            <p className="text-sm font-black">{stats?.matchesPlayed ?? profileData?.matchesPlayed ?? 0}</p>
+          </div>
+          <div className="flex-1 p-3 text-center">
+            <p className="text-[10px] font-black text-slate-300 uppercase">Streak</p>
+            <p className={cn('text-sm font-black flex items-center justify-center gap-1', streak > 0 ? 'text-orange-500' : 'text-slate-400')}>
+              <Flame className="h-3 w-3" />
+              {streak >= 0 ? `${streak}W` : `${Math.abs(streak)}L`}
+            </p>
+          </div>
+          <div className="flex-1 p-3 text-center">
+            <p className="text-[10px] font-black text-slate-300 uppercase">Win Rate</p>
+            <p className="text-sm font-black text-sky-600">{winRate}</p>
+          </div>
         </div>
 
+        {/* Tabs */}
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-          {tabs.map((tab) => (
+          {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all whitespace-nowrap active-press",
-                activeTab === tab.id 
-                  ? "bg-[#0B1F3A] text-white shadow-lg" 
-                  : "bg-white text-slate-400 border border-slate-100"
+                'flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all whitespace-nowrap',
+                activeTab === tab.id
+                  ? 'bg-[#0B1F3A] text-white shadow-lg'
+                  : 'bg-white text-slate-400 border border-slate-100'
               )}
             >
               <tab.icon className="h-3.5 w-3.5" />
@@ -127,6 +163,7 @@ const PlayerProfile = () => {
           ))}
         </div>
 
+        {/* Tab content */}
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -135,9 +172,11 @@ const PlayerProfile = () => {
             exit={{ opacity: 0, y: -10 }}
             className="min-h-[400px]"
           >
-            {activeTab === 'performance' && <PerformanceStats stats={profileData?.stats} />}
+            {activeTab === 'performance' && <PerformanceStats stats={stats || profileData} />}
+            {activeTab === 'history' && (
+              <TournamentSection matchHistory={matchHistory} tournaments={tournaments} />
+            )}
             {activeTab === 'analytics' && <AnalyticsSection />}
-            {activeTab === 'history' && <TournamentSection />}
             {activeTab === 'badges' && <AchievementSection />}
           </motion.div>
         </AnimatePresence>

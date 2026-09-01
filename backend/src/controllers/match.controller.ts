@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { MatchService } from '../services/match.service';
 import { broadcastScoreUpdate, broadcastMatchComplete, broadcastMatchCreated } from '../sockets/match.socket';
+import { updateRankingsForMatch } from '../services/ranking.service';
 
 export const matchController = {
 
@@ -79,7 +80,11 @@ export const matchController = {
 
         broadcastScoreUpdate(io, req.params.id, payload);
 
-        if (matchCompleted) broadcastMatchComplete(io, match);
+        if (matchCompleted) {
+          broadcastMatchComplete(io, match);
+          // Update rankings in background (non-blocking)
+          updateRankingsForMatch(String(match._id)).catch(() => {});
+        }
       }
 
       res.json({ match, gameCompleted, matchCompleted });
@@ -123,6 +128,7 @@ export const matchController = {
       const match = await MatchService.endMatch(req.params.id);
       const io = (req as any).app.get('io');
       if (io) broadcastMatchComplete(io, match);
+      updateRankingsForMatch(String(match._id)).catch(() => {});
       res.json(match);
     } catch (err: any) {
       const status = err.message === 'Match not found' ? 404 : 400;
