@@ -1,36 +1,61 @@
 import mongoose from 'mongoose';
 
+// Per-game score snapshot
+const gameScoreSchema = new mongoose.Schema({
+  scoreA: { type: Number, default: 0 },
+  scoreB: { type: Number, default: 0 },
+  winner: { type: Number, enum: [1, 2], default: null }, // 1=sideA, 2=sideB
+}, { _id: false });
+
 const matchSchema = new mongoose.Schema({
-  name: { type: String },
-  matchId: { type: String, unique: true, sparse: true, index: true },
+  matchId:    { type: String, unique: true, sparse: true, index: true },
+  name:       { type: String },
   match_type: { type: String, enum: ['singles', 'doubles', 'mixed'], default: 'singles' },
-  // Flexible players object: { p1, p2 } for singles or { sideA: [], sideB: [] } for doubles
+  category:   { type: String, enum: ['friendly', 'competitive'], default: 'friendly' },
+
+  // players: { p1, p2 } for singles | { sideA: [], sideB: [] } for doubles
   players: { type: mongoose.Schema.Types.Mixed, default: {} },
+
+  // Current game score (resets each game)
   current_score: { type: [Number], default: [0, 0] },
+
+  // Games won by each side
   sets_won: { type: [Number], default: [0, 0] },
+
+  // Total games to play (best of 3 standard)
   total_sets: { type: Number, default: 3 },
+
+  // Game-by-game history
+  game_scores: { type: [gameScoreSchema], default: [] },
+
+  // Current game number (1-indexed)
+  current_game: { type: Number, default: 1 },
+
   serving: { type: Number, enum: [1, 2], default: 1 },
+
   status: {
     type: String,
     enum: ['scheduled', 'live', 'completed'],
     default: 'scheduled',
-    index: true
+    index: true,
   },
-  court: { type: String },
+
+  winner: { type: Number, enum: [1, 2], default: null }, // 1=sideA, 2=sideB
+
+  court:        { type: String },
   tournamentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tournament', index: true },
-  // Legacy fields
-  score: { type: [Number], default: [0, 0] },
-  setScores: [[Number]],
-  currentSet: { type: Number, default: 1 },
-  server: { type: Number, enum: [1, 2], default: 1 },
+
+  // Event log
   events: [{
-    type: { type: String },
-    side: Number,
-    action: String,
-    score: [Number],
-    timestamp: { type: Date, default: Date.now }
+    type:      { type: String },
+    side:      Number,
+    action:    String,
+    score:     [Number],
+    game:      Number,
+    timestamp: { type: Date, default: Date.now },
   }],
-  last_update: { type: Date, default: Date.now }
+
+  last_update: { type: Date, default: Date.now },
 }, { timestamps: true });
 
 export const Match = mongoose.model('Match', matchSchema);

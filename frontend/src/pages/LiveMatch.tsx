@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MatchAPI, TournamentAPI } from '@/services/api';
+import { useSocketEvent } from '@/hooks/use-socket';
 
 const LiveMatch = () => {
   const navigate = useNavigate();
@@ -16,31 +17,59 @@ const LiveMatch = () => {
   const [liveMatches, setLiveMatches] = useState<any[]>([]);
   const [liveTournaments, setLiveTournaments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const categories = ["All", "Matches", "Tournaments"];
 
-  useEffect(() => {
-    const fetchLiveData = async () => {
-      try {
-        const [matches, tourneys] = await Promise.all([
-          MatchAPI.getAll('live'),
-          TournamentAPI.getAll(),
-        ]);
-        setLiveMatches(matches.map((m: any) => ({ ...m, id: m._id || m.id })));
-        setLiveTournaments(tourneys.map((t: any) => ({ ...t, id: t._id || t.id })));
-      } catch (err) {
-        const localMatches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
-        const localTourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
-        setLiveMatches(localMatches);
-        setLiveTournaments(localTourneys);
-      }
-      setIsLoading(false);
-    };
+  const fetchLiveData = async () => {
+    try {
+      const [matches, tourneys] = await Promise.all([
+        MatchAPI.getAll('live'),
+        TournamentAPI.getAll(),
+      ]);
+      setLiveMatches(matches.map((m: any) => ({ ...m, id: m._id || m.id })));
+      setLiveTournaments(tourneys.map((t: any) => ({ ...t, id: t._id || t.id })));
+    } catch {
+      setLiveMatches(JSON.parse(localStorage.getItem('active_studio_matches') || '[]'));
+    }
+    setIsLoading(false);
+  };
 
+  useEffect(() => {
     fetchLiveData();
-    const interval = setInterval(fetchLiveData, 10000);
-    return () => clearInterval(interval);
   }, []);
+
+  // Real-time: update score on existing live match card
+  useSocketEvent('feed:score_update', (payload) => {
+    setLiveMatches(prev => prev.map(m =>
+      (m._id || m.id) === payload.matchId
+        ? { ...m, current_score: payload.current_score, serving: payload.serving, status: payload.status }
+        : m
+    ));
+  });
+
+  // Real-time: new match went live
+  useSocketEvent('feed:match_created', (match) => {
+    const normalized = { ...match, id: match._id || match.id };
+    setLiveMatches(prev => {
+      if (prev.find(m => (m._id || m.id) === normalized.id)) return prev;
+      return [normalized, ...prev];
+    });
+  });
+
+  useSocketEvent('feed:match_started', (match) => {
+    const normalized = { ...match, id: match._id || match.id };
+    setLiveMatches(prev => {
+      if (prev.find(m => (m._id || m.id) === normalized.id)) {
+        return prev.map(m => (m._id || m.id) === normalized.id ? { ...m, status: 'live' } : m);
+      }
+      return [normalized, ...prev];
+    });
+  });
+
+  // Real-time: match completed — remove from live list
+  useSocketEvent('feed:match_completed', (match) => {
+    setLiveMatches(prev => prev.filter(m => (m._id || m.id) !== String(match._id)));
+  });
 
   const filteredItems = useMemo(() => {
     const matches = liveMatches.map(m => ({

@@ -233,6 +233,9 @@ const Login = () => {
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                     OTP sent to +91 {phone}
                   </p>
+                  <p className="text-[10px] text-sky-500 font-bold bg-sky-50 rounded-lg py-1.5 px-3">
+                    Demo mode — use OTP: <span className="font-black tracking-widest">123456</span>
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-6 gap-2">

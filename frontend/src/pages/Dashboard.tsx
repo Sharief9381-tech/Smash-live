@@ -1,49 +1,82 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { motion } from 'framer-motion';
 import { 
   Activity, Trophy, Zap, 
-  ArrowUpRight, Users, 
+  ArrowUpRight,
   LayoutDashboard, 
-  ChevronRight, MapPin, Target,
-  TrendingUp, Radio, Search as SearchIcon
+  MapPin, Target,
+  TrendingUp, Radio, Search as SearchIcon, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { MatchAPI, TournamentAPI } from '@/services/api';
+import { useSocketEvent } from '@/hooks/use-socket';
 
 const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [liveMatches, setLiveMatches]   = useState<any[]>([]);
+  const [tournaments, setTournaments]   = useState<any[]>([]);
+  const [loading, setLoading]           = useState(true);
 
-  const matches = [
-    { id: "M1", p1: "V. Axelsen", p2: "L. Zii Jia", score: "21-19, 14-11", tournament: "BWF Finals", smashId: "LIVE_001" },
-    { id: "M2", p1: "An Se-young", p2: "T. Tzu-ying", score: "21-12, 18-15", tournament: "Jakarta Open", smashId: "LIVE_002" },
-  ];
+  useEffect(() => {
+    Promise.all([MatchAPI.getAll('live'), TournamentAPI.getAll()])
+      .then(([matches, tourneys]) => {
+        setLiveMatches(matches);
+        setTournaments(tourneys);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
-  const tournaments = [
-    { id: "T1", name: "BWF World Tour Finals", loc: "Jakarta, ID", status: "Live", players: 32, cat: "Major", points: "12,000", bg: "bg-sky-500/5", smashId: "T_BWF_24" },
-    { id: "T2", name: "China Masters 2024", loc: "Shenzhen, CN", status: "Live", players: 64, cat: "Super 750", points: "9,200", bg: "bg-slate-50", smashId: "T_CHN_24" },
-    { id: "T3", name: "European Championships", loc: "Saarbrücken, DE", status: "Break", players: 128, cat: "Continental", points: "7,000", bg: "bg-slate-50", smashId: "T_EUR_24" },
-  ];
+  // Real-time score updates on dashboard cards
+  useSocketEvent('feed:score_update', (payload) => {
+    setLiveMatches(prev => prev.map(m =>
+      (m._id || m.id) === payload.matchId
+        ? { ...m, current_score: payload.current_score, status: payload.status }
+        : m
+    ));
+  });
 
-  const filteredMatches = useMemo(() => {
-    return matches.filter(m => 
-      m.p1.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      m.p2.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.tournament.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.smashId.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery]);
+  useSocketEvent('feed:match_created', (match) => {
+    setLiveMatches(prev => {
+      if (prev.find(m => (m._id || m.id) === (match._id || match.id))) return prev;
+      return [match, ...prev];
+    });
+  });
 
-  const filteredTournaments = useMemo(() => {
-    return tournaments.filter(t => 
-      t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      t.smashId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.loc.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery]);
+  useSocketEvent('feed:match_started', (match) => {
+    setLiveMatches(prev => {
+      if (prev.find(m => (m._id || m.id) === (match._id || match.id))) {
+        return prev.map(m => (m._id || m.id) === (match._id || match.id) ? { ...m, status: 'live' } : m);
+      }
+      return [match, ...prev];
+    });
+  });
+
+  useSocketEvent('feed:match_completed', (match) => {
+    setLiveMatches(prev => prev.filter(m => (m._id || m.id) !== String(match._id)));
+  });
+
+  const getP1 = (m: any) => m.players?.p1?.name || m.players?.sideA?.[0]?.name || 'Player A';
+  const getP2 = (m: any) => m.players?.p2?.name || m.players?.sideB?.[0]?.name || 'Player B';
+  const getScore = (m: any) => m.current_score ? `${m.current_score[0]}-${m.current_score[1]}` : '0-0';
+
+  const filteredMatches = useMemo(() =>
+    liveMatches.filter(m =>
+      getP1(m).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      getP2(m).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (m.name || '').toLowerCase().includes(searchQuery.toLowerCase())
+    ), [searchQuery, liveMatches]);
+
+  const filteredTournaments = useMemo(() =>
+    tournaments.filter(t =>
+      (t.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (t.city || '').toLowerCase().includes(searchQuery.toLowerCase())
+    ), [searchQuery, tournaments]);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -80,23 +113,28 @@ const Dashboard = () => {
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
-                {filteredMatches.length > 0 ? filteredMatches.map((match, i) => (
-                  <div key={i} className="bg-slate-50 border border-slate-100 p-6 rounded-3xl hover:border-sky-500/30 transition-all cursor-pointer group">
+                {loading ? (
+                  <div className="col-span-2 py-12 flex justify-center"><Loader2 className="animate-spin text-sky-500 h-7 w-7" /></div>
+                ) : filteredMatches.length > 0 ? filteredMatches.map((match, i) => (
+                  <div key={match._id || match.id || i} className="bg-slate-50 border border-slate-100 p-6 rounded-3xl hover:border-sky-500/30 transition-all cursor-pointer group">
                     <div className="flex justify-between items-start mb-3">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{match.tournament}</p>
-                      <Badge variant="outline" className="text-[8px] font-bold border-slate-200">{match.smashId}</Badge>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{match.name || 'Match'}</p>
+                      <div className="flex items-center gap-1.5">
+                        <div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+                        <span className="text-[8px] font-black text-red-400 uppercase">Live</span>
+                      </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <p className="font-black text-[#0B1F3A] group-hover:text-sky-600 transition-colors">{match.p1}</p>
-                        <p className="font-black text-[#0B1F3A] group-hover:text-sky-600 transition-colors">{match.p2}</p>
+                        <p className="font-black text-[#0B1F3A] group-hover:text-sky-600 transition-colors">{getP1(match)}</p>
+                        <p className="font-black text-[#0B1F3A] group-hover:text-sky-600 transition-colors">{getP2(match)}</p>
                       </div>
-                      <span className="text-xl font-mono font-black text-sky-600 group-hover:scale-110 transition-transform">{match.score}</span>
+                      <span className="text-xl font-mono font-black text-sky-600 group-hover:scale-110 transition-transform">{getScore(match)}</span>
                     </div>
                   </div>
                 )) : (
                   <div className="col-span-2 py-12 text-center bg-slate-100/50 rounded-3xl border-2 border-dashed border-slate-200">
-                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No player in this court</p>
+                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No live matches right now</p>
                   </div>
                 )}
               </div>
@@ -115,37 +153,28 @@ const Dashboard = () => {
               <div className="space-y-4">
                 {filteredTournaments.length > 0 ? filteredTournaments.map((tourney, i) => (
                   <motion.div 
-                    key={i}
+                    key={tourney._id || tourney.id || i}
                     whileHover={{ x: 5 }}
-                    className={`flex flex-col md:flex-row items-center justify-between p-6 rounded-[2rem] border border-slate-100 ${tourney.bg} group transition-all cursor-pointer`}
+                    className="flex flex-col md:flex-row items-center justify-between p-6 rounded-[2rem] border border-slate-100 bg-slate-50 group transition-all cursor-pointer"
                   >
                     <div className="flex items-center gap-6">
                       <div className="h-14 w-14 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-sky-500 shadow-sm group-hover:bg-[#0B1F3A] group-hover:text-white transition-all">
                         <Trophy className="h-6 w-6" />
                       </div>
                       <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-black text-[#0B1F3A]">{tourney.name}</h4>
-                          <Badge className="bg-slate-200 text-slate-600 font-black text-[8px]">{tourney.smashId}</Badge>
-                        </div>
+                        <h4 className="font-black text-[#0B1F3A] mb-1">{tourney.name}</h4>
                         <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {tourney.loc}</span>
+                          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {tourney.city || tourney.loc || '—'}</span>
                         </div>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-8 mt-4 md:mt-0">
-                      <div className="text-right hidden sm:block">
-                        <p className="text-lg font-black text-[#0B1F3A]">{tourney.points}</p>
-                      </div>
-                      <Button size="icon" className="h-12 w-12 rounded-2xl bg-white border border-slate-100 text-[#0B1F3A] hover:bg-sky-50 transition-all shadow-sm">
-                        <ArrowUpRight className="h-5 w-5" />
-                      </Button>
-                    </div>
+                    <Button size="icon" className="h-12 w-12 rounded-2xl bg-white border border-slate-100 text-[#0B1F3A] hover:bg-sky-50 transition-all shadow-sm mt-4 md:mt-0">
+                      <ArrowUpRight className="h-5 w-5" />
+                    </Button>
                   </motion.div>
                 )) : (
-                   <div className="py-12 text-center bg-slate-100/50 rounded-3xl border-2 border-dashed border-slate-200">
-                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No tournaments found in this court</p>
+                  <div className="py-12 text-center bg-slate-100/50 rounded-3xl border-2 border-dashed border-slate-200">
+                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No tournaments found</p>
                   </div>
                 )}
               </div>

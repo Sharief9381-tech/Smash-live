@@ -148,68 +148,72 @@ const CreateIndividualMatch = () => {
 
   const handleStart = async () => {
     const isDoubles = matchType !== 'singles';
-    const hasEnoughPlayers = isDoubles 
-      ? (selectedPlayers.tA1 && selectedPlayers.tA2 && selectedPlayers.tB1 && selectedPlayers.tB2)
-      : (selectedPlayers.p1 && selectedPlayers.p2);
 
-    if (!formData.name || !hasEnoughPlayers) {
-      showError("Please complete the team rosters");
+    // Collect all selected players
+    const allSelected = isDoubles
+      ? [selectedPlayers.tA1, selectedPlayers.tA2, selectedPlayers.tB1, selectedPlayers.tB2]
+      : [selectedPlayers.p1, selectedPlayers.p2];
+
+    if (allSelected.some(p => !p)) {
+      showError(isDoubles ? 'Please select all 4 players' : 'Please select both players');
+      return;
+    }
+
+    // Duplicate player check
+    const ids = allSelected.map((p: any) => p.id).filter(Boolean);
+    if (new Set(ids).size !== ids.length) {
+      showError('The same player cannot appear more than once');
+      return;
+    }
+
+    // Same player on both sides check (doubles)
+    if (isDoubles) {
+      const sideAIds = new Set([selectedPlayers.tA1?.id, selectedPlayers.tA2?.id].filter(Boolean));
+      for (const p of [selectedPlayers.tB1, selectedPlayers.tB2]) {
+        if (p?.id && sideAIds.has(p.id)) {
+          showError('A player cannot be on both sides');
+          return;
+        }
+      }
+    }
+
+    if (!formData.name) {
+      showError('Match name is required');
       return;
     }
 
     setIsInitializing(true);
-    const matchId = `live_${Date.now()}`;
-    
+
     const finalPlayers = isDoubles ? {
       sideA: [selectedPlayers.tA1, selectedPlayers.tA2],
-      sideB: [selectedPlayers.tB1, selectedPlayers.tB2]
+      sideB: [selectedPlayers.tB1, selectedPlayers.tB2],
     } : {
       p1: selectedPlayers.p1,
-      p2: selectedPlayers.p2
+      p2: selectedPlayers.p2,
     };
 
-    const localMatch = { 
-      ...formData, 
-      players: finalPlayers, 
-      match_type: matchType, 
-      id: matchId, 
-      status: 'live', 
-      current_score: [0, 0], 
-      sets_won: [0, 0],
-      total_sets: parseInt(formData.sets),
-      serving: 1 
-    };
-
-    // Save locally first for instant redirect
-    localStorage.setItem(matchId, JSON.stringify(localMatch));
-    const active = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
-    active.push(localMatch);
-    localStorage.setItem('active_studio_matches', JSON.stringify(active));
-
-    // Sync to MongoDB in background
     try {
-      const data = await MatchAPI.create({
-        name: formData.name,
-        players: finalPlayers,
+      // Create match (status: scheduled)
+      const created = await MatchAPI.create({
+        name:       formData.name,
+        players:    finalPlayers,
         match_type: matchType,
-        status: 'live',
-        current_score: [0, 0],
-        sets_won: [0, 0],
+        category:   formData.round === 'Competitive' ? 'competitive' : 'friendly',
+        court:      formData.court,
         total_sets: parseInt(formData.sets),
-        serving: 1,
       });
-      if (data._id || data.id) {
-        const cloudId = data._id || data.id;
-        localStorage.setItem(cloudId, JSON.stringify({ ...localMatch, id: cloudId }));
-        navigate(`/scoring/${cloudId}`, { replace: true });
-        return;
-      }
-    } catch (err) {
-      console.warn("Cloud sync failed, using local.");
-    }
 
-    showSuccess("Match Initialized");
-    navigate(`/scoring/${matchId}`, { replace: true });
+      const cloudId = created._id || created.id;
+
+      // Auto-start it
+      await MatchAPI.start(cloudId);
+
+      showSuccess('Match Started!');
+      navigate(`/scoring/${cloudId}`, { replace: true });
+    } catch (err: any) {
+      showError(err.message || 'Failed to create match');
+      setIsInitializing(false);
+    }
   };
 
   return (
@@ -230,13 +234,23 @@ const CreateIndividualMatch = () => {
                     <Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="h-12 bg-slate-50 border-slate-100 rounded-xl font-bold" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-400">Category</Label>
+                    <Label className="text-[10px] font-black uppercase text-slate-400">Match Type</Label>
                     <Select value={matchType} onValueChange={(v: any) => setMatchType(v)}>
                       <SelectTrigger className="h-12 bg-slate-50 border-slate-100 rounded-xl font-bold"><SelectValue /></SelectTrigger>
                       <SelectContent className="rounded-xl">
                         <SelectItem value="singles">Singles</SelectItem>
                         <SelectItem value="doubles">Doubles</SelectItem>
                         <SelectItem value="mixed">Mixed Doubles</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase text-slate-400">Category</Label>
+                    <Select value={formData.round} onValueChange={v => setFormData({...formData, round: v})}>
+                      <SelectTrigger className="h-12 bg-slate-50 border-slate-100 rounded-xl font-bold"><SelectValue /></SelectTrigger>
+                      <SelectContent className="rounded-xl">
+                        <SelectItem value="Friendly">Friendly</SelectItem>
+                        <SelectItem value="Competitive">Competitive</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

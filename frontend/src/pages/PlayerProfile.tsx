@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import ProfileHero from '@/components/profile/ProfileHero';
 import PerformanceStats from '@/components/profile/PerformanceStats';
@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { UserAPI } from '@/services/api';
+import { useSocketEvent } from '@/hooks/use-socket';
 
 const PlayerProfile = () => {
   const { id } = useParams();
@@ -24,27 +25,40 @@ const PlayerProfile = () => {
   const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState<any>(null);
 
-  useEffect(() => {
-    const fetchAthlete = async () => {
-      setLoading(true);
-      if (!id || id === 'me') {
-        const saved = localStorage.getItem('userProfile');
-        if (saved) setProfileData(JSON.parse(saved));
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const data = await UserAPI.getById(id);
-        if (data) setProfileData(data);
-      } catch (e) {
-        const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
-        const local = registered.find((u: any) => u.id === id || u.mobile === id);
-        if (local) setProfileData(local);
-      } finally { setLoading(false); }
-    };
-    fetchAthlete();
+  const fetchAthlete = useCallback(async () => {
+    setLoading(true);
+    if (!id || id === 'me') {
+      const saved = localStorage.getItem('userProfile');
+      if (saved) setProfileData(JSON.parse(saved));
+      setLoading(false);
+      return;
+    }
+    try {
+      const data = await UserAPI.getById(id);
+      if (data) setProfileData(data);
+    } catch {
+      const registered = JSON.parse(localStorage.getItem('registered_users') || '[]');
+      const local = registered.find((u: any) => u.id === id || u.mobile === id);
+      if (local) setProfileData(local);
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => { fetchAthlete(); }, [fetchAthlete]);
+
+  // Re-fetch profile when a match involving this player completes
+  useSocketEvent('feed:match_completed', (match) => {
+    const playersStr = JSON.stringify(match.players || '');
+    const profileName = profileData?.name || '';
+    const profileId   = profileData?._id || profileData?.id || id;
+    if (
+      playersStr.includes(profileId) ||
+      (profileName && playersStr.toLowerCase().includes(profileName.toLowerCase()))
+    ) {
+      fetchAthlete();
+    }
+  });
 
   const tabs = [
     { id: 'performance', label: 'Stats', icon: Activity },

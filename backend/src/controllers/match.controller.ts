@@ -1,28 +1,132 @@
 import { Request, Response } from 'express';
-import { MatchBackendService } from '../services/backend/match.service';
+import { MatchService } from '../services/match.service';
+import { broadcastScoreUpdate, broadcastMatchComplete, broadcastMatchCreated } from '../sockets/match.socket';
 
 export const matchController = {
+
   async create(req: Request, res: Response) {
     try {
-      const match = await MatchBackendService.createMatch(req.body);
+      const match = await MatchService.createMatch(req.body);
+      const io = (req as any).app.get('io');
+      if (io) broadcastMatchCreated(io, match);
       res.status(201).json(match);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
+    } catch (err: any) {
+      res.status(400).json({ message: err.message });
     }
   },
 
-  async updateScore(req: Request, res: Response) {
+  async getAll(req: Request, res: Response) {
     try {
-      const { id } = req.params;
-      const { side, action } = req.body;
-      const match = await MatchBackendService.updateScore(id, side, action);
-      
-      // Socket emission logic would go here
-      // req.app.get('io').to(id).emit('score:update', match);
-      
-      res.json(match);
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
+      const status = req.query.status as string | undefined;
+      const matches = await MatchService.getMatches(status);
+      res.json(matches);
+    } catch (err: any) {
+      res.status(400).json({ message: err.message });
     }
-  }
+  },
+
+  async getById(req: Request, res: Response) {
+    try {
+      const match = await MatchService.getMatchById(req.params.id);
+      res.json(match);
+    } catch (err: any) {
+      const status = err.message === 'Match not found' ? 404 : 400;
+      res.status(status).json({ message: err.message });
+    }
+  },
+
+  async start(req: Request, res: Response) {
+    try {
+      const match = await MatchService.startMatch(req.params.id);
+      const io = (req as any).app.get('io');
+      if (io) {
+        io.to(req.params.id).emit('match:started', match);
+        io.emit('feed:match_started', match);
+      }
+      res.json(match);
+    } catch (err: any) {
+      const status = err.message === 'Match not found' ? 404 : 400;
+      res.status(status).json({ message: err.message });
+    }
+  },
+
+  async scorePoint(req: Request, res: Response) {
+    try {
+      const side = Number(req.body.side) as 1 | 2;
+      const action = req.body.action || 'point';
+
+      if (!side) return res.status(400).json({ message: 'side is required (1 or 2)' });
+
+      const { match, gameCompleted, matchCompleted } = await MatchService.scorePoint(req.params.id, side, action);
+      const io = (req as any).app.get('io');
+
+      if (io) {
+        const payload = {
+          matchId: String(match._id),
+          name: match.name,
+          players: match.players,
+          match_type: match.match_type,
+          current_score: match.current_score,
+          sets_won: match.sets_won,
+          current_game: match.current_game,
+          game_scores: match.game_scores,
+          serving: match.serving,
+          status: match.status,
+          winner: match.winner,
+          gameCompleted,
+          matchCompleted,
+        };
+
+        broadcastScoreUpdate(io, req.params.id, payload);
+
+        if (matchCompleted) broadcastMatchComplete(io, match);
+      }
+
+      res.json({ match, gameCompleted, matchCompleted });
+    } catch (err: any) {
+      const status = err.message === 'Match not found' ? 404 : 400;
+      res.status(status).json({ message: err.message });
+    }
+  },
+
+  async undoPoint(req: Request, res: Response) {
+    try {
+      const match = await MatchService.undoPoint(req.params.id);
+      const io = (req as any).app.get('io');
+      if (io) {
+        const payload = {
+          matchId: String(match._id),
+          name: match.name,
+          players: match.players,
+          match_type: match.match_type,
+          current_score: match.current_score,
+          sets_won: match.sets_won,
+          current_game: match.current_game,
+          game_scores: match.game_scores,
+          serving: match.serving,
+          status: match.status,
+          winner: match.winner,
+          gameCompleted: false,
+          matchCompleted: false,
+        };
+        broadcastScoreUpdate(io, req.params.id, payload);
+      }
+      res.json(match);
+    } catch (err: any) {
+      const status = err.message === 'Match not found' ? 404 : 400;
+      res.status(status).json({ message: err.message });
+    }
+  },
+
+  async endMatch(req: Request, res: Response) {
+    try {
+      const match = await MatchService.endMatch(req.params.id);
+      const io = (req as any).app.get('io');
+      if (io) broadcastMatchComplete(io, match);
+      res.json(match);
+    } catch (err: any) {
+      const status = err.message === 'Match not found' ? 404 : 400;
+      res.status(status).json({ message: err.message });
+    }
+  },
 };

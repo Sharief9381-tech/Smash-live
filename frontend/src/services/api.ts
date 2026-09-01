@@ -32,20 +32,41 @@ export const TournamentAPI = {
   getById: (id: string) =>
     request<any>(`/tournaments/${id}`),
 
-  create: (data: { name: string; city: string; start_date: string; slug: string; status?: string; organizer?: string }) =>
+  create: (data: object) =>
     request<any>('/tournaments', { method: 'POST', body: JSON.stringify(data) }),
+
+  update: (id: string, data: object) =>
+    request<any>(`/tournaments/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
 
   delete: (id: string) =>
     request<any>(`/tournaments/${id}`, { method: 'DELETE' }),
 
-  getParticipants: (tournamentId: string) =>
-    request<any[]>(`/tournaments/${tournamentId}/participants`),
+  getParticipants: (id: string) =>
+    request<any[]>(`/tournaments/${id}/participants`),
 
-  addParticipant: (tournamentId: string, data: object) =>
-    request<any>(`/tournaments/${tournamentId}/participants`, {
+  addParticipant: (id: string, data: object) =>
+    request<any>(`/tournaments/${id}/participants`, { method: 'POST', body: JSON.stringify(data) }),
+
+  generateDraw: (id: string) =>
+    request<any>(`/tournaments/${id}/draw`, { method: 'POST' }),
+
+  getBracket: (id: string) =>
+    request<any[]>(`/tournaments/${id}/bracket`),
+
+  recordResult: (id: string, bracketMatchId: string, winnerParticipantId: string) =>
+    request<any>(`/tournaments/${id}/result`, {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify({ bracketMatchId, winnerParticipantId }),
     }),
+
+  getMatches: (id: string) =>
+    request<any[]>(`/tournaments/${id}/matches`),
+
+  getStandings: (id: string) =>
+    request<any[]>(`/tournaments/${id}/standings`),
+
+  closeRegistration: (id: string) =>
+    request<any>(`/tournaments/${id}/close-registration`, { method: 'POST' }),
 };
 
 // ── Matches ──────────────────────────────────────────────────────────────────
@@ -60,8 +81,27 @@ export const MatchAPI = {
   create: (data: object) =>
     request<any>('/matches', { method: 'POST', body: JSON.stringify(data) }),
 
-  update: (id: string, data: object) =>
-    request<any>(`/matches/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  /** Transition match from scheduled → live */
+  start: (id: string) =>
+    request<any>(`/matches/${id}/start`, { method: 'POST' }),
+
+  /**
+   * Award a point — backend applies badminton rules.
+   * Returns { match, gameCompleted, matchCompleted }
+   */
+  scorePoint: (id: string, side: 1 | 2, action = 'point') =>
+    request<{ match: any; gameCompleted: boolean; matchCompleted: boolean }>(
+      `/matches/${id}/score`,
+      { method: 'POST', body: JSON.stringify({ side, action }) }
+    ),
+
+  /** Undo the last point */
+  undo: (id: string) =>
+    request<any>(`/matches/${id}/undo`, { method: 'POST' }),
+
+  /** Manually end a match */
+  end: (id: string) =>
+    request<any>(`/matches/${id}/end`, { method: 'POST' }),
 
   delete: (id: string) =>
     request<any>(`/matches/${id}`, { method: 'DELETE' }),

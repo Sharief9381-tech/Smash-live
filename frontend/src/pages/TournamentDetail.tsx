@@ -1,193 +1,437 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Trophy, Calendar, Users, MapPin, 
-  ChevronLeft, Activity, Globe, Loader2, Copy, Check, QrCode, Download
+import {
+  Trophy, Calendar, Users, MapPin,
+  ChevronLeft, Activity, Globe, Loader2,
+  Copy, Check, Download, Play, Lock, Shuffle, Star
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { TournamentAPI } from '@/services/api';
 import { showSuccess, showError } from '@/utils/toast';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
+// ── Status badge colours ───────────────────────────────────────────────────
+const STATUS_COLORS: Record<string, string> = {
+  registration_open:   'bg-green-500',
+  registration_closed: 'bg-amber-500',
+  draw_generated:      'bg-sky-500',
+  in_progress:         'bg-red-500',
+  completed:           'bg-slate-400',
+  draft:               'bg-slate-300',
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  registration_open:   'Registration Open',
+  registration_closed: 'Registration Closed',
+  draw_generated:      'Draw Generated',
+  in_progress:         'In Progress',
+  completed:           'Completed',
+  draft:               'Draft',
+};
+
+// ── Round labels (knockout) ────────────────────────────────────────────────
+function roundLabel(round: number, totalRounds: number): string {
+  const diff = totalRounds - round;
+  if (diff === 0) return 'Final';
+  if (diff === 1) return 'Semi Final';
+  if (diff === 2) return 'Quarter Final';
+  return `Round ${round}`;
+}
+
+// ── Bracket view ───────────────────────────────────────────────────────────
+const BracketView = ({
+  bracket, participants, onResult
+}: {
+  bracket: any[];
+  participants: any[];
+  onResult: (matchId: string, winnerId: string) => void;
+}) => {
+  const pMap: Record<string, any> = {};
+  participants.forEach(p => { pMap[String(p._id)] = p; });
+
+  const rounds = [...new Set(bracket.map(m => m.round))].sort((a, b) => a - b);
+  const maxRound = Math.max(...rounds);
+
+  return (
+    <div className="overflow-x-auto pb-4">
+      <div className="flex gap-6 min-w-max">
+        {rounds.map(round => (
+          <div key={round} className="flex flex-col gap-4 w-56">
+            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 text-center">
+              {roundLabel(round, maxRound)}
+            </p>
+            {bracket.filter(m => m.round === round).map((match: any) => {
+              const pA = pMap[String(match.participantA)];
+              const pB = pMap[String(match.participantB)];
+              const winner = match.winner ? String(match.winner) : null;
+              const isBye = match.status === 'bye';
+              const isDone = match.status === 'completed' || isBye;
+
+              return (
+                <div key={String(match._id)} className={cn(
+                  'bg-white border rounded-2xl overflow-hidden shadow-sm',
+                  isDone ? 'border-slate-100 opacity-80' : 'border-sky-200'
+                )}>
+                  {/* Participant A */}
+                  <div className={cn('px-4 py-2.5 flex items-center justify-between border-b border-slate-50',
+                    winner === String(match.participantA) ? 'bg-sky-50' : '')}>
+                    <span className={cn('text-xs font-black uppercase truncate max-w-[120px]',
+                      winner === String(match.participantA) ? 'text-sky-600' : 'text-[#0B1F3A]')}>
+                      {pA?.name || (isBye ? 'BYE' : 'TBD')}
+                    </span>
+                    {!isDone && pA && pB && (
+                      <button onClick={() => onResult(String(match._id), String(match.participantA))}
+                        className="text-[8px] font-black bg-sky-500 text-white px-2 py-1 rounded-lg ml-2 hover:bg-sky-600 transition">
+                        WIN
+                      </button>
+                    )}
+                  </div>
+                  {/* Participant B */}
+                  <div className={cn('px-4 py-2.5 flex items-center justify-between',
+                    winner === String(match.participantB) ? 'bg-sky-50' : '')}>
+                    <span className={cn('text-xs font-black uppercase truncate max-w-[120px]',
+                      winner === String(match.participantB) ? 'text-sky-600' : 'text-[#0B1F3A]')}>
+                      {pB?.name || (isBye ? 'BYE' : 'TBD')}
+                    </span>
+                    {!isDone && pA && pB && (
+                      <button onClick={() => onResult(String(match._id), String(match.participantB))}
+                        className="text-[8px] font-black bg-sky-500 text-white px-2 py-1 rounded-lg ml-2 hover:bg-sky-600 transition">
+                        WIN
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ── Standings view (Round Robin) ───────────────────────────────────────────
+const StandingsView = ({ standings }: { standings: any[] }) => (
+  <div className="space-y-2">
+    <div className="grid grid-cols-6 gap-2 px-4 py-2">
+      {['#', 'Player', 'P', 'W', 'L', 'Pts'].map(h => (
+        <span key={h} className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">{h}</span>
+      ))}
+    </div>
+    {standings.map((row: any, idx: number) => (
+      <div key={idx} className={cn('grid grid-cols-6 gap-2 px-4 py-3 rounded-2xl items-center',
+        idx === 0 ? 'bg-sky-50 border border-sky-100' : 'bg-white border border-slate-50')}>
+        <span className={cn('text-sm font-black text-center', idx === 0 ? 'text-yellow-500' : 'text-slate-400')}>
+          {idx === 0 ? '🥇' : `#${idx + 1}`}
+        </span>
+        <span className="text-xs font-black text-[#0B1F3A] uppercase col-span-1 truncate">{row.participant?.name || '—'}</span>
+        <span className="text-xs font-black text-slate-500 text-center">{row.played}</span>
+        <span className="text-xs font-black text-green-600 text-center">{row.wins}</span>
+        <span className="text-xs font-black text-red-400 text-center">{row.losses}</span>
+        <span className="text-sm font-black text-sky-600 text-center">{row.points}</span>
+      </div>
+    ))}
+  </div>
+);
+
+// ── Main page ──────────────────────────────────────────────────────────────
 const TournamentDetail = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [tournament, setTournament] = useState<any>(null);
-  const [participants, setParticipants] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        const tourney = await TournamentAPI.getById(id!);
-        setTournament({ ...tourney, id: tourney._id || tourney.id });
-        const athletes = await TournamentAPI.getParticipants(tourney._id || tourney.id);
-        setParticipants(athletes);
-      } catch (err) {
-        // fallback to localStorage
-        const localTourneys = JSON.parse(localStorage.getItem('active_studio_tournaments') || '[]');
-        const localMatch = localTourneys.find((t: any) => t.id === id || t.slug === id);
-        if (localMatch) {
-          setTournament(localMatch);
-          const storageKey = `participants_${localMatch.id || localMatch.slug}`;
-          setParticipants(JSON.parse(localStorage.getItem(storageKey) || '[]'));
-        }
-      } finally {
-        setLoading(false);
+  const [tournament,    setTournament]    = useState<any>(null);
+  const [participants,  setParticipants]  = useState<any[]>([]);
+  const [bracket,       setBracket]       = useState<any[]>([]);
+  const [standings,     setStandings]     = useState<any[]>([]);
+  const [loading,       setLoading]       = useState(true);
+  const [activeTab,     setActiveTab]     = useState<'roster'|'bracket'|'standings'>('roster');
+  const [copied,        setCopied]        = useState(false);
+
+  const load = useCallback(async () => {
+    if (!id) return;
+    setLoading(true);
+    try {
+      const [t, ps] = await Promise.all([
+        TournamentAPI.getById(id),
+        TournamentAPI.getParticipants(id),
+      ]);
+      setTournament({ ...t, id: t._id || t.id });
+      setParticipants(ps);
+
+      if (['draw_generated', 'in_progress', 'completed'].includes(t.status)) {
+        const br = await TournamentAPI.getBracket(t._id || t.id);
+        setBracket(br);
       }
-    };
-    if (id) loadData();
+
+      if (t.format === 'round_robin' && ['in_progress', 'completed'].includes(t.status)) {
+        try {
+          const st = await TournamentAPI.getStandings(t._id || t.id);
+          setStandings(st);
+        } catch {}
+      }
+    } catch {
+      showError('Failed to load tournament');
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
 
-  const registrationLink = tournament ? `${window.location.origin}/register/${tournament.slug}` : "";
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(registrationLink)}`;
+  useEffect(() => { load(); }, [load]);
 
-  const copyLink = () => {
+  const handleGenerateDraw = async () => {
     if (!tournament) return;
-    navigator.clipboard.writeText(registrationLink);
-    setCopied(true);
-    showSuccess("Registration link copied!");
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await TournamentAPI.generateDraw(tournament.id);
+      showSuccess('Draw generated!');
+      load();
+      setActiveTab('bracket');
+    } catch (e: any) { showError(e.message); }
   };
+
+  const handleCloseReg = async () => {
+    if (!tournament) return;
+    try {
+      await TournamentAPI.closeRegistration(tournament.id);
+      showSuccess('Registration closed');
+      load();
+    } catch (e: any) { showError(e.message); }
+  };
+
+  const handleResult = async (bracketMatchId: string, winnerId: string) => {
+    if (!tournament) return;
+    try {
+      await TournamentAPI.recordResult(tournament.id, bracketMatchId, winnerId);
+      showSuccess('Result recorded!');
+      load();
+    } catch (e: any) { showError(e.message); }
+  };
+
+  const regLink = tournament ? `${window.location.origin}/register/${tournament.slug}` : '';
+  const qrUrl   = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(regLink)}`;
 
   const downloadQR = async () => {
     try {
-      const response = await fetch(qrUrl);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `QR_${tournament.name.replace(/\s+/g, '_')}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      showSuccess("QR Downloaded!");
-    } catch (e) {
-      showError("Download failed.");
-    }
+      const res  = await fetch(qrUrl);
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = `QR_${tournament.name.replace(/\s+/g, '_')}.png`;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+      showSuccess('QR Downloaded!');
+    } catch { showError('Download failed'); }
   };
 
   if (loading) return <div className="min-h-screen bg-slate-50 flex items-center justify-center"><Loader2 className="h-10 w-10 text-sky-500 animate-spin" /></div>;
 
-  if (!tournament) {
-    return (
-      <div className="min-h-screen bg-[#F8FAFC] pb-20">
-        <Navbar />
-        <main className="container flex flex-col items-center justify-center py-40 gap-6 text-center px-6">
-           <Trophy className="h-16 w-16 text-slate-200" />
-           <div className="space-y-2">
-             <h2 className="text-3xl font-black text-[#0B1F3A] uppercase italic">Circuit Expired</h2>
-             <p className="text-slate-500 font-medium max-w-sm">The registration protocol for this circuit has been cleared.</p>
-           </div>
-           <Button onClick={() => navigate('/tournaments')} className="bg-[#0B1F3A] text-white px-10 h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] border-none shadow-xl">Return to Hub</Button>
-        </main>
-      </div>
-    );
-  }
+  if (!tournament) return (
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-6">
+      <Trophy className="h-16 w-16 text-slate-200" />
+      <Button onClick={() => navigate('/tournaments')} className="bg-[#0B1F3A] text-white px-10 h-14 rounded-2xl font-black uppercase text-[10px]">
+        Back to Tournaments
+      </Button>
+    </div>
+  );
+
+  const isKnockout   = tournament.format === 'knockout';
+  const isRR         = tournament.format === 'round_robin';
+  const canClose     = tournament.status === 'registration_open';
+  const canDraw      = ['registration_open', 'registration_closed'].includes(tournament.status);
+  const hasBracket   = bracket.length > 0;
+  const winnerP      = participants.find(p => String(p._id) === String(tournament.winner));
+
+  const tabs = [
+    { id: 'roster',    label: 'Roster',   show: true },
+    { id: 'bracket',   label: isRR ? 'Fixtures' : 'Bracket', show: hasBracket },
+    { id: 'standings', label: 'Standings', show: isRR && standings.length > 0 },
+  ].filter(t => t.show);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#0B1F3A] pb-32">
       <Navbar />
-      
-      <main className="container px-4 py-8 space-y-8">
-        <div className="space-y-6">
+      <main className="container px-4 py-8 space-y-8 max-w-4xl mx-auto">
+
+        {/* Header */}
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <button 
-              onClick={() => navigate('/tournaments')}
-              className="p-2 -ml-2 text-slate-400 hover:text-[#0B1F3A] transition-colors"
-            >
+            <button onClick={() => navigate('/tournaments')} className="p-2 -ml-2 text-slate-400 hover:text-[#0B1F3A]">
               <ChevronLeft className="h-6 w-6" />
             </button>
             <div className="flex items-center gap-2">
               <Globe className="h-3.5 w-3.5 text-sky-500" />
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Registry Active</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Tournament Detail</span>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <Badge className="bg-sky-500 text-white border-none font-black px-4 h-6 text-[8px] uppercase rounded-full">{tournament.status?.toUpperCase() || "ACTIVE"}</Badge>
-              <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">ID: {String(tournament.id).slice(-6).toUpperCase()}</span>
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-2 items-center">
+              <Badge className={cn('text-white border-none font-black px-4 h-6 text-[8px] uppercase rounded-full', STATUS_COLORS[tournament.status] || 'bg-slate-400')}>
+                {STATUS_LABELS[tournament.status] || tournament.status}
+              </Badge>
+              <Badge variant="outline" className="font-black text-[8px] uppercase px-3 h-6">
+                {tournament.format === 'round_robin' ? 'Round Robin' : 'Knockout'} · {tournament.category}
+              </Badge>
             </div>
-            
-            <div className="space-y-1">
-              <h1 className="text-3xl font-black tracking-tight uppercase italic leading-none">{tournament.name}</h1>
-              <div className="flex flex-wrap items-center gap-4 text-[10px] text-slate-400 font-black uppercase tracking-widest mt-2">
-                <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-sky-500" /> {tournament.city}</span>
-                <span className="h-1 w-1 bg-slate-200 rounded-full" />
-                <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-sky-500" /> {tournament.start_date || tournament.startDate}</span>
-                <span className="h-1 w-1 bg-slate-200 rounded-full" />
-                <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5 text-sky-500" /> {participants.length} Entries</span>
+            <h1 className="text-3xl font-black tracking-tight uppercase italic leading-none">{tournament.name}</h1>
+            <div className="flex flex-wrap gap-4 text-[10px] text-slate-400 font-black uppercase tracking-widest">
+              {tournament.city      && <span className="flex items-center gap-1.5"><MapPin     className="h-3.5 w-3.5 text-sky-500" /> {tournament.city}</span>}
+              {tournament.start_date && <span className="flex items-center gap-1.5"><Calendar   className="h-3.5 w-3.5 text-sky-500" /> {tournament.start_date}</span>}
+              <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5 text-sky-500" /> {participants.length} / {tournament.max_participants}</span>
+            </div>
+          </div>
+
+          {/* Winner banner */}
+          {tournament.status === 'completed' && winnerP && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-3xl p-5 flex items-center gap-4">
+              <Trophy className="h-8 w-8 text-yellow-500 shrink-0" />
+              <div>
+                <p className="text-[9px] font-black text-yellow-600 uppercase tracking-widest">Tournament Winner</p>
+                <p className="text-xl font-black text-[#0B1F3A] uppercase italic">{winnerP.name}</p>
               </div>
             </div>
+          )}
+
+          {/* Action buttons */}
+          <div className="flex flex-wrap gap-3">
+            {canClose && (
+              <Button onClick={handleCloseReg} variant="outline" className="h-11 rounded-xl font-black text-[10px] uppercase gap-2 border-amber-200 text-amber-600 hover:bg-amber-50">
+                <Lock className="h-4 w-4" /> Close Registration
+              </Button>
+            )}
+            {canDraw && participants.length >= 2 && (
+              <Button onClick={handleGenerateDraw} className="h-11 rounded-xl bg-[#0B1F3A] text-white font-black text-[10px] uppercase gap-2 shadow-lg hover:bg-sky-500 transition">
+                <Shuffle className="h-4 w-4" /> Generate Draw
+              </Button>
+            )}
           </div>
         </div>
 
         <div className="grid lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8 space-y-6">
-            <div className="bg-white rounded-[2.5rem] border border-slate-100 p-8 space-y-6 shadow-sm">
-              <div className="flex items-center justify-between border-b border-slate-50 pb-4">
-                <h3 className="text-sm font-black uppercase italic text-[#0B1F3A]">Entry Roster</h3>
-                <Activity className="h-4 w-4 text-sky-500" />
+
+            {/* Tabs */}
+            {tabs.length > 1 && (
+              <div className="flex gap-2">
+                {tabs.map(tab => (
+                  <button key={tab.id} onClick={() => setActiveTab(tab.id as any)}
+                    className={cn('px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all',
+                      activeTab === tab.id ? 'bg-[#0B1F3A] text-white' : 'bg-white text-slate-400 border border-slate-100')}>
+                    {tab.label}
+                  </button>
+                ))}
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {participants.length > 0 ? participants.map((p: any, idx: number) => (
-                  <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-4">
-                    <div className="h-9 w-9 rounded-full bg-[#0B1F3A] flex items-center justify-center text-sky-400 font-black text-[10px] uppercase shadow-inner">{p.name[0]}</div>
-                    <div className="overflow-hidden">
-                      <p className="font-black text-[#0B1F3A] uppercase text-xs truncate">{p.name}</p>
-                      <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest truncate">{p.smash_id || p.smashId || "Dossier Active"}</p>
-                    </div>
+            )}
+
+            {/* Roster */}
+            {activeTab === 'roster' && (
+              <div className="bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-sm space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                  <h3 className="text-sm font-black uppercase italic">Entry Roster</h3>
+                  <Activity className="h-4 w-4 text-sky-500" />
+                </div>
+                {participants.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {participants.map((p: any, i: number) => (
+                      <div key={String(p._id)} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-full bg-[#0B1F3A] flex items-center justify-center text-sky-400 font-black text-[10px] uppercase shrink-0">
+                          {p.name[0]}
+                        </div>
+                        <div className="overflow-hidden flex-1">
+                          <p className="font-black text-[#0B1F3A] uppercase text-xs truncate">{p.name}</p>
+                          {p.partner_name && (
+                            <p className="text-[9px] font-bold text-sky-500 truncate">+ {p.partner_name}</p>
+                          )}
+                          <p className="text-[8px] font-bold text-slate-400 uppercase truncate">
+                            {p.smash_id || 'Registered'} · {p.status}
+                          </p>
+                        </div>
+                        {p.status === 'winner' && <Star className="h-4 w-4 text-yellow-500 shrink-0" />}
+                        {p.status === 'eliminated' && <span className="text-[8px] font-black text-red-400 uppercase">Out</span>}
+                      </div>
+                    ))}
                   </div>
-                )) : (
-                  <div className="col-span-full py-20 text-center opacity-40">
+                ) : (
+                  <div className="py-20 text-center opacity-40">
                     <Users className="h-10 w-10 mx-auto text-slate-200 mb-3" />
-                    <p className="font-black text-slate-400 uppercase text-[9px] tracking-widest italic">No entries synchronized yet</p>
+                    <p className="font-black text-slate-400 uppercase text-[9px]">No entries yet</p>
                   </div>
                 )}
               </div>
-            </div>
+            )}
+
+            {/* Bracket */}
+            {activeTab === 'bracket' && hasBracket && (
+              <div className="bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-sm space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                  <h3 className="text-sm font-black uppercase italic">
+                    {isKnockout ? 'Knockout Bracket' : 'Round Robin Fixtures'}
+                  </h3>
+                  <Trophy className="h-4 w-4 text-sky-500" />
+                </div>
+                <BracketView
+                  bracket={bracket}
+                  participants={participants}
+                  onResult={handleResult}
+                />
+              </div>
+            )}
+
+            {/* Standings */}
+            {activeTab === 'standings' && standings.length > 0 && (
+              <div className="bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-sm space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                  <h3 className="text-sm font-black uppercase italic">Standings</h3>
+                  <Activity className="h-4 w-4 text-sky-500" />
+                </div>
+                <StandingsView standings={standings} />
+              </div>
+            )}
           </div>
 
+          {/* Sidebar — QR / registration */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-[#0B1F3A] p-8 rounded-[2.5rem] text-white space-y-6 shadow-xl relative overflow-hidden group">
-              <div className="flex items-center justify-between">
+            {tournament.status === 'registration_open' && (
+              <div className="bg-[#0B1F3A] p-8 rounded-[2.5rem] text-white space-y-5 shadow-xl">
                 <Trophy className="h-8 w-8 text-sky-400" />
-                <QrCode className="h-6 w-6 text-white/20" />
-              </div>
-              
-              <div className="space-y-4">
-                <div className="bg-white p-3 rounded-2xl shadow-inner inline-block mx-auto relative group/qr">
-                  <img src={qrUrl} alt="QR Code" className="w-full aspect-square rounded-lg" />
-                  <Button 
-                    onClick={downloadQR}
-                    className="absolute -bottom-2 -right-2 h-10 w-10 bg-sky-500 text-white rounded-xl shadow-lg hover:bg-sky-400 border-none p-0"
-                  >
+                <div className="bg-white p-3 rounded-2xl shadow-inner inline-block relative">
+                  <img src={qrUrl} alt="QR" className="w-full aspect-square rounded-lg" />
+                  <Button onClick={downloadQR} className="absolute -bottom-2 -right-2 h-10 w-10 bg-sky-500 text-white rounded-xl shadow-lg border-none p-0">
                     <Download className="h-4 w-4" />
                   </Button>
                 </div>
-
-                <div className="space-y-2 text-center">
-                  <h3 className="text-lg font-black italic tracking-tighter uppercase">Athlete Entry</h3>
-                  <p className="text-[9px] text-white/50 font-bold uppercase tracking-widest leading-relaxed">Show this QR to athletes for instant circuit registration.</p>
+                <div className="space-y-2">
+                  <p className="text-[9px] text-white/50 font-bold uppercase tracking-widest">Athlete Entry Link</p>
+                  <div className="flex gap-2">
+                    <div className="flex-1 h-10 bg-white/10 rounded-xl px-3 flex items-center overflow-hidden">
+                      <span className="text-[9px] font-mono text-white/60 truncate">{regLink}</span>
+                    </div>
+                    <Button onClick={() => { navigator.clipboard.writeText(regLink); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+                      className="h-10 w-10 bg-sky-500 text-white rounded-xl shrink-0 border-none p-0">
+                      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
                 </div>
-
-                <Button 
-                  onClick={copyLink}
-                  className={cn(
-                    "w-full h-11 rounded-xl font-black uppercase tracking-widest text-[9px] transition-all border-none active:scale-95",
-                    copied ? "bg-green-500 hover:bg-green-600" : "bg-sky-500 hover:bg-sky-400"
-                  )}
-                >
-                  {copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
-                  {copied ? "Link Copied" : "Copy Entry Link"}
-                </Button>
               </div>
+            )}
+
+            {/* Tournament info card */}
+            <div className="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm space-y-4">
+              <h4 className="text-xs font-black uppercase tracking-widest text-slate-400">Tournament Info</h4>
+              {[
+                { label: 'Format',    val: tournament.format === 'round_robin' ? 'Round Robin' : 'Knockout' },
+                { label: 'Category',  val: tournament.category },
+                { label: 'Organizer', val: tournament.organizer || '—' },
+                { label: 'Max Entry', val: tournament.max_participants },
+                { label: 'Entries',   val: participants.length },
+              ].map(({ label, val }) => (
+                <div key={label} className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0">
+                  <span className="text-[10px] font-black text-slate-400 uppercase">{label}</span>
+                  <span className="text-xs font-black text-[#0B1F3A] uppercase">{val}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>

@@ -1,9 +1,10 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import { Search, Loader2, Minus, Trophy, Zap, ChevronRight } from 'lucide-react';
+import { Search, Loader2, Trophy, Zap, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { UserAPI } from '@/services/api';
 import { cn } from '@/lib/utils';
+import { useSocketEvent } from '@/hooks/use-socket';
 
 const Rankings = () => {
   const navigate = useNavigate();
@@ -12,19 +13,23 @@ const Rankings = () => {
   const [athletes, setAthletes] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchAthletes = async () => {
-      try {
-        const data = await UserAPI.getAll();
-        setAthletes(data);
-      } catch (err) {
-        setAthletes(JSON.parse(localStorage.getItem('registered_users') || '[]'));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchAthletes();
+  const fetchAthletes = useCallback(async () => {
+    try {
+      const data = await UserAPI.getAll();
+      setAthletes(data);
+    } catch {
+      setAthletes(JSON.parse(localStorage.getItem('registered_users') || '[]'));
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => { fetchAthletes(); }, [fetchAthletes]);
+
+  // Re-fetch rankings when a match completes (stats/ranking may have changed)
+  useSocketEvent('feed:match_completed', () => {
+    fetchAthletes();
+  });
 
   const filtered = useMemo(() => athletes.filter(p => p.name?.toLowerCase().includes(searchQuery.toLowerCase()) || p.smash_id?.toLowerCase().includes(searchQuery.toLowerCase())), [searchQuery, athletes]);
 
