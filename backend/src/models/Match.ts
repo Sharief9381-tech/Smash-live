@@ -56,6 +56,20 @@ const matchSchema = new mongoose.Schema({
   }],
 
   last_update: { type: Date, default: Date.now },
+
+  // Toss
+  toss: {
+    winner:   { type: String },        // 'sideA' | 'sideB'
+    result:   { type: String },        // 'heads' | 'tails'
+    call:     { type: String },        // 'heads' | 'tails' (what sideA called)
+    choice:   { type: String },        // 'serve' | 'receive' | 'side'
+    official: { type: String },        // match official name
+    venue:    { type: String },
+    city:     { type: String },
+    court_type: { type: String },
+    date:     { type: String },
+    time:     { type: String },
+  },
 }, { timestamps: true });
 
 export const Match = mongoose.model('Match', matchSchema);
