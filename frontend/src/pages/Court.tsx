@@ -1,43 +1,67 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import SmashRating from '@/components/dashboard/SmashRating';
 import { motion } from 'framer-motion';
 import { 
   Trophy, Zap, Activity, Loader2, 
-  ChevronRight, Calendar, Users, Flame, Heart, MessageSquare
+  ChevronRight, Calendar, Users, Flame, MessageSquare, TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link, useNavigate } from 'react-router-dom';
-import { MatchAPI, TournamentAPI } from '@/services/api';
+import { MatchAPI, TournamentAPI, AnalyticsAPI, UserAPI } from '@/services/api';
 import { cn } from '@/lib/utils';
+import { useSocketEvent } from '@/hooks/use-socket';
+import { MatchCardSkeleton } from '@/components/ui/skeleton-cards';
 
 const Court = () => {
   const navigate = useNavigate();
-  const [matches, setMatches] = useState<any[]>([]);
+  const [matches,     setMatches]     = useState<any[]>([]);
   const [tournaments, setTournaments] = useState<any[]>([]);
-  const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [profile,     setProfile]     = useState<any>(null);
+  const [stats,       setStats]       = useState<any>(null);
+  const [siteStats,   setSiteStats]   = useState<{ athletes: number; tourneys: number; participants: number } | null>(null);
+  const [loading,     setLoading]     = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const saved = localStorage.getItem('userProfile');
-      if (saved) setProfile(JSON.parse(saved));
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    const saved = localStorage.getItem('userProfile');
+    const prof  = saved ? JSON.parse(saved) : null;
+    if (prof) setProfile(prof);
 
-      try {
-        const [activeMatches, activeTourneys] = await Promise.all([
-          MatchAPI.getAll('live'),
-          TournamentAPI.getAll(),
-        ]);
-        const localMatches = JSON.parse(localStorage.getItem('active_studio_matches') || '[]');
-        setMatches([...activeMatches.slice(0, 2), ...localMatches].slice(0, 4));
-        setTournaments(activeTourneys.slice(0, 2));
-      } catch (err) { console.warn("Sync limited."); }
-      finally { setLoading(false); }
-    };
-    fetchData();
+    try {
+      const [activeMatches, activeTourneys, analytics] = await Promise.all([
+        MatchAPI.getAll('live'),
+        TournamentAPI.getAll(),
+        AnalyticsAPI.getStats(),
+      ]);
+      setMatches(activeMatches.slice(0, 4));
+      setTournaments(activeTourneys.slice(0, 3));
+      setSiteStats(analytics);
+
+      // Fetch own stats if logged in
+      if (prof?._id || prof?.id) {
+        try {
+          const s = await UserAPI.getStats(prof._id || prof.id);
+          setStats(s.stats);
+        } catch {}
+      }
+    } catch { /* offline — show empty */ }
+    finally { setLoading(false); }
   }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Real-time score updates on dashboard match cards
+  useSocketEvent('feed:score_update', (payload) => {
+    setMatches(prev => prev.map(m =>
+      (m._id || m.id) === payload.matchId
+        ? { ...m, current_score: payload.current_score }
+        : m
+    ));
+  });
+  useSocketEvent('feed:match_created', () => { fetchData(); });
+  useSocketEvent('feed:match_completed', () => { fetchData(); });
 
   return (
     <div className="min-h-screen bg-slate-50 pb-32">
@@ -50,7 +74,40 @@ const Court = () => {
             <h1 className="uppercase italic">Hello, {profile?.name?.split(' ')[0] || "Athlete"}! 🔥</h1>
             <Badge className="bg-sky-500 text-white border-none text-[10px] font-black h-6 uppercase">Active</Badge>
           </div>
-          <SmashRating rating={profile?.stats?.rating || 0} level={profile?.stats?.level || 1} xp={0} />
+          <SmashRating rating={stats?.rankingPoints || profile?.rankingPoints || 0} level={1} xp={0} />
+
+          {/* Personal quick stats */}
+          {(stats || profile?.matchesPlayed > 0) && (
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { label: 'Matches', val: stats?.matchesPlayed ?? profile?.matchesPlayed ?? 0, color: 'text-sky-600' },
+                { label: 'Wins',    val: stats?.matchesWon   ?? profile?.matchesWon   ?? 0, color: 'text-green-600' },
+                { label: 'Points',  val: stats?.rankingPoints ?? profile?.rankingPoints ?? 0, color: 'text-indigo-600' },
+              ].map((s, i) => (
+                <div key={i} className="app-card p-3 text-center">
+                  <p className={cn('text-lg font-black', s.color)}>{s.val}</p>
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{s.label}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Platform stats */}
+          {siteStats && (
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+              {[
+                { label: 'Athletes',     val: siteStats.athletes },
+                { label: 'Tournaments',  val: siteStats.tourneys },
+                { label: 'Participants', val: siteStats.participants },
+              ].map((s, i) => (
+                <div key={i} className="flex items-center gap-2 bg-white border border-slate-100 rounded-xl px-4 py-2 shrink-0 shadow-sm">
+                  <TrendingUp className="h-3 w-3 text-sky-500" />
+                  <span className="text-[9px] font-black text-slate-400 uppercase">{s.label}</span>
+                  <span className="text-sm font-black text-[#0B1F3A]">{s.val}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* 2. Quick Actions Grid */}
@@ -84,7 +141,9 @@ const Court = () => {
           </div>
           
           <div className="flex flex-col gap-2">
-            {matches.length > 0 ? matches.map((match, i) => (
+            {loading ? (
+              Array.from({ length: 2 }).map((_, i) => <MatchCardSkeleton key={i} />)
+            ) : matches.length > 0 ? matches.map((match, i) => (
               <Link to={`/broadcast/${match.id}`} key={i} className="app-card p-3 flex items-center justify-between">
                 <div className="flex-1 min-w-0 pr-4">
                   <p className="text-[10px] font-black text-slate-300 uppercase truncate mb-1">{match.name}</p>
