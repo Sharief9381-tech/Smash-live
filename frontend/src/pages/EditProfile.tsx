@@ -1,193 +1,179 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  User, Camera, ChevronLeft, Save, Zap, Upload
-} from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ChevronLeft, Save, Zap, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { showSuccess, showError } from '@/utils/toast';
+import { AuthService } from '@/services/auth.service';
+import { INDIAN_STATES, STATE_DISTRICTS } from '@/data/locations';
+import { cn } from '@/lib/utils';
 
-const LOCATION_DATA: Record<string, string[]> = {
-  "Denmark": ["Hovedstaden", "Sjælland", "Syddanmark", "Midtjylland", "Nordjylland"],
-  "China": ["Guangdong", "Beijing", "Shanghai", "Zhejiang", "Fujian"],
-  "Indonesia": ["Jakarta", "West Java", "East Java", "Central Java", "Bali"],
-  "Thailand": ["Bangkok", "Chiang Mai", "Phuket", "Chonburi"],
-  "Malaysia": ["Selangor", "Penang", "Johor", "Kuala Lumpur"],
-  "India": ["Maharashtra", "Karnataka", "Delhi", "Tamil Nadu", "Telangana"],
-  "Japan": ["Tokyo", "Osaka", "Kyoto", "Aichi", "Hokkaido"],
-  "Singapore": ["Central", "North", "North-East", "East", "West"]
-};
+const LEVELS = ['beginner', 'intermediate', 'advanced', 'professional'];
+const CATEGORIES = ["Men's Singles", "Women's Singles", "Men's Doubles", "Women's Doubles", "Mixed Doubles"];
 
 const EditProfile = () => {
   const navigate = useNavigate();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  const [formData, setFormData] = useState({
-    name: "Viktor Axelsen",
-    smashId: "SMASH#0000",
-    country: "Denmark",
-    state: "Hovedstaden",
-    image: "https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?q=80&w=2070&auto=format&fit=crop",
-    gender: "men",
-    dob: "1994-01-04",
-    category: "singles",
-    hand: "right",
-    height: "194",
-    coach: "Kenneth Jonassen",
-    club: "Odense Badminton Klub"
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({
+    name:              '',
+    gender:            '',
+    state:             '',
+    district:          '',
+    age:               '',
+    playingLevel:      '',
+    preferredCategory: '',
   });
 
   useEffect(() => {
-    const saved = localStorage.getItem('userProfile');
-    if (saved) {
-      setFormData(prev => ({ ...prev, ...JSON.parse(saved) }));
-    }
+    const saved = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    setForm({
+      name:              saved.name              || '',
+      gender:            saved.gender            || '',
+      state:             saved.state             || '',
+      district:          saved.district          || '',
+      age:               saved.age               ? String(saved.age) : '',
+      playingLevel:      saved.playingLevel      || '',
+      preferredCategory: saved.preferredCategory || '',
+    });
   }, []);
 
-  const handleSave = () => {
-    localStorage.setItem('userProfile', JSON.stringify(formData));
-    showSuccess("Intelligence dossier updated successfully!");
-    navigate('/player/me');
-  };
+  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        showError("File too large. Maximum size is 2MB.");
-        return;
-      }
-      
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, image: reader.result as string });
-        showSuccess("Photo uploaded successfully!");
-      };
-      reader.readAsDataURL(file);
+  const handleSave = async () => {
+    if (!form.name.trim()) { showError('Name is required'); return; }
+    setLoading(true);
+    const update = {
+      name:              form.name,
+      gender:            form.gender,
+      state:             form.state,
+      district:          form.district,
+      age:               form.age ? parseInt(form.age) : undefined,
+      playingLevel:      form.playingLevel,
+      preferredCategory: form.preferredCategory,
+    };
+
+    try {
+      const updated = await AuthService.updateProfile(update);
+      const current = JSON.parse(localStorage.getItem('userProfile') || '{}');
+      AuthService.setLocalSession({ ...current, ...update, ...(updated || {}) });
+      showSuccess('Profile updated!');
+      navigate('/player/me');
+    } catch (e: any) {
+      // Offline — save locally
+      const current = JSON.parse(localStorage.getItem('userProfile') || '{}');
+      AuthService.setLocalSession({ ...current, ...update });
+      showSuccess('Profile saved locally');
+      navigate('/player/me');
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleCountryChange = (country: string) => {
-    setFormData({ 
-      ...formData, 
-      country, 
-      state: LOCATION_DATA[country]?.[0] || "" 
-    });
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-[#0B1F3A] pb-20">
+    <div className="min-h-screen bg-slate-50 pb-20">
       <Navbar />
-      <main className="container max-w-5xl px-6 py-12">
-        <div className="space-y-12">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => navigate('/player/me')}
-                className="rounded-full h-12 w-12 hover:bg-white"
-              >
-                <ChevronLeft className="h-6 w-6" />
-              </Button>
-              <h1 className="text-4xl font-black tracking-tighter">Edit Intelligence Profile</h1>
+      <main className="container max-w-lg px-4 py-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <button onClick={() => navigate('/player/me')} className="p-2 -ml-2 text-slate-400 hover:text-[#0B1F3A]">
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+          <h1 className="text-xl font-black text-[#0B1F3A] uppercase italic">Edit Profile</h1>
+          <Button onClick={handleSave} disabled={loading} className="h-10 bg-[#0B1F3A] text-white px-5 rounded-xl font-black text-[10px] uppercase">
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Save className="h-3.5 w-3.5 mr-1.5" />Save</>}
+          </Button>
+        </div>
+
+        <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-xl space-y-5">
+
+          {/* Avatar preview */}
+          <div className="flex items-center gap-4 pb-4 border-b border-slate-50">
+            <div className="h-16 w-16 rounded-full bg-[#0B1F3A] flex items-center justify-center text-sky-400 font-black text-2xl uppercase shrink-0">
+              {form.name?.[0] || '?'}
             </div>
-            <Button onClick={handleSave} className="bg-[#0B1F3A] text-white font-black px-8 rounded-2xl h-14 shadow-xl">
-              <Save className="mr-2 h-4 w-4" /> Save Changes
-            </Button>
+            <div>
+              <p className="font-black text-[#0B1F3A] uppercase italic">{form.name || 'Your Name'}</p>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">SmashLive Athlete</p>
+            </div>
           </div>
 
-          <div className="grid lg:grid-cols-12 gap-12">
-            <div className="lg:col-span-4 space-y-6">
-              <section className="glass-panel p-8 rounded-[3rem] border-slate-200 text-center space-y-6 bg-white">
-                <div className="relative mx-auto h-48 w-48 group">
-                  <div className="h-full w-full rounded-full bg-slate-100 border-4 border-white overflow-hidden shadow-xl">
-                    <img src={formData.image} className="w-full h-full object-cover" alt="Profile preview" />
-                  </div>
-                  <button 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Camera className="h-8 w-8 text-white" />
-                  </button>
-                  <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    className="hidden" 
-                    accept="image/*" 
-                    onChange={handleImageUpload}
-                  />
-                </div>
-                <div>
-                  <h4 className="font-black text-lg">{formData.smashId}</h4>
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Unique Smash Identity</p>
-                </div>
-                <Button 
-                  variant="outline" 
-                  className="w-full h-12 rounded-xl border-slate-200 font-bold"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="mr-2 h-4 w-4" /> Choose File
-                </Button>
-              </section>
-            </div>
+          {/* Name */}
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Full Name</Label>
+            <Input value={form.name} onChange={e => set('name', e.target.value)}
+              className="h-12 rounded-xl bg-slate-50 border-slate-100 font-bold" placeholder="Your name" />
+          </div>
 
-            <div className="lg:col-span-8 space-y-10">
-              <section className="glass-panel p-10 rounded-[3rem] space-y-8 border-slate-200 bg-white">
-                <h3 className="text-xl font-black flex items-center gap-3 italic">
-                  <User className="h-5 w-5 text-sky-500" /> Identity Intelligence
-                </h3>
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Player Name</Label>
-                    <Input value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Country</Label>
-                    <Select value={formData.country} onValueChange={handleCountryChange}>
-                      <SelectTrigger className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold">
-                        <SelectValue placeholder="Select Country" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.keys(LOCATION_DATA).map(country => (
-                          <SelectItem key={country} value={country}>{country}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">State / Region</Label>
-                    <Select value={formData.state} onValueChange={(state) => setFormData({...formData, state})}>
-                      <SelectTrigger className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold">
-                        <SelectValue placeholder="Select State" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {formData.country && LOCATION_DATA[formData.country]?.map(state => (
-                          <SelectItem key={state} value={state}>{state}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Height (cm)</Label>
-                    <Input type="number" value={formData.height} onChange={(e) => setFormData({...formData, height: e.target.value})} className="h-14 bg-slate-50 border-slate-100 rounded-2xl px-6 font-bold" />
-                  </div>
-                </div>
-              </section>
-
-              <div className="pt-6">
-                <Button onClick={handleSave} className="w-full bg-[#0B1F3A] text-white font-black h-20 rounded-[2rem] shadow-xl text-lg group">
-                  SYNC INTELLIGENCE <Zap className="ml-2 h-6 w-6 fill-current group-hover:scale-125 transition-transform" />
-                </Button>
-              </div>
+          {/* Gender + Age */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Gender</Label>
+              <Select value={form.gender} onValueChange={v => set('gender', v)}>
+                <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-slate-100 font-bold"><SelectValue placeholder="Select" /></SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Age</Label>
+              <Input type="number" value={form.age} onChange={e => set('age', e.target.value)}
+                className="h-12 rounded-xl bg-slate-50 border-slate-100 font-bold" placeholder="Age" min={8} max={80} />
+            </div>
+          </div>
+
+          {/* State + District */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">State</Label>
+              <Select value={form.state} onValueChange={v => set('state', v)}>
+                <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-slate-100 font-bold text-sm"><SelectValue placeholder="State" /></SelectTrigger>
+                <SelectContent className="rounded-xl max-h-60">
+                  {INDIAN_STATES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">District</Label>
+              <Select value={form.district} onValueChange={v => set('district', v)} disabled={!form.state}>
+                <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-slate-100 font-bold text-sm"><SelectValue placeholder="District" /></SelectTrigger>
+                <SelectContent className="rounded-xl max-h-60">
+                  {form.state && STATE_DISTRICTS[form.state]?.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Playing level */}
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Playing Level</Label>
+            <Select value={form.playingLevel} onValueChange={v => set('playingLevel', v)}>
+              <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-slate-100 font-bold"><SelectValue placeholder="Select level" /></SelectTrigger>
+              <SelectContent className="rounded-xl">
+                {LEVELS.map(l => <SelectItem key={l} value={l} className="capitalize">{l.charAt(0).toUpperCase() + l.slice(1)}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Preferred category */}
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Preferred Category</Label>
+            <Select value={form.preferredCategory} onValueChange={v => set('preferredCategory', v)}>
+              <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-slate-100 font-bold"><SelectValue placeholder="Select category" /></SelectTrigger>
+              <SelectContent className="rounded-xl">
+                {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
         </div>
+
+        <Button onClick={handleSave} disabled={loading}
+          className="w-full h-16 bg-[#0B1F3A] hover:bg-sky-500 text-white font-black text-lg rounded-[22px] shadow-xl transition-all gap-2">
+          {loading ? <Loader2 className="animate-spin" /> : <><Zap className="h-5 w-5 fill-current" /> Save Profile</>}
+        </Button>
       </main>
     </div>
   );

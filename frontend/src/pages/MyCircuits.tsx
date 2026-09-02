@@ -1,136 +1,211 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import { motion } from 'framer-motion';
-import { 
-  Calendar, Trophy, Activity, Zap, 
+import {
+  Calendar, Trophy, Activity, Zap,
   ChevronRight, MapPin, Clock, Loader2,
-  AlertCircle
+  AlertCircle, History
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
-import { MatchAPI, TournamentAPI } from '@/services/api';
+import { MatchAPI, TournamentAPI, UserAPI } from '@/services/api';
 import { cn } from '@/lib/utils';
+import { useSocketEvent } from '@/hooks/use-socket';
 
 const MyCircuits = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [upcomingMatches, setUpcomingMatches] = useState<any[]>([]);
-  const [registeredTourneys, setRegisteredTourneys] = useState<any[]>([]);
-  const [userProfile, setUserProfile] = useState<any>(null);
+  const [loading,              setLoading]              = useState(true);
+  const [liveMatches,          setLiveMatches]          = useState<any[]>([]);
+  const [completedMatches,     setCompletedMatches]     = useState<any[]>([]);
+  const [myTournaments,        setMyTournaments]        = useState<any[]>([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-      setUserProfile(profile);
+  const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+  const myId    = profile._id || profile.id;
+  const myName  = (profile.name || '').toLowerCase();
+  const mobile  = profile.mobile || '';
 
-      try {
-        const smashId = profile.smashId || profile.smash_id;
-        const [allMatches, allTourneys] = await Promise.all([
-          MatchAPI.getAll('live'),
-          TournamentAPI.getAll(),
-        ]);
+  const matchesMe = (m: any) => {
+    const str = JSON.stringify(m.players || '').toLowerCase();
+    return str.includes(mobile) || (myName && str.includes(myName));
+  };
 
-        // Filter matches involving this user
-        const userMatches = allMatches.filter((m: any) => {
-          if (!m.players || !smashId) return false;
-          return JSON.stringify(m.players).toLowerCase().includes(smashId.toLowerCase());
-        });
-        setUpcomingMatches(userMatches);
-        setRegisteredTourneys(allTourneys.filter((t: any) => t.status !== 'Completed'));
-      } catch (err) {
-        console.warn("Personal sync limited.");
-      } finally {
-        setLoading(false);
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Fetch all matches — filter client-side by player identity
+      const [allMatches, allLive] = await Promise.all([
+        MatchAPI.getAll(),
+        MatchAPI.getAll('live'),
+      ]);
+
+      setLiveMatches(allLive.filter(matchesMe).map(m => ({ ...m, id: m._id || m.id })));
+      setCompletedMatches(
+        allMatches
+          .filter(m => m.status === 'completed' && matchesMe(m))
+          .slice(0, 10)
+          .map(m => ({ ...m, id: m._id || m.id }))
+      );
+
+      // Tournaments: fetch stats which includes participations
+      if (myId) {
+        try {
+          const stats = await UserAPI.getStats(myId);
+          setMyTournaments(stats.tournaments || []);
+        } catch {
+          setMyTournaments([]);
+        }
       }
-    };
+    } catch {
+      setLiveMatches([]);
+      setCompletedMatches([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [myId, mobile, myName]);
 
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Real-time: refresh when match score updates
+  useSocketEvent('feed:score_update', (payload) => {
+    setLiveMatches(prev => prev.map(m =>
+      (m._id || m.id) === payload.matchId
+        ? { ...m, current_score: payload.current_score, status: payload.status }
+        : m
+    ));
+  });
+
+  useSocketEvent('feed:match_completed', () => { fetchData(); });
+  useSocketEvent('feed:match_created',   () => { fetchData(); });
+
+  const getScore = (m: any) => m.current_score ? `${m.current_score[0]}-${m.current_score[1]}` : '0-0';
+  const getP1    = (m: any) => m.players?.p1?.name || m.players?.sideA?.[0]?.name || 'Side A';
+  const getP2    = (m: any) => m.players?.p2?.name || m.players?.sideB?.[0]?.name || 'Side B';
+
+  const getMatchResult = (m: any) => {
+    const isSideA = JSON.stringify(m.players?.p1 || m.players?.sideA || '').toLowerCase().includes(mobile)
+      || JSON.stringify(m.players?.p1 || m.players?.sideA || '').toLowerCase().includes(myName);
+    const won = m.winner === (isSideA ? 1 : 2);
+    return won ? 'W' : 'L';
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 pb-32">
       <Navbar />
-      
-      <main className="px-4 py-8 space-y-8">
-        <div className="space-y-4">
+      <main className="px-4 py-8 space-y-8 max-w-lg mx-auto">
+
+        <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-sky-500" />
-            <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.4em]">My Schedule</span>
+            <Calendar className="h-4 w-4 text-sky-500" />
+            <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.4em]">My Activity</span>
           </div>
-          <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-none">Upcoming</h1>
-          <p className="text-[11px] font-medium text-slate-400 max-w-xs">Your next matches and registered tournaments linked to your Smash ID.</p>
+          <h1 className="text-4xl font-black text-[#0B1F3A] tracking-tighter uppercase italic leading-none">My Circuits</h1>
+          {profile.name && (
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              {profile.smashId || profile.smash_id || ''} · {profile.state || ''}
+            </p>
+          )}
         </div>
 
         {loading ? (
           <div className="py-20 flex justify-center"><Loader2 className="h-8 w-8 text-sky-500 animate-spin" /></div>
         ) : (
-          <div className="space-y-10">
-            {/* MATCHES */}
-            <section className="space-y-4">
-              <h2 className="uppercase italic flex items-center gap-2 px-1 text-sky-600">
-                <Activity className="h-4 w-4" /> Next Matches
+          <div className="space-y-8">
+
+            {/* Live matches */}
+            <section className="space-y-3">
+              <h2 className="text-[10px] font-black text-sky-600 uppercase tracking-widest flex items-center gap-2">
+                <Activity className="h-3.5 w-3.5" /> Live Now
               </h2>
-              
-              <div className="space-y-3">
-                {upcomingMatches.length > 0 ? upcomingMatches.map((match, i) => (
-                  <div key={i} className="app-card p-5 border-l-4 border-l-sky-500">
-                    <div className="flex justify-between items-start mb-4">
-                      <Badge className="bg-sky-500 text-white border-none text-[8px] font-black uppercase px-2 h-5">Live Now</Badge>
-                      <span className="text-[9px] font-black text-slate-300">ID: {match.id.slice(-6).toUpperCase()}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <h3 className="text-lg font-black uppercase italic leading-none">{match.name}</h3>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                          <Clock className="h-3 w-3" /> Court {match.court || "TBD"}
-                        </p>
-                      </div>
-                      <Button onClick={() => navigate(`/broadcast/${match.id}`)} className="h-10 px-4 bg-[#0B1F3A] text-white rounded-xl text-[10px] font-black uppercase tracking-widest">
-                        Go to Match
-                      </Button>
-                    </div>
+              {liveMatches.length > 0 ? liveMatches.map(m => (
+                <div key={m.id} onClick={() => navigate(`/broadcast/${m.id}`)}
+                  className="bg-white border border-sky-200 rounded-2xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:border-sky-400 transition-all">
+                  <div className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-black text-[#0B1F3A] uppercase text-sm truncate">{m.name || 'Live Match'}</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase">{getP1(m)} vs {getP2(m)}</p>
                   </div>
-                )) : (
-                  <div className="py-12 text-center bg-white/50 border border-dashed rounded-[2rem] border-slate-200">
-                    <p className="text-[10px] font-black text-slate-400 uppercase italic">No matches scheduled</p>
-                  </div>
-                )}
-              </div>
+                  <span className="font-black text-xl font-mono text-sky-600 shrink-0">{getScore(m)}</span>
+                  <ChevronRight className="h-4 w-4 text-slate-300 shrink-0" />
+                </div>
+              )) : (
+                <div className="py-8 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-white/50">
+                  <p className="text-[9px] font-black text-slate-400 uppercase italic">No live matches right now</p>
+                </div>
+              )}
             </section>
 
-            {/* REGISTERED TOURNAMENTS */}
-            <section className="space-y-4">
-              <h2 className="uppercase italic flex items-center gap-2 px-1 text-amber-600">
-                <Trophy className="h-4 w-4" /> Tournament Registration
-              </h2>
-              <div className="space-y-3">
-                {registeredTourneys.length > 0 ? registeredTourneys.map((t, i) => (
-                  <div key={i} className="app-card p-5 group bg-white hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => navigate(`/tournament/${t.id}`)}>
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-xl bg-[#0B1F3A] flex items-center justify-center text-sky-400 shadow-lg">
-                        <Trophy className="h-6 w-6" />
-                      </div>
-                      <div className="flex-1 space-y-1">
-                        <h3 className="text-[15px] font-black uppercase italic leading-none group-hover:text-sky-600 transition-colors">{t.name}</h3>
-                        <div className="flex items-center gap-3 text-[9px] font-bold text-slate-400 uppercase">
-                           <span className="flex items-center gap-1"><MapPin className="h-3 w-3 text-sky-500" /> {t.city}</span>
-                           <span className="flex items-center gap-1"><Calendar className="h-3 w-3 text-sky-500" /> {t.start_date}</span>
-                        </div>
-                      </div>
-                      <ChevronRight className="h-5 w-5 text-slate-200 group-hover:text-sky-500 transition-all" />
+            {/* Recent match history */}
+            <section className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                  <History className="h-3.5 w-3.5" /> Recent Matches
+                </h2>
+                <button onClick={() => navigate('/smashed')} className="text-[9px] font-black text-sky-500 uppercase tracking-widest">
+                  All <ChevronRight className="inline h-3 w-3" />
+                </button>
+              </div>
+              {completedMatches.length > 0 ? completedMatches.map(m => {
+                const result = getMatchResult(m);
+                return (
+                  <div key={m.id} onClick={() => navigate(`/scoring/${m.id}`)}
+                    className="bg-white border border-slate-100 rounded-2xl p-4 flex items-center gap-4 shadow-sm cursor-pointer hover:border-slate-200 transition-all">
+                    <div className={cn('h-10 w-10 rounded-xl flex items-center justify-center font-black text-white text-sm shrink-0',
+                      result === 'W' ? 'bg-green-500' : 'bg-red-400')}>
+                      {result}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-black text-[#0B1F3A] uppercase text-xs truncate">{m.name || 'Match'}</p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase truncate">{getP1(m)} vs {getP2(m)}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="font-black text-xs text-slate-600">{getScore(m)}</p>
+                      <p className="text-[8px] font-black text-slate-300 uppercase">{m.match_type}</p>
                     </div>
                   </div>
-                )) : (
-                  <div className="py-12 text-center bg-white/50 border border-dashed rounded-[2rem] border-slate-200">
-                    <AlertCircle className="h-8 w-8 text-slate-200 mx-auto mb-3" />
-                    <p className="text-[10px] font-black text-slate-400 uppercase italic">No active registrations</p>
-                    <Button onClick={() => navigate('/tournaments')} variant="ghost" className="mt-2 text-sky-500 font-black text-[9px] uppercase hover:bg-transparent">Find Tournaments</Button>
-                  </div>
-                )}
-              </div>
+                );
+              }) : (
+                <div className="py-8 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-white/50">
+                  <p className="text-[9px] font-black text-slate-400 uppercase italic">No completed matches yet</p>
+                </div>
+              )}
             </section>
+
+            {/* My tournaments */}
+            <section className="space-y-3">
+              <h2 className="text-[10px] font-black text-amber-600 uppercase tracking-widest flex items-center gap-2">
+                <Trophy className="h-3.5 w-3.5" /> My Tournaments
+              </h2>
+              {myTournaments.length > 0 ? myTournaments.map((t, i) => (
+                <div key={t._id || i} onClick={() => t._id && navigate(`/tournament/${t._id}`)}
+                  className={cn('bg-white border border-slate-100 rounded-2xl p-4 flex items-center gap-4 shadow-sm transition-all',
+                    t._id ? 'cursor-pointer hover:border-amber-200' : '')}>
+                  <div className="h-10 w-10 rounded-xl bg-[#0B1F3A] flex items-center justify-center text-sky-400 shrink-0">
+                    <Trophy className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-black text-[#0B1F3A] uppercase text-xs truncate">{t.name}</p>
+                    <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase">
+                      {t.city && <span className="flex items-center gap-1"><MapPin className="h-3 w-3 text-sky-500" />{t.city}</span>}
+                      {t.date && <span>{t.date}</span>}
+                    </div>
+                  </div>
+                  <Badge className={cn('text-white border-none text-[8px] font-black uppercase shrink-0',
+                    t.result === 'winner' ? 'bg-yellow-500' :
+                    t.result === 'eliminated' ? 'bg-red-400' : 'bg-sky-500')}>
+                    {t.result || 'registered'}
+                  </Badge>
+                </div>
+              )) : (
+                <div className="py-8 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-white/50">
+                  <AlertCircle className="h-6 w-6 text-slate-200 mx-auto mb-2" />
+                  <p className="text-[9px] font-black text-slate-400 uppercase italic">No tournament registrations</p>
+                  <Button onClick={() => navigate('/tournaments')} variant="ghost" className="mt-1 text-sky-500 font-black text-[9px] uppercase hover:bg-transparent">
+                    Find Tournaments
+                  </Button>
+                </div>
+              )}
+            </section>
+
           </div>
         )}
       </main>
