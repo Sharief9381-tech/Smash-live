@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { TournamentAPI } from '@/services/api';
 import { showSuccess, showError } from '@/utils/toast';
+import { TournamentCardSkeleton } from '@/components/ui/skeleton-cards';
 
 const Tournaments = () => {
   const navigate = useNavigate();
@@ -116,7 +117,9 @@ const Tournaments = () => {
         </div>
 
         {loading ? (
-          <div className="py-32 flex justify-center"><Loader2 className="animate-spin text-sky-500 h-10 w-10" /></div>
+          <div className="space-y-6">
+            {Array.from({ length: 3 }).map((_, i) => <TournamentCardSkeleton key={i} />)}
+          </div>
         ) : (
           <div className="space-y-6">
             <AnimatePresence mode="popLayout">

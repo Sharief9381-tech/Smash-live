@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserAPI } from '@/services/api';
 import { cn } from '@/lib/utils';
 import { useSocketEvent } from '@/hooks/use-socket';
+import { PlayerCardSkeleton } from '@/components/ui/skeleton-cards';
 import { INDIAN_STATES } from '@/data/locations';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -94,9 +95,8 @@ const Rankings = () => {
         {/* List */}
         <div className="space-y-3">
           {isLoading ? (
-            <div className="py-20 flex flex-col items-center gap-4">
-              <Loader2 className="h-8 w-8 text-sky-500 animate-spin" />
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Loading Rankings...</p>
+            <div className="space-y-3">
+              {Array.from({ length: 6 }).map((_, i) => <PlayerCardSkeleton key={i} />)}
             </div>
           ) : filtered.length === 0 ? (
             <div className="py-24 text-center border-2 border-dashed border-slate-200 rounded-[2.5rem] bg-white/50">

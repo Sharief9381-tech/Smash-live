@@ -12,6 +12,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { UserAPI } from '@/services/api';
 import { useSocketEvent } from '@/hooks/use-socket';
+import { ProfileSkeleton, StatCardSkeleton } from '@/components/ui/skeleton-cards';
 
 const PlayerProfile = () => {
   const { id }       = useParams<{ id: string }>();
@@ -81,8 +82,12 @@ const PlayerProfile = () => {
   ];
 
   if (loading) return (
-    <div className="h-screen flex items-center justify-center bg-slate-50">
-      <Loader2 className="animate-spin text-sky-500 h-10 w-10" />
+    <div className="min-h-screen bg-slate-50">
+      <Navbar />
+      <div className="container max-w-lg px-4 py-6 space-y-6">
+        <ProfileSkeleton />
+        <StatCardSkeleton />
+      </div>
     </div>
   );
 
